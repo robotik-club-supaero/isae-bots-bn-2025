@@ -22,5 +22,6 @@ class BezierTrajectory : public Trajectory {
     std::vector<Point2D<Meter>> m_points;
     double_t m_totalLength;
     double_t m_position;
+    Point2D<Meter> m_currentPosition;
     Derivative<Point2D<Meter>> m_direction;
 };
