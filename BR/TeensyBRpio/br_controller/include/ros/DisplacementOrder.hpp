@@ -27,6 +27,9 @@ enum GoalType {
 
     /// Direct control of the setpoint's speed.
     CONTROL = 4,
+
+    // TODO remove, replace with actual Bezier order
+    TEST_BEZIER = 50,
 };
 
 class DisplacementOrder {

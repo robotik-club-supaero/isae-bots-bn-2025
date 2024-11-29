@@ -4,6 +4,9 @@
 #include <functional>
 #include <iostream>
 
+#define INTEGRAL_NUM_STEPS 1000
+#define DIRECTION_EST_STEP 0.001
+
 // Functions
 
 // Factorial function
@@ -27,18 +30,28 @@ double_t bernstein(int n, int i, double_t t) {
     return binomial(n, i) * std::pow(t, i) * std::pow(1 - t, n - i);
 }
 
-BezierTrajectory::BezierTrajectory(std::vector<Point2D<Meter>> points) : m_points(points), m_position(0), m_totalLength(0), m_direction(1, 0, points[0]) {
+Point2D<Meter> bezier(const std::vector<Point2D<Meter>> &points, double_t t) {
+    Point2D<Meter> position = points[0];
+    for (int i = 0; i < points.size(); i++) {
+        double b = bernstein(points.size() - 1, i, t);
+        position += points[i] * b;
+    }
+
+    return position;
+}
+
+BezierTrajectory::BezierTrajectory(std::vector<Point2D<Meter>> points)
+    : m_points(points), m_position(0), m_totalLength(0), m_direction(0), m_currentPosition(points[0]) {
+
     Point2D<Meter> lastPoint = points[0];
-    for (int i = 1; i < 1000; i++) {
-        m_position = (double_t)i / 1000.0;
-        Point2D<Meter> currentPoint = getCurrentPosition();
-        if (i == 1) {
-            m_direction.update(currentPoint, 1.0);
-        }
+    for (int i = 0; i <= INTEGRAL_NUM_STEPS; i++) {
+        Point2D<Meter> currentPoint = bezier(points, (double_t)i / INTEGRAL_NUM_STEPS);
         m_totalLength += Vector2D<Meter>::distance(lastPoint, currentPoint);
         lastPoint = currentPoint;
     }
-    m_position = 0;
+
+    // Compute direction
+    advance(0);
 }
 
 bool BezierTrajectory::advance(double_t distance) {
@@ -51,12 +64,11 @@ bool BezierTrajectory::advance(double_t distance) {
         m_position = m_totalLength;
     }
 
-    Point2D p = m_points[0];
-    for (int i = 0; i < m_points.size(); i++) {
-        double b = bernstein(m_points.size() - 1, i, m_position / m_totalLength);
-        p += m_points[i] * b;
+    double_t t = m_position / m_totalLength;
+    m_currentPosition = bezier(m_points, t);
+    if (t + DIRECTION_EST_STEP <= 1) {
+        m_direction = (bezier(m_points, t + DIRECTION_EST_STEP) - m_currentPosition).argument();
     }
-    m_direction.update(p, 1.0);
 
     return true;
 }
@@ -65,6 +77,6 @@ std::optional<double_t> BezierTrajectory::getRemainingDistance() const {
     return std::make_optional<double_t>(m_totalLength - m_position);
 }
 
-Position2D<Meter> BezierTrajectory::getCurrentPosition() const {    
-    return {m_currentPosition, m_direction.value().argument()};
+Position2D<Meter> BezierTrajectory::getCurrentPosition() const {
+    return {m_currentPosition, m_direction};
 }

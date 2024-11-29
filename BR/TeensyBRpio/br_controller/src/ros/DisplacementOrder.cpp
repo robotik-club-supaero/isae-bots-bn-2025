@@ -1,6 +1,7 @@
 #include "ros/DisplacementOrder.hpp"
 #include "logging.hpp"
 #include "rotations/SetHeadingProfile.hpp"
+#include "trajectories/BezierTrajectory.hpp"
 #include "trajectories/LinearTrajectory.hpp"
 
 DisplacementOrder::DisplacementOrder(GoalType type, Position2D<Millimeter> goalPosition) : type(type), position(goalPosition) {}
@@ -14,6 +15,7 @@ DisplacementOrder::DisplacementOrder(int type, Position2D<Millimeter> goalPositi
         case STOP:
         case RESET:
         case CONTROL:
+        case TEST_BEZIER:
             this->type = (GoalType)type;
             break;
         default:
@@ -53,6 +55,13 @@ void DisplacementOrder::operator()(manager_t<TActuators, TFeedback, TClock> &man
             });
             break;
         }
+        case TEST_BEZIER: {
+            manager.sendOrder([&](controller_t &controller, Position2D<Meter> robotPosition) {
+                controller.template startTrajectory<BezierTrajectory, std::vector<Point2D<Meter>>>(
+                    FORWARD, {{0,0}, {2.8, 0.7}, {0, 1.8}, {1.3, 1.8}}, std::nullopt);
+            });
+            break;
+        } break;
         default:
             break;
     }
