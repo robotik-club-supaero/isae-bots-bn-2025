@@ -1,6 +1,5 @@
 #include "geometry/Vector2D.hpp"
 #include "trajectories/Trajectory.hpp"
-#include "math/Derivative.hpp"
 #include <vector>
 
 // Trajectory structure
@@ -23,5 +22,5 @@ class BezierTrajectory : public Trajectory {
     double_t m_totalLength;
     double_t m_position;
     Point2D<Meter> m_currentPosition;
-    Derivative<Point2D<Meter>> m_direction;
+    Angle m_direction;
 };
