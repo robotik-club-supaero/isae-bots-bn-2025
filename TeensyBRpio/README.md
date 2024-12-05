@@ -42,18 +42,40 @@ w : entier correspondant au type de consigne
 Les consignes sont définies telles quelles :
 
 ```
-0 : point final (marche avant)
-1 : point transitoire (pas d'orientation finale, theta est ignoré)
-2 : stop (progressif si le robot est en train de se déplacer, cf doc)
+
+#### Consignes basiques
+
+0 : marche avant en ligne droite, theta est l'orientation finale
+1 : marche avant en ligne droite, sans orientation finale (theta est ignoré)
+2 : stop (progressif si le robot est en train de se déplacer, cf doc) (x, y et theta sont ignorés)
 3 : reset de la position, bascule le robot en stop et réinitalise le PID
 4 : contrôle manuel de la vitesse cible (x = vitesse linéaire (m/s), y = vitesse angulaire (rad/s), theta est ignoré)
+8 : marche arrière en ligne droite, sans orientation finale (theta est ignoré)
+9 : orientation vers l'angle theta sans déplacement (x et y sont ignorés)
+
+#### Suivi de chemin (calculé par l'A* par exemple)
+
+20 : ajoute un point de passage au chemin à suivre.
+    - Si theta = 1, la trajectoire est démarrée en marche avant (sans orientation finale).
+    - Si theta = 2, la trajectoire est démarrée en marche arrière (sans orientation finale).
+    - Sinon, theta doit valoir 0. Les autres valeurs de theta sont invalides (réservées pour usage futur).
+
+21 : ajoute le dernier point de passage et démarre la trajectoire en marche avant ; theta est l'orientation finale
+22 : idem mais en marche arrière
+
+23 : annule le chemin en cours de construction et supprime les points de passage ajoutés jusqu'à présent (x, y et theta sont ignorés).
+    - Le fait de démarrer la trajectoire avec w=20, w=21 ou w=22 réinitialise également le chemin.
+    - Cet ordre n'interrompt pas le déplacement si une trajectoire est déjà démarrée.
+
+#### Obsolètes ou pas encore implémentées
+
 5 : [PAS ENCORE IMPLEMENTE] recalage avant : le robot s'oriente selon theta = z, puis avance en marche avant jusqu'au contact d'un mur et reset sa position (x ou y)
 6 : [PAS ENCORE IMPLEMENTE] recalage arriere : le robot s'oriente selon theta = z, puis recule en marche arriere jusqu'au contact
+
 7 : [SUPPRIME] point final marche avant, mais avec une dynamique assouplie
-8 : [SUPPRIME] idem mais en marche arriere
-9 : orientation pure vers l'angle theta = z (x et y sont ignorés)
 10 : [SUPPRIME] fake_recal_avant : le robot se plaque au mur mais sans reset sa position
 11 : [SUPPRIME] fake_recal_arriere : idem
+
 ```
 Les consignes marquées [SUPPRIME] ne seront pas réimplémentées sauf si elles sont vraiment nécessaires.
 

@@ -11,6 +11,7 @@
 #include <memory>
 #include <optional>
 #include <utility>
+#include <vector>
 
 /**
  * ROS2 node to receive displacement orders and send callbacks.
@@ -65,6 +66,8 @@ class ROS : public ROSImpl::node_t {
     bool m_wasActive;
 
     log_entry_t m_log;
+
+    std::shared_ptr<std::vector<Point2D<Meter>>> m_pendingPath;
 
     /* SUBSCRIBERS */
 

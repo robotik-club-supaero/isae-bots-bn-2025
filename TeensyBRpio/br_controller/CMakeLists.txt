@@ -27,6 +27,7 @@ file(GLOB_RECURSE base_SRCS
     "${PROJECT_SOURCE_DIR}/src/trajectories/*.cpp"
 )
 set(ros_SRCS ${PROJECT_SOURCE_DIR}/src/ros/ROS.cpp ${PROJECT_SOURCE_DIR}/src/ros/DisplacementOrder.cpp)
+set(test_SRCS ${PROJECT_SOURCE_DIR}/test/logging.cpp)
 
 add_executable(simulation_br launch/main_simulation.cpp ${base_SRCS} ${ros_SRCS})
 target_link_libraries(simulation_br m)
@@ -36,5 +37,15 @@ install(TARGETS
   simulation_br
   DESTINATION lib/${PROJECT_NAME}
 )
+
+if(BUILD_TESTING)
+  add_executable(test_curve test/test_curve.cpp ${base_SRCS} ${test_SRCS})
+  target_link_libraries(test_curve m sfml-graphics sfml-window sfml-system)
+  
+  install(TARGETS
+    test_curve
+    DESTINATION lib/${PROJECT_NAME}
+  )
+endif()
 
 ament_package()

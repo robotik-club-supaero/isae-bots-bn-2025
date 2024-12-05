@@ -9,6 +9,8 @@
 #include "manager/ControllerManager.hpp"
 #include "math/ProportionalIntegralDerivative.hpp"
 
+#include <vector>
+
 enum GoalType {
     UNVALID_GOALTYPE = -1,
     /// Linear displacement with final orientation
@@ -20,6 +22,11 @@ enum GoalType {
     /// Linear displacement backwards
     LINEAR_REVERSE = 8,
 
+    PATH_ADD_POINT = 20,
+    PATH_START_FORWARD = 21,
+    PATH_START_BACKWARD = 22,
+    PATH_RESET = 23,
+
     /// Emergency braking
     STOP = 2,
     /// Resets the estimated position
@@ -27,9 +34,6 @@ enum GoalType {
 
     /// Direct control of the setpoint's speed.
     CONTROL = 4,
-
-    // TODO remove, replace with actual Bezier order
-    TEST_BEZIER = 50,
 };
 
 class DisplacementOrder {
@@ -41,8 +45,9 @@ class DisplacementOrder {
     DisplacementOrder(GoalType type, Position2D<Millimeter> goalPosition);
     DisplacementOrder(int type, Position2D<Millimeter> goalPosition);
 
-    template <Actuators TActuators, PositionFeedback TFeedback, Clock TClock>
-    void operator()(manager_t<TActuators, TFeedback, TClock> &manager) const;
+/// Sends the order to the manager or the controller depending on the goal type.
+    template <Actuators TActuators, PositionFeedback TFeedback, Clock TClock>    
+    void operator()(manager_t<TActuators, TFeedback, TClock> &manager, std::vector<Point2D<Meter>> &pendingPath) const;
 
     GoalType type;
     Position2D<Millimeter> position;
@@ -50,10 +55,15 @@ class DisplacementOrder {
   private:
     static constexpr int CONTROL_MAX_SPEED = 255;
 
-    /// Sends the order to the manager or the controller depending on the goal type.
+    /// Starts linear displacement
     template <Actuators TActuators, PositionFeedback TFeedback, Clock TClock>
-    static void goTo(manager_t<TActuators, TFeedback, TClock> &manager, DisplacementKind kind, Vector2D<Millimeter> goalPosition,
-                     std::optional<Angle> angle);
+    static void goTo(manager_t<TActuators, TFeedback, TClock> &manager, DisplacementKind kind, Point2D<Millimeter> goalPosition,
+                     std::optional<Angle> finalOrientation);
+    
+     /// Starts path
+    template <Actuators TActuators, PositionFeedback TFeedback, Clock TClock>
+    static void startPath(manager_t<TActuators, TFeedback, TClock> &manager, DisplacementKind kind, std::vector<Point2D<Meter>> &path,
+                     std::optional<Angle> finalOrientation);
 };
 
 #endif

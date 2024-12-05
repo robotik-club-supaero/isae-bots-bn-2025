@@ -14,7 +14,7 @@ class Angle {
   public:
     Angle(double_t value);
 
-    operator double_t();
+    operator double_t() const;
     double_t value() const;
 
     /// @return this + PI
