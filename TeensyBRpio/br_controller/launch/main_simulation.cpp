@@ -1,5 +1,3 @@
-#if !defined(ARDUINO) && defined(_SIMULATION)
-
 #include "logging.hpp"
 #include "specializations/manager.hpp"
 #include "specializations/ros.hpp"
@@ -20,7 +18,7 @@ void got_signal(int) {
     quit.store(true);
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv) { 
     struct sigaction sa;
     memset(&sa, 0, sizeof(sa));
     sa.sa_handler = got_signal;
@@ -46,10 +44,8 @@ int main(int argc, char **argv) {
     rclcpp::shutdown();
 }
 
-void log(LogSeverity severity, string_t message) {
+void log(LogSeverity severity, const string_t &message) {
     if (ros) {
         ros->sendLog(severity, message);
     }
 }
-
-#endif

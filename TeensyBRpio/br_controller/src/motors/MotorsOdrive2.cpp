@@ -1,12 +1,8 @@
-#ifdef ARDUINO
-
 #include "motors/MotorsOdrive2.hpp"
 #include <ODriveEnums.h>
 
 #include <algorithm>
 #include <numbers>
-
-#include "logging.hpp"
 
 // defines to avoid wondering if 0 is left or right
 #define BR_RIGHT 0
@@ -73,6 +69,4 @@ double_t MotorsOdrive2::getLastLeftSpeed() const {
 double_t MotorsOdrive2::getLastRightSpeed() const {
     return m_lastRightSpeed;
 }
-#endif
-
 #endif

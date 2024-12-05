@@ -32,7 +32,7 @@ namespace ros_rclc {
 class Node {
 
   public:
-    Node(string_t name) : m_name(name), m_msgLog() {
+    Node(string_t name) : m_name(std::move(name)), m_msgLog() {
         RCCHECK_HARD(rclc_support_init(m_support.get(), 0, NULL, m_allocator.get()));
         RCCHECK_HARD(rclc_node_init_default(m_node.get(), name.c_str(), "", m_support.get()));
         RCCHECK_HARD(rclc_executor_init(m_executor.get(), &m_support->context, 5, m_allocator.get()));
@@ -43,16 +43,16 @@ class Node {
     void spin_once() { RCCHECK_HARD(rclc_executor_spin_some(m_executor.get(), 0)); }
 
     template <typename T>
-    Subscription<T> createSubscription(string_t topic, std::function<void(const T &)> callback) {
+    Subscription<T> createSubscription(const string_t &topic, std::function<void(const T &)> callback) {
         return Subscription<T>(m_node, m_executor.get(), topic, callback);
     }
 
     template <typename T>
-    Publisher<T> createPublisher(string_t topic) {
+    Publisher<T> createPublisher(const string_t &topic) {
         return Publisher<T>(m_node, topic);
     }
 
-    void sendLog(LogSeverity severity, string_t message) {
+    void sendLog(LogSeverity severity, const string_t &message) {
         switch (severity) {
             case INFO:
                 m_msgLog.level = rcl_interfaces__msg__Log__INFO;

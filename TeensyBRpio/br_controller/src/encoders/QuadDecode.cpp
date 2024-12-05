@@ -1,5 +1,3 @@
-#ifdef ARDUINO
-
 #include "encoders/QuadDecode.h"
 
 // ISR routine for FlexTimer1 Module
@@ -35,5 +33,3 @@ extern "C" void ftm2_isr(void) {
         }
     }
 }
-
-#endif

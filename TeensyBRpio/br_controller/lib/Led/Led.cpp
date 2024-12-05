@@ -1,5 +1,3 @@
-#ifdef ARDUINO
-
 #include "Led.hpp"
 
 #include <Arduino.h>
@@ -20,5 +18,3 @@ void BlinkLED::loop() {
         m_timer = millis();
     }
 }
-
-#endif
