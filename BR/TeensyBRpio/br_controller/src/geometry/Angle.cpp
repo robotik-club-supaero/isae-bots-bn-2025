@@ -2,7 +2,7 @@
 #include <cmath>
 #include <numbers>
 
-constexpr double_t PI = std::numbers::pi_v<double_t>;
+constexpr double_t PI = Angle::PI;
 
 /// Take an angle in [-2*PI;2*PI] and return the equivalent angle in (-PI;PI]
 /// The result is unspecified if `value` is not within [-2*PI;2*PI].
