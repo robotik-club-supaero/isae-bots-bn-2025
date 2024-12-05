@@ -1,5 +1,3 @@
-#if defined(ARDUINO) && !defined(_SIMULATION)
-
 #include <Arduino.h>
 #include <micro_ros_platformio.h>
 
@@ -25,10 +23,8 @@ void loop() {
     blinkingLed->loop();
 }
 
-void log(LogSeverity severity, string_t message) {
+void log(LogSeverity severity, const string_t &message) {
     if (rosInstance) {
         rosInstance->sendLog(severity, message);
     }
 }
-
-#endif

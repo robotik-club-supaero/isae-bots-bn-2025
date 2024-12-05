@@ -12,12 +12,12 @@
 namespace ros_rclcpp {
 class Node {
   public:
-    Node(string_t name) : m_node(std::make_shared<rclcpp::Node>(name)) {}
+    Node(string_t name) : m_node(std::make_shared<rclcpp::Node>(std::move(name))) {}
 
     void spin_once() { rclcpp::spin_some(m_node); }
 
     template <typename T>
-    rclcpp::Subscription<typename Messages<T>::type>::SharedPtr createSubscription(string_t topic, std::function<void(const T &)> callback) {
+    rclcpp::Subscription<typename Messages<T>::type>::SharedPtr createSubscription(const string_t &topic, std::function<void(const T &)> callback) {
         return m_node->template create_subscription<typename Messages<T>::type>( //
             topic, 10, [callback](std::unique_ptr<typename Messages<T>::type> msg) -> void {
                 T data = Messages<T>::extract(*msg);
@@ -26,11 +26,11 @@ class Node {
     }
 
     template <typename T>
-    Publisher<T> createPublisher(string_t topic) {
+    Publisher<T> createPublisher(const string_t &topic) {
         return Publisher<T>(m_node->template create_publisher<typename Messages<T>::type>(topic, 10));
     }
 
-    void sendLog(LogSeverity severity, string_t message) {
+    void sendLog(LogSeverity severity, const string_t &message) {
         const char *msgRaw = message.c_str();
         auto logger = m_node->get_logger();
 

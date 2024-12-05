@@ -16,11 +16,19 @@ find_package(br_messages REQUIRED)
 
 include_directories(include lib)
 
-file(GLOB_RECURSE all_SRCS
-    "${PROJECT_SOURCE_DIR}/src/*.cpp"
+file(GLOB_RECURSE base_SRCS
+   "${PROJECT_SOURCE_DIR}/src/controller/*.cpp" 
+    "${PROJECT_SOURCE_DIR}/src/feedback/UnicycleStateSimulator.cpp" 
+    "${PROJECT_SOURCE_DIR}/src/geometry/*.cpp" 
+    "${PROJECT_SOURCE_DIR}/src/manager/*.cpp" 
+    "${PROJECT_SOURCE_DIR}/src/math/*.cpp" 
+    "${PROJECT_SOURCE_DIR}/src/motors/MotorStub2.cpp" 
+    "${PROJECT_SOURCE_DIR}/src/rotations/*.cpp" 
+    "${PROJECT_SOURCE_DIR}/src/trajectories/*.cpp"
 )
+set(ros_SRCS ${PROJECT_SOURCE_DIR}/src/ros/ROS.cpp ${PROJECT_SOURCE_DIR}/src/ros/DisplacementOrder.cpp)
 
-add_executable(simulation_br ${all_SRCS})
+add_executable(simulation_br launch/main_simulation.cpp ${base_SRCS} ${ros_SRCS})
 target_link_libraries(simulation_br m)
 ament_target_dependencies(simulation_br rclcpp std_msgs geometry_msgs br_messages)
 

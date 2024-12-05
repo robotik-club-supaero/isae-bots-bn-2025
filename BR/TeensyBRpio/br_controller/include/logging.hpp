@@ -3,7 +3,9 @@
 
 #include "defines/string.h"
 
-#ifndef __EXCEPTIONS
+#ifdef __EXCEPTIONS
+#include <stdexcept>
+#else
 #include <cstdlib>
 #endif
 
@@ -32,13 +34,13 @@ inline string_t severityToString(LogSeverity severity) {
     }
 }
 
-void log(LogSeverity severity, string_t message);
+void log(LogSeverity severity, const string_t &message);
 
-[[noreturn]] inline void abort(string_t message) {
-#ifdef __EXCEPTIONS
-    throw message;
-#else
+[[noreturn]] inline void abort(const string_t &message) {
     log(FATAL, message);
+#ifdef __EXCEPTIONS
+    throw std::runtime_error(message);
+#else
     std::abort();
 #endif
 }

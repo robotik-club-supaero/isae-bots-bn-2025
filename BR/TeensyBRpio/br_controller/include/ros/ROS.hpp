@@ -47,7 +47,7 @@ class ROS : public ROSImpl::node_t {
 
     /// Spins the ROS node and call "loop" on the attached manager. It is an error to call this function before a manager is attached.
     void loop();
-    void sendLog(LogSeverity severity, string_t message);
+    void sendLog(LogSeverity severity, const string_t &message);
 
   private:
     subscription_t<disp_order_t> createSubOrder();

@@ -40,7 +40,7 @@ class Subscription {
     using MsgT = MessageWrapper<T>;
 
     friend class Node;
-    Subscription(std::shared_ptr<rcl_node_t> node, rclc_executor_t *executor, string_t topic, std::function<void(const T &)> callback)
+    Subscription(std::shared_ptr<rcl_node_t> node, rclc_executor_t *executor, const string_t &topic, std::function<void(const T &)> callback)
         : m_node(std::move(node)), m_subscription(std::make_unique<rcl_subscription_t>()), m_msg(std::make_unique<MsgT>(callback)) {
 
         RCCHECK_HARD(rclc_subscription_init_default(m_subscription.get(), m_node.get(), Messages<T>::getTypeSupport(), topic.c_str()));
