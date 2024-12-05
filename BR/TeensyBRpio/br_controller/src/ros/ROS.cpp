@@ -111,6 +111,9 @@ void _ROS::loop() {
             }
             m_pubHN.publish(OK_POS);
         }
+        if ((event & UpdateResultCode::TERMINAL) && event != UpdateResultCode::STOPPED) {
+             m_pubHN.publish(OK_ORDER);
+        }
     });
 
     duration_t now = m_clock.micros();

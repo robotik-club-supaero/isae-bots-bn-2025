@@ -109,8 +109,11 @@ Ce topic retourne la position actuelle du robot toutes les 100ms (ou toutes les 
 Ce topic effectue le feedback des étapes de l'asservissement. Le message est un entier parmi :
 ```
 1 : okPos, le robot a fini son avance lineaire
-2 : okTurn, le robot a fini de tourner 
-3 : le robot a fini une marche arrière (ce code est toujours immédiatement suivi de okPos)
+2 : okTurn, le robot a fini de tourner
+3 : le robot a fini une marche arrière (ce code est toujours immédiatement suivi de okPos) [OBSOLETE]
+5 : okReady, contrôleur passé en état ready (activation asservissement ODrive)
+6 : okIdle, contrôleur passé en état idle (désactivation asservissement ODrive)
+7 : okOrder, ordre (déplacement ou rotation) terminé
 0 : [jamais envoyé actuellement] erreur dans l'asserv (timeout, derapage, divergence etc...) donc erreur qui peut reussir apres un deuxieme essai
 -1 : [jamais envoyé actuellement] erreur bloquante (gains non sets ou non valides, erreurs internes etc...)
 ```

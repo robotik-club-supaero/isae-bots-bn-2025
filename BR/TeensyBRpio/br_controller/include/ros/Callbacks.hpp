@@ -9,6 +9,8 @@ enum AsservCallback {
     OK_READY = 5,
     OK_IDLE = 6,
 
+    OK_ORDER = 7,
+
     ERROR_ASSERV = 0,
 };
 
