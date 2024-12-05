@@ -2,11 +2,11 @@
 #include "logging.hpp"
 
 /**
- * Generates a Bézier curve such that: 
+ * Generates a Bézier curve such that:
  *  - The curve goes from `start` to `end`
  *  - The direction at the start point is `initialDirection`
  *  - If `next` is non-empty, the direction at the end point is the mean between [start, end] and [end, next].
- * 
+ *
  * @param next The next destination of the robot, *after* the generated Bézier curve, or `std::nullopt` if `end` is the final destination.
  */
 BezierCurve generateBezier(Point2D<Meter> start, Point2D<Meter> end, Angle initialDirection, std::optional<Point2D<Meter>> next) {
@@ -32,6 +32,16 @@ PathTrajectory::PathTrajectory(Angle initialDirection, std::vector<Point2D<Meter
     : m_points(points), m_currentArcIndex(0), m_currentArc({}), m_currentArcLength(0), m_currentArcPosition(0), m_remainingLength(0) {
     if (points.size() < 2) {
         abort("Trajectory must have at least 2 points");
+    }
+
+    Angle preferredDirection = (points[1] - points[0]).argument();
+    if (points.size() > 2) {
+        preferredDirection += Vector2D<Meter>::angle(points[2] - points[1], points[1] - points[0]).value() / 2;
+    }
+    if (abs(initialDirection - preferredDirection) > Angle::PI / 3) {
+        // Force the controller to enter state "initial rotation" before starting the trajectory
+        // As we are not moving yet, it is more efficient (and safer) to turn now than starting to move in the wrong direction.
+        initialDirection = preferredDirection;
     }
     setupArc(initialDirection);
     updateRemainingLength();

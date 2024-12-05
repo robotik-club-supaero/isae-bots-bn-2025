@@ -33,6 +33,8 @@ class Angle {
     Angle operator*(double_t factor) const;
     Angle operator/(double_t factor) const;
 
+    static constexpr double_t PI = std::numbers::pi_v<double_t>;
+
   private:
     double_t m_value;
 };

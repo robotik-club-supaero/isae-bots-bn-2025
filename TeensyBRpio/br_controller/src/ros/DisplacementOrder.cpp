@@ -1,8 +1,8 @@
 #include "ros/DisplacementOrder.hpp"
 #include "logging.hpp"
 #include "rotations/SetHeadingProfile.hpp"
-#include "trajectories/PathTrajectory.hpp"
 #include "trajectories/LinearTrajectory.hpp"
+#include "trajectories/PathTrajectory.hpp"
 
 DisplacementOrder::DisplacementOrder(GoalType type, Position2D<Millimeter> goalPosition) : type(type), position(goalPosition) {}
 
@@ -97,8 +97,12 @@ void DisplacementOrder::startPath(manager_t<TActuators, TFeedback, TClock> &mana
                                   std::optional<Angle> finalOrientation) {
     manager.sendOrder([&](controller_t &controller, Position2D<Meter> robotPosition) {
         path.insert(path.begin(), robotPosition);
-        controller.template startTrajectory<PathTrajectory, Angle &, std::vector<Point2D<Meter>>>(kind, robotPosition.theta, std::move(path),
-                                                                                                   finalOrientation);
+        Angle initialDirection = robotPosition.theta;
+        if (kind == REVERSE) {
+            initialDirection = initialDirection.reverse();
+        }
+        controller.template startTrajectory<PathTrajectory, Angle &, std::vector<Point2D<Meter>>>(kind, initialDirection, std::move(path),
+                                                                                                  finalOrientation);
     });
 }
 
