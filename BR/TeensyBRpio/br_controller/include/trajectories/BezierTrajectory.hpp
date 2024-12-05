@@ -1,11 +1,18 @@
-#include "geometry/Vector2D.hpp"
+#ifndef _BEZIER_TRAJECTORY_HPP_
+#define _BEZIER_TRAJECTORY_HPP_
+
 #include "trajectories/Trajectory.hpp"
+#include "geometry/Bezier.hpp"
 #include <vector>
 
-// Trajectory structure
+/// A Bézier trajectory between the origin and the destination, with additional control points in-between.
 class BezierTrajectory : public Trajectory {
 
   public:
+    /**
+     * @param points There must be at least two points. The first point is the origin and the last point is
+     * the destination. Other elements, if any, are the control points (the curve may NOT pass through them).
+     */
     BezierTrajectory(std::vector<Point2D<Meter>> points);
 
     /// @copydoc Trajectory::advance()
@@ -18,9 +25,9 @@ class BezierTrajectory : public Trajectory {
     std::optional<double_t> getRemainingDistance() const override;
 
   private:
-    std::vector<Point2D<Meter>> m_points;
-    double_t m_totalLength;
+    BezierCurve m_curve;
     double_t m_position;
-    Point2D<Meter> m_currentPosition;
-    Angle m_direction;
+    double_t m_totalLength;
 };
+
+#endif

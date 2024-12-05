@@ -17,7 +17,7 @@ double_t modulo_pipi(double_t value) {
 
 Angle::Angle(double_t value) : m_value(modulo_pipi(value)) {}
 
-Angle::operator double_t() {
+Angle::operator double_t() const {
     return m_value;
 }
 double_t Angle::value() const {
@@ -25,7 +25,7 @@ double_t Angle::value() const {
 }
 
 Angle Angle::reverse() const {
-    return *this + PI;
+    return *this + Angle(PI);
 }
 
 Angle Angle::operator-() const {
