@@ -4,9 +4,9 @@
 
 namespace controller {
 
-StateTrajectoryWithRamp::StateTrajectoryWithRamp(std::unique_ptr<Trajectory> trajectory, double_t maxLinSpeed, double_t maxLinAcceleration,
+StateTrajectoryWithRamp::StateTrajectoryWithRamp(std::unique_ptr<Trajectory> trajectory, Speeds maxSpeeds, double_t maxLinAcceleration,
                                                  DisplacementKind kind, std::optional<Angle> finalOrientation)
-    : m_trajectory(std::move(trajectory)), m_maxSpeed(maxLinSpeed), m_ramp(maxLinSpeed, maxLinAcceleration), m_kind(kind),
+    : m_trajectory(std::move(trajectory)), m_maxSpeeds(maxSpeeds), m_ramp(maxSpeeds.linear, maxLinAcceleration), m_kind(kind),
       m_finalOrientation(finalOrientation) {
     log(INFO, "Entering controller state: Forward");
 }
@@ -22,17 +22,27 @@ ControllerStatus StateTrajectoryWithRamp::getStatus() const {
 StateUpdateResult StateTrajectoryWithRamp::update(double_t interval, Position2D<Meter> &setpoint, Position2D<Meter> actualRobotPosition) {
     if (m_trajectory) {
         m_ramp.update(interval);
+        double_t currentRampSpeed = m_ramp.getCurrentSpeed();
 
-        if (m_trajectory->advance(m_ramp.getCurrentSpeed() * interval)) {
+        if (m_trajectory->advance(currentRampSpeed * interval)) {
+            Angle oldTheta = setpoint.theta;
+
             Position2D<Meter> position = m_trajectory->getCurrentPosition();
             setpoint.x = position.x;
             setpoint.y = position.y;
             setpoint.theta = position.theta + m_kind.getAlignmentOffset();
 
-            m_ramp.setTargetSpeed(m_maxSpeed);
+            m_ramp.setTargetSpeed(m_maxSpeeds.linear);
             std::optional<double_t> remainingDistance = m_trajectory->getRemainingDistance();
             if (remainingDistance) {
                 m_ramp.ensureCanBrake(*remainingDistance);
+            }
+
+            // TODO: this is not robust in case of high angular acceleration
+            double_t angularSpeed = abs(setpoint.theta - oldTheta) / interval;
+            if (angularSpeed > m_maxSpeeds.angular) {
+                double_t curveRadius = currentRampSpeed / angularSpeed;
+                m_ramp.setTargetSpeed(m_maxSpeeds.angular * curveRadius);          
             }
         } else {
             m_trajectory.reset();
@@ -49,7 +59,7 @@ StateUpdateResult StateTrajectoryWithRamp::update(double_t interval, Position2D<
 }
 
 void StateTrajectoryWithRamp::notify(ControllerEvent event) {
-    std::visit(overload{[&](const MaxSpeedsChanged &event) { m_maxSpeed = event.newSpeeds.linear; }, [](auto) {}}, event);
+    std::visit(overload{[&](const MaxSpeedsChanged &event) { m_maxSpeeds = event.newSpeeds; }, [](auto) {}}, event);
 }
 
 } // namespace controller
