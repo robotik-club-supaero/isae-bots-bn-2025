@@ -3,6 +3,7 @@
 
 #include "controller/ControllerState.hpp"
 #include "geometry/Angle.hpp"
+#include "geometry/Speeds.hpp"
 #include "math/Ramp.hpp"
 
 class Trajectory;
@@ -14,7 +15,7 @@ namespace controller {
 class StateTrajectoryWithRamp : public ControllerState {
   public:
     /// @param trajectory must not be null
-    StateTrajectoryWithRamp(std::unique_ptr<Trajectory> trajectory, double_t maxLinSpeed, double_t maxLinAcceleration, DisplacementKind kind,
+    StateTrajectoryWithRamp(std::unique_ptr<Trajectory> trajectory, Speeds maxSpeeds, double_t maxLinAcceleration, DisplacementKind kind,
                             std::optional<Angle> finalOrientation = std::nullopt);
     ControllerStatus getStatus() const override;
     /// It is undefined behaviour to call this function after it has returned BadRobotOrientation
@@ -23,7 +24,7 @@ class StateTrajectoryWithRamp : public ControllerState {
 
   private:
     std::unique_ptr<Trajectory> m_trajectory;
-    double_t m_maxSpeed;
+    Speeds m_maxSpeeds;
     Ramp m_ramp;
 
     DisplacementKind m_kind;
