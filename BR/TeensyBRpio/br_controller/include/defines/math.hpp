@@ -15,7 +15,7 @@ concept Add = requires(T a) {
 };
 template <typename TValue>
 concept Mul = requires(double_t a, TValue b) {
-    { b *a } -> std::convertible_to<TValue>;
+    { b * a } -> std::convertible_to<TValue>;
 };
 
 /* #region convert */
