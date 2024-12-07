@@ -29,7 +29,7 @@ file(GLOB_RECURSE base_SRCS
 set(ros_SRCS ${PROJECT_SOURCE_DIR}/src/ros/ROS.cpp ${PROJECT_SOURCE_DIR}/src/ros/DisplacementOrder.cpp)
 set(test_SRCS ${PROJECT_SOURCE_DIR}/test/logging.cpp)
 
-add_executable(simulation_br launch/main_simulation.cpp ${base_SRCS} ${ros_SRCS})
+add_executable(simulation_br src/main_simulation.cpp ${base_SRCS} ${ros_SRCS})
 target_link_libraries(simulation_br m)
 ament_target_dependencies(simulation_br rclcpp std_msgs geometry_msgs br_messages)
 

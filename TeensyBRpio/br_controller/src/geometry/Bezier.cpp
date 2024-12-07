@@ -2,66 +2,81 @@
 #include "logging.hpp"
 
 #define INTEGRAL_NUM_STEPS 1000
-#define DIRECTION_EST_STEP 0.001
 
-// Binomial coefficient function
-double binomial(unsigned int n, unsigned int i) {
-    if (i > n) {
-        return 0;
-    }
-    if (i == 0 || i == n) {
-        return 1;
-    }
-    // NB: n > 0, otherwise `i == 0 || i > n` would hold
-    if (i == 1 || i == n - 1) {
-        return n;
-    }
-    unsigned int fact_i = 1;
-    unsigned int fact_n_i = 1;
-    unsigned int fact_n = 1;
+/**
+ * Iterator over (n choose i) for 0 <= i <= n.
+ *
+ * This leverages the fact that `(n i+1) = (n i) * (n - i) / (i + 1)` to compute each value in constant time
+ * based on the previous value.
+ *
+ * Usage:
+ * `for(BinomialIterator binom(n); binom.value; ++binom) {
+ *      // (binom.n binom.i) == binom.value
+ * }`
+ *
+ * Internal use only.
+ */
+struct BinomialIterator {
 
-    for (unsigned int k = 2; k <= n; k++) {
-        fact_n *= k;
-        if (k == i) {
-            fact_i = fact_n;
-        }
-        if (k == n - i) {
-            fact_n_i = fact_n;
-        }
+    unsigned int n;
+    unsigned int i;
+    unsigned int value;
+
+    BinomialIterator(unsigned int n) : n(n), i(0), value(1) {}
+
+    BinomialIterator &operator++() {
+        value = (value * (n - i)) / (i + 1);
+        i++;
+        return *this;
     }
-    return fact_n / (fact_i * fact_n_i);
+
+    BinomialIterator operator++(int) {
+        BinomialIterator cpy = *this;
+        ++(*this);
+        return cpy;
+    }
+
+    operator unsigned int() const { return value; }
+};
+
+/**
+ * Computes the polynomial `B` that corresponds to the Bézier curve defined by the given points.
+ *
+ * The curve is defined by: `B(t) = sum((n i) * t^i * (1 - t)^(n-i) * P_i)`, hence
+ * `B(t) = sum[t^i *
+ *                   (n i) * sum_{j<=i} ((-1)^(i-j) * (i j) * P_j)
+ *         ]}`.
+ *
+ * The second form allows to precompute the coefficients of the polynomial and can be evaluated using Horner's method.
+ */
+Polynomial<Point2D<Meter>> bezierToPolynomial(const std::vector<Point2D<Meter>> &points) {
+    if (points.size() < 2) {
+        abort("A Bézier curve must have at least two points");
+    }
+    std::vector<Point2D<Meter>> coeffs;
+
+    for (BinomialIterator binom(points.size() - 1); binom.value; ++binom) {
+        Point2D<Meter> coeff = {0, 0};
+        for (BinomialIterator nested_binom(binom.i); nested_binom.value; ++nested_binom) {
+            coeff += points[nested_binom.i] * ((int)nested_binom.value * (((binom.i + nested_binom.i) % 2) ? (-1) : 1));
+        }
+        coeffs.push_back(coeff * binom.value);
+    }
+
+    return std::move(coeffs);
 }
 
-// Bernstein polynomial function
-double_t bernstein(unsigned int n, unsigned int i, double_t t) {
-    if (t < 0.0 || t > 1.0) {
-        abort("t must be between 0 and 1");
-    }
-    return binomial(n, i) * std::pow(t, i) * std::pow(1 - t, n - i);
-}
+BezierCurve::BezierCurve(std::vector<Point2D<Meter>> points)
+    : m_polynomial(bezierToPolynomial(points)), m_derivative(m_polynomial.derivative()), m_points(std::move(points)) {}
 
-BezierCurve::BezierCurve(std::vector<Point2D<Meter>> points) : m_points(std::move(points)) {}
-
-BezierCurve::BezierCurve(std::initializer_list<Point2D<Meter>> points) : BezierCurve(std::vector(std::move(points))) {}
+BezierCurve::BezierCurve(std::initializer_list<Point2D<Meter>> points) : BezierCurve(std::vector(points)) {}
 
 Point2D<Meter> BezierCurve::operator()(double_t t) const {
-    Point2D<Meter> position = {0, 0};
-    for (std::size_t i = 0; i < m_points.size(); i++) {
-        double_t b = bernstein(m_points.size() - 1, i, t);    
-        position += m_points[i] * b;
-    }
-    return position;
+    return m_polynomial(t);
 }
-Position2D<Meter> BezierCurve::position(double_t t) const {
-    Point2D<Meter> point1 = this->operator()(t);
-    double_t t2 = t + DIRECTION_EST_STEP;
-    if (t2 > 1) {
-        t2 = t - DIRECTION_EST_STEP;
-    }
-    Point2D<Meter> point2 = this->operator()(t2);
-    Angle direction = ((point2 - point1) / (t2 - t)).argument();
 
-    return {point1, direction};
+Vector2D<Meter> BezierCurve::derivative(double_t t) const {
+    return m_derivative(t);
 }
 
 double_t BezierCurve::computeLength() const {
@@ -79,8 +94,5 @@ double_t BezierCurve::computeLength(unsigned int num_steps) const {
 }
 
 const std::vector<Point2D<Meter>> &BezierCurve::points() const {
-    return m_points;
-}
-std::vector<Point2D<Meter>> &BezierCurve::points() {
     return m_points;
 }

@@ -6,7 +6,7 @@
 #include <vector>
 
 /// A Bézier trajectory between the origin and the destination, with additional control points in-between.
-class BezierTrajectory : public Trajectory {
+class [[deprecated("not tested")]] BezierTrajectory : public Trajectory {
 
   public:
     /**
@@ -26,7 +26,9 @@ class BezierTrajectory : public Trajectory {
 
   private:
     BezierCurve m_curve;
+    /// Between 0 and 1
     double_t m_position;
+    /// In meters
     double_t m_totalLength;
 };
 

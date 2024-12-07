@@ -29,7 +29,8 @@ BezierCurve generateBezier(Point2D<Meter> start, Point2D<Meter> end, Angle initi
 }
 
 PathTrajectory::PathTrajectory(Angle initialDirection, std::vector<Point2D<Meter>> points)
-    : m_points(points), m_currentArcIndex(0), m_currentArc({}), m_currentArcLength(0), m_currentArcPosition(0), m_remainingLength(0) {
+    : m_points(points), m_currentArcIndex(0), m_currentArc(), m_currentArcLength(0), m_currentArcPosition(0), m_currentDerivative(),
+      m_remainingLength(0) {
     if (points.size() < 2) {
         abort("Trajectory must have at least 2 points");
     }
@@ -45,6 +46,8 @@ PathTrajectory::PathTrajectory(Angle initialDirection, std::vector<Point2D<Meter
     }
     setupArc(initialDirection);
     updateRemainingLength();
+
+    m_currentDerivative = m_currentArc->derivative(0);
 }
 
 void PathTrajectory::setupArc(Angle initialDirection) {
@@ -52,8 +55,8 @@ void PathTrajectory::setupArc(Angle initialDirection) {
     if (m_currentArcIndex + 2 < m_points.size()) {
         next = std::make_optional(m_points[m_currentArcIndex + 2]);
     }
-    m_currentArc = generateBezier(m_points[m_currentArcIndex + 0], m_points[m_currentArcIndex + 1], initialDirection, next);
-    m_currentArcLength = m_currentArc.computeLength();
+    m_currentArc.emplace(generateBezier(m_points[m_currentArcIndex + 0], m_points[m_currentArcIndex + 1], initialDirection, next));
+    m_currentArcLength = m_currentArc->computeLength();
 }
 
 void PathTrajectory::updateRemainingLength() {
@@ -64,47 +67,55 @@ void PathTrajectory::updateRemainingLength() {
 }
 
 bool PathTrajectory::advance(double_t distance) {
-    if (m_currentArcPosition >= m_currentArcLength && m_currentArcIndex >= numberOfArcs() - 1) {
+    if (m_currentArcPosition >= 1 && m_currentArcIndex >= numberOfArcs() - 1) {
         return false;
     }
-    m_currentArcPosition += distance;
 
-    while (m_currentArcPosition >= m_currentArcLength && m_currentArcIndex < numberOfArcs() - 1) {
-        m_currentArcIndex++;
-        m_currentArcPosition -= m_currentArcLength;
+    do {
+        double_t remainingOnArc = m_currentArcLength * (1 - m_currentArcPosition);
+        if (distance < remainingOnArc) {
+            double_t increment = distance / m_currentDerivative.norm();
+            m_currentArcPosition += increment;
+            if (m_currentArcPosition > 1) {
+                m_currentArcPosition = 1;
+            }
+            distance = 0;
+        } else {
+            m_currentArcPosition = 1;
+            distance -= remainingOnArc;
+        }
+        if (m_currentArcPosition >= 1 && m_currentArcIndex < numberOfArcs() - 1) {
+            m_currentArcIndex++;
+            m_currentArcPosition = 0;
 
-        const std::vector<Point2D<Meter>> &points = m_currentArc.points();
-        Angle direction = (points[points.size() - 1] - points[points.size() - 2]).argument();
-        setupArc(direction);
-        updateRemainingLength();
-    }
+            setupArc(m_currentArc->derivative(1).argument());
+            updateRemainingLength();
+        }
+    } while (distance > 0 && m_currentArcIndex < numberOfArcs() - 1);
 
-    if (m_currentArcPosition >= m_currentArcLength) {
-        m_currentArcPosition = m_currentArcLength;
-    }
-
+    m_currentDerivative = m_currentArc->derivative(m_currentArcPosition);
     return true;
 }
 
 Position2D<Meter> PathTrajectory::getCurrentPosition() const {
-    return m_currentArc.position(m_currentArcPosition / m_currentArcLength);
+    return {m_currentArc->operator()(m_currentArcPosition), m_currentDerivative.argument()};
 }
 
 std::optional<double_t> PathTrajectory::getRemainingDistance() const {
-    return m_remainingLength + m_currentArcLength - m_currentArcPosition;
+    return m_remainingLength + m_currentArcLength * (1 - m_currentArcPosition);
 }
 
 const std::vector<Point2D<Meter>> &PathTrajectory::getPathPoints() const {
     return m_points;
 }
 const BezierCurve &PathTrajectory::getCurrentBezierArc() const {
-    return m_currentArc;
+    return *m_currentArc;
 }
 PathTrajectory::size_type PathTrajectory::getCurrentArcIndex() const {
     return m_currentArcIndex;
 }
 
 bool PathTrajectory::skipToNextArc() {
-    m_currentArcPosition = m_currentArcLength;
+    m_currentArcPosition = 1;
     return advance(0);
 }

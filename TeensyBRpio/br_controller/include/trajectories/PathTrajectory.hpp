@@ -60,9 +60,13 @@ class PathTrajectory : public Trajectory {
     std::vector<Point2D<Meter>> m_points;
 
     size_type m_currentArcIndex;
-    BezierCurve m_currentArc;
+    /// Never null except during object initialization
+    std::optional<BezierCurve> m_currentArc;
+    /// In meters
     double_t m_currentArcLength;
+    /// Between 0 and 1
     double_t m_currentArcPosition;
+    Vector2D<Meter> m_currentDerivative;
 
     /// A lower bound of the cumulative length of the remaining arcs (excluding the current arc).
     double_t m_remainingLength;
