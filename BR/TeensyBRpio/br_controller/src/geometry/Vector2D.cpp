@@ -63,6 +63,10 @@ template <typename Unit>
 Vector2D<Unit> Vector2D<Unit>::operator/(double_t factor) const {
     return Vector2D(x / factor, y / factor);
 }
+template <typename Unit>
+Vector2D<Unit> Vector2D<Unit>::operator-() const {
+    return Vector2D(-x, -y);
+}
 
 template <typename Unit>
 double_t Vector2D<Unit>::distance(Vector2D<Unit> a, Vector2D<Unit> b) {

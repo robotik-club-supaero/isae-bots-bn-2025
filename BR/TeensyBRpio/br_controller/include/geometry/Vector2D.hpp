@@ -58,6 +58,8 @@ class Vector2D {
     Vector2D<Unit> operator*(double_t factor) const;
     Vector2D<Unit> operator/(double_t factor) const;
 
+    Vector2D<Unit> operator-() const;
+
     static double_t distance(Vector2D<Unit> a, Vector2D<Unit> b);
     /**
      * Returns the signed angle between a and b (in radians).

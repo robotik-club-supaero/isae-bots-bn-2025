@@ -2,6 +2,13 @@
 #include "logging.hpp"
 
 /**
+ * Returns the unnormalized direction of the angle bisector between lineA and lineB.
+ */
+inline Vector2D<Meter> angleBisector(Vector2D<Meter> lineA, Vector2D<Meter> lineB) {
+    return lineA.normalize() + lineB.normalize();
+}
+
+/**
  * Generates a Bézier curve such that:
  *  - The curve goes from `start` to `end`
  *  - The direction at the start point is `initialDirection`
@@ -15,14 +22,12 @@ BezierCurve generateBezier(Point2D<Meter> start, Point2D<Meter> end, Angle initi
 
     Point2D<Meter> controlPt1 = start + Point2D<Meter>(std::cos(initialDirection), std::sin(initialDirection)) * ctrlPtDistance;
 
-    Vector2D<Meter> controlLine1 = start - end;
-    Vector2D<Meter> controlLine2;
+    Vector2D<Meter> finalDirection;
     if (next) {
-        controlLine2 = end - *next;
+        finalDirection = angleBisector(start - end, end - *next);
     } else {
-        controlLine2 = controlPt1 - end;
+        finalDirection = controlPt1 - end;
     }
-    Vector2D<Meter> finalDirection = (controlLine1.normalize() + controlLine2.normalize()) / 2;
     Point2D<Meter> controlPt2 = end + finalDirection.normalize() * ctrlPtDistance;
 
     return {start, controlPt1, controlPt2, end};
@@ -34,9 +39,11 @@ PathTrajectory::PathTrajectory(Angle initialDirection, std::vector<Point2D<Meter
         abort("Trajectory must have at least 2 points");
     }
 
-    Angle preferredDirection = (points[1] - points[0]).argument();
+    Angle preferredDirection = initialDirection;
     if (points.size() > 2) {
-        preferredDirection += Vector2D<Meter>::angle(points[2] - points[1], points[1] - points[0]).value() / 2;
+        preferredDirection = angleBisector(points[1] - points[0], 2 * points[1] - (points[0] + points[2])).argument();
+    } else {
+        preferredDirection = (points[1] - points[0]).argument();
     }
     if (abs(initialDirection - preferredDirection) > Angle::PI / 3) {
         // Force the controller to enter state "initial rotation" before starting the trajectory

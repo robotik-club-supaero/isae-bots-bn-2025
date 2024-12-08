@@ -43,20 +43,21 @@ StateUpdateResult StateTrajectoryWithRamp::update(double_t interval, Position2D<
             double_t actualCurvature = currentRampSpeed == 0 ? 0 : angularSpeed / currentRampSpeed;
 
             double_t distanceToCheck = m_ramp.getBrakingDistance();
-
-            while (1) {
+           
+            while (distanceToCheck) {
                 double_t maxCurvature = std::max(actualCurvature, m_trajectory->getMaxCurvature(distanceToCheck));
                 if (maxCurvature == 0) {
                     break;
                 }
                 double_t maxSpeedForCurvature = m_maxSpeeds.angular / maxCurvature;
+                if (maxSpeedForCurvature >= m_ramp.getTargetSpeed()) {
+                    break;
+                }
                 double_t distanceToAdaptSpeed = m_ramp.getBrakingDistance(maxSpeedForCurvature);
-                if (distanceToCheck < distanceToAdaptSpeed) {
+                if (distanceToCheck > distanceToAdaptSpeed) {
                     distanceToCheck = distanceToAdaptSpeed;
                 } else {
-                    if (maxSpeedForCurvature < m_ramp.getTargetSpeed()) {
-                        m_ramp.setTargetSpeed(maxSpeedForCurvature);
-                    }
+                    m_ramp.setTargetSpeed(maxSpeedForCurvature);               
                     break;
                 }
             }
