@@ -38,12 +38,29 @@ StateUpdateResult StateTrajectoryWithRamp::update(double_t interval, Position2D<
                 m_ramp.ensureCanBrake(*remainingDistance);
             }
 
-            // TODO: this is not robust in case of high angular acceleration
             double_t angularSpeed = abs(setpoint.theta - oldTheta) / interval;
-            if (angularSpeed > m_maxSpeeds.angular) {
-                double_t curveRadius = currentRampSpeed / angularSpeed;
-                m_ramp.setTargetSpeed(m_maxSpeeds.angular * curveRadius);          
+            // V_lin = R V_ang; curvature = 1 / R
+            double_t actualCurvature = currentRampSpeed == 0 ? 0 : angularSpeed / currentRampSpeed;
+
+            double_t distanceToCheck = m_ramp.getBrakingDistance();
+
+            while (1) {
+                double_t maxCurvature = std::max(actualCurvature, m_trajectory->getMaxCurvature(distanceToCheck));
+                if (maxCurvature == 0) {
+                    break;
+                }
+                double_t maxSpeedForCurvature = m_maxSpeeds.angular / maxCurvature;
+                double_t distanceToAdaptSpeed = m_ramp.getBrakingDistance(maxSpeedForCurvature);
+                if (distanceToCheck < distanceToAdaptSpeed) {
+                    distanceToCheck = distanceToAdaptSpeed;
+                } else {
+                    if (maxSpeedForCurvature < m_ramp.getTargetSpeed()) {
+                        m_ramp.setTargetSpeed(maxSpeedForCurvature);
+                    }
+                    break;
+                }
             }
+
         } else {
             m_trajectory.reset();
         }

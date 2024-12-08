@@ -24,6 +24,12 @@ class BezierCurve {
     Vector2D<Meter> derivative(double_t t) const;
 
     /**
+     * Computes the *signed* curvature of the curve. This is the reciprocal of the radius of curvature.
+     * @param t The position on the curve. Must be between 0 and 1 (both included), otherwise the result is unspecified.
+     */
+    double_t curvature(double_t t) const;
+
+    /**
      * Estimates the length of the curve using a discrete numerical method with the default number of steps.
      */
     double_t computeLength() const;
@@ -36,10 +42,13 @@ class BezierCurve {
 
     const std::vector<Point2D<Meter>> &points() const;
 
+    const Polynomial<Point2D<Meter>> &polynomial() const;
+
   private:
     /// Pre-computed Bézier polynomial
     Polynomial<Point2D<Meter>> m_polynomial;
     Polynomial<Point2D<Meter>> m_derivative;
+    Polynomial<Point2D<Meter>> m_secondDerivative;
     std::vector<Point2D<Meter>> m_points;
 };
 

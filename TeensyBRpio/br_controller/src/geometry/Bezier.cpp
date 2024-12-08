@@ -67,7 +67,8 @@ Polynomial<Point2D<Meter>> bezierToPolynomial(const std::vector<Point2D<Meter>> 
 }
 
 BezierCurve::BezierCurve(std::vector<Point2D<Meter>> points)
-    : m_polynomial(bezierToPolynomial(points)), m_derivative(m_polynomial.derivative()), m_points(std::move(points)) {}
+    : m_polynomial(bezierToPolynomial(points)), m_derivative(m_polynomial.derivative()), m_secondDerivative(m_derivative.derivative()),
+      m_points(std::move(points)) {}
 
 BezierCurve::BezierCurve(std::initializer_list<Point2D<Meter>> points) : BezierCurve(std::vector(points)) {}
 
@@ -77,6 +78,14 @@ Point2D<Meter> BezierCurve::operator()(double_t t) const {
 
 Vector2D<Meter> BezierCurve::derivative(double_t t) const {
     return m_derivative(t);
+}
+
+double_t BezierCurve::curvature(double_t t) const {
+    Vector2D<Meter> derivative = m_derivative(t);
+    double_t derivativeNorm = derivative.norm();
+    Vector2D<Meter> secondDerivative = m_secondDerivative(t);
+
+    return (derivative.x * secondDerivative.y - derivative.y * secondDerivative.x) / (derivativeNorm * derivativeNorm * derivativeNorm);
 }
 
 double_t BezierCurve::computeLength() const {
@@ -95,4 +104,7 @@ double_t BezierCurve::computeLength(unsigned int num_steps) const {
 
 const std::vector<Point2D<Meter>> &BezierCurve::points() const {
     return m_points;
+}
+const Polynomial<Point2D<Meter>> &BezierCurve::polynomial() const {
+    return m_polynomial;
 }

@@ -56,6 +56,12 @@ class Ramp {
     void update(double_t interval);
 
     /**
+     * Compute the minimum braking distance to reach the target speed from the current speed, considering the acceleration is
+     * constant and equal to the maximal acceleration of this ramp.
+     */
+    double_t getBrakingDistance(double_t targetSpeed = 0) const;
+
+    /**
      * Compute the maximum acceptable speed to be able to stop in at most `distance` meters, considering the braking deceleration is
      * constant and equal to the maximal acceleration of this ramp.
      * This returns an absolute (i.e. unsigned) speed.

@@ -1,5 +1,5 @@
 #include "trajectories/Trajectory.hpp"
 
-double_t Trajectory::getMaxCurve(double_t distance) const {
+double_t Trajectory::getMaxCurvature(double_t distance) const {
     return 0;
 }
