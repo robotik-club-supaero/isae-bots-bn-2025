@@ -52,6 +52,11 @@ void Ramp::update(double_t interval) {
     }
 }
 
+double_t Ramp::getBrakingDistance(double_t targetSpeed) const {
+    double_t delta_v = abs(targetSpeed - m_currentSpeed);
+    return delta_v * (m_currentSpeed + delta_v / 2) / m_maxAcceleration;
+}
+
 double_t Ramp::computeSpeedFromBrakingDistance(double_t distance) const {
     // Braking distance = v**2 / (2a)
     // It must be no greater than d = the remaining distance on the trajectory: v**2 / (2a) <= d

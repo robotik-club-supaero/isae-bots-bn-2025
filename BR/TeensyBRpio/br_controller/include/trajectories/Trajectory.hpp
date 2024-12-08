@@ -50,14 +50,16 @@ class Trajectory {
     virtual std::optional<double_t> getRemainingDistance() const = 0;
 
     /**
-     * Returns the maximum curve of the trajectory for the next `distance` meters, starting at the current position. 0 means the trajectory is a
-     * straight line.
+     * Returns the maximum absolute curvature of the trajectory for the next `distance` meters, starting at the current position.
+     * The curvature is used to anticipate deceleration in turns.
+     * 
+     * - Returning 0 means the trajectory is a straight line and effectively disables turn anticipation.
+     *   0 is also a valid default value for trajectories that do not support curvature estimation.
+     * - Returning a negative value is illegal and unspecified behavior.
      *
-     * This will eventually allow to implement automatic braking before curves, but is not implemented yet.
-     *
-     * The default implementation returns 0. Overriding this method currently is not required and has no effect.
+     * The default implementation currently returns 0, but trajectories could be required to override this method in the future.
      */
-    [[deprecated("Not implemented yet")]] virtual double_t getMaxCurve(double_t distance) const;
+    virtual double_t getMaxCurvature(double_t distance) const;
 
   protected:
     Trajectory() = default;
