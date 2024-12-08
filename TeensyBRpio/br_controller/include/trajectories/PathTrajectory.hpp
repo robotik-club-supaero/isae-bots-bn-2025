@@ -67,7 +67,7 @@ class PathTrajectory : public Trajectory {
         double_t length;
     };
 
-    inline constexpr size_type numberOfArcs() const { return m_points.size() - 1; }
+    inline size_type numberOfArcs() const { return m_points.size() - 1; }
 
     std::optional<BezierArc> generateNextArc() const;
     BezierArc generateArc(size_type index, Angle initialDirection) const;
