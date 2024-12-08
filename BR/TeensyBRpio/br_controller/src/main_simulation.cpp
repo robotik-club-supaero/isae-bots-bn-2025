@@ -1,3 +1,5 @@
+#ifndef ARDUINO
+
 #include "logging.hpp"
 #include "specializations/manager.hpp"
 #include "specializations/ros.hpp"
@@ -49,3 +51,5 @@ void log(LogSeverity severity, const string_t &message) {
         ros->sendLog(severity, message);
     }
 }
+
+#endif

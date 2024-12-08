@@ -45,7 +45,7 @@ PathTrajectory::PathTrajectory(Angle initialDirection, std::vector<Point2D<Meter
     } else {
         preferredDirection = (points[1] - points[0]).argument();
     }
-    if (abs(initialDirection - preferredDirection) > Angle::PI / 3) {
+    if (abs(initialDirection - preferredDirection) > Angle::Pi / 3) {
         // Force the controller to enter state "initial rotation" before starting the trajectory
         // As we are not moving yet, it is more efficient (and safer) to turn now than starting to move in the wrong direction.
         initialDirection = preferredDirection;
@@ -150,7 +150,7 @@ double_t PathTrajectory::getMaxCurvature(double_t distance) const {
         }
 
         // We are using cubic Bézier curves, so the second derivative is monotonic.
-        return std::max(abs(arc.curve.curvature(start)), distance == 0 ? 0 : abs(arc.curve.curvature(std::min(1., end))));
+        return std::max(abs(arc.curve.curvature(start)), distance == 0 ? 0 : abs(arc.curve.curvature(std::min((double_t)1., end))));
     };
 
     double_t curvature = __maxCurvatureInner(*m_currentArc, m_currentArcPosition, &distance);

@@ -17,7 +17,7 @@ T Polynomial<T>::operator()(double_t value) const {
 template <Add T>
 Polynomial<T> Polynomial<T>::derivative() const {
     std::vector<T> coeffs;
-    for (auto i = 1; i < m_coeffs.size(); i++) {
+    for (unsigned int i = 1; i < m_coeffs.size(); i++) {
         coeffs.push_back(i * m_coeffs[i]);
     }
     return Polynomial(std::move(coeffs));
