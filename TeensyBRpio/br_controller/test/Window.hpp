@@ -13,6 +13,10 @@ class Window: public sf::RenderWindow {
         return sf::Vector2f(point.x * m_scale.x + WINDOW_MARGIN, WINDOW_HEIGHT + WINDOW_MARGIN - point.y * m_scale.y);
     }
 
+    Point2D<Meter> toPhysicalCoordinates(int x, int y) const {
+        return Point2D<Meter>((x - (int)WINDOW_MARGIN) / m_scale.x, ((int)(WINDOW_HEIGHT + WINDOW_MARGIN) - y) / m_scale.y);
+    }
+
   private:
     static constexpr double TABLE_WIDTH = 2;
     static constexpr double TABLE_HEIGHT = 3;
