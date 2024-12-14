@@ -17,9 +17,12 @@ class PathTrajectory : public Trajectory {
   public:
     using size_type = std::vector<Point2D<Meter>>::size_type;
 
+    /// @param initialDirection If it is not empty, the trajectory will try to start in this direction except
+    /// if this would cause a big detour. How the trajectory decides whether or not to take the initial direction
+    /// into account is unspecified.
     /// @param points Ordered list of crosspoints. The first point must be the start of the trajectory.
     /// There must be at least two points.
-    PathTrajectory(Angle initialDirection, std::vector<Point2D<Meter>> points);
+    PathTrajectory(std::optional<Angle> initialDirection, std::vector<Point2D<Meter>> points);
 
     /// @copydoc Trajectory::advance()
     bool advance(double_t distance) override;
@@ -70,7 +73,7 @@ class PathTrajectory : public Trajectory {
     inline size_type numberOfArcs() const { return m_points.size() - 1; }
 
     std::optional<BezierArc> generateNextArc() const;
-    BezierArc generateArc(size_type index, Angle initialDirection) const;
+    BezierArc generateArc(size_type index, Vector2D<Meter> initialDirection) const;
     void setupNextArc();
     void updateRemainingLength();
 

@@ -106,6 +106,9 @@ class ControllerManager : private fsm::StateMachine<ManagerState<TActuators, TCo
     const TActuators &getActuators() const;
     const TFeedback &getPositionFeedback() const;
 
+    const TClock &getClock() const;
+    TClock &getClock();
+
   private:
     bool sendOrderInternal(std::function<void(TController &, Position2D<Meter>)> order);
 

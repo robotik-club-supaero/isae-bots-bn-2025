@@ -14,7 +14,7 @@ find_package(geometry_msgs REQUIRED)
 find_package(br_messages REQUIRED)
 # find_package(...) # Add dependencies here
 
-include_directories(include lib)
+include_directories(include)
 
 file(GLOB_RECURSE base_SRCS
    "${PROJECT_SOURCE_DIR}/src/controller/*.cpp" 
@@ -41,6 +41,8 @@ install(TARGETS
 if(BUILD_TESTING)
   add_executable(test_curve test/test_curve.cpp ${base_SRCS} ${test_SRCS})
   target_link_libraries(test_curve m sfml-graphics sfml-window sfml-system)
+  target_compile_definitions(test_curve PRIVATE USE_TEST_CLOCK)
+  target_include_directories(test_curve PRIVATE test)
   
   install(TARGETS
     test_curve

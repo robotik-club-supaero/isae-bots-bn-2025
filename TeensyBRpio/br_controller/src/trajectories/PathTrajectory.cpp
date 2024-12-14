@@ -11,16 +11,16 @@ inline Vector2D<Meter> angleBisector(Vector2D<Meter> lineA, Vector2D<Meter> line
 /**
  * Generates a Bézier curve such that:
  *  - The curve goes from `start` to `end`
- *  - The direction at the start point is `initialDirection`
- *  - If `next` is non-empty, the direction at the end point is the mean between [start, end] and [end, next].
+ *  -  The direction at the start point is that of `initialDirection`
+ *  - If `next` is non-empty, the direction at the end point is the angle bisector between [start, end] and [end, next].
  *
  * @param next The next destination of the robot, *after* the generated Bézier curve, or `std::nullopt` if `end` is the final destination.
  */
-BezierCurve generateBezier(Point2D<Meter> start, Point2D<Meter> end, Angle initialDirection, std::optional<Point2D<Meter>> next) {
+BezierCurve generateBezier(Point2D<Meter> start, Point2D<Meter> end, Vector2D<Meter> initialDirection, std::optional<Point2D<Meter>> next) {
     double_t distance = Point2D<Meter>::distance(start, end);
     double_t ctrlPtDistance = distance / 3;
 
-    Point2D<Meter> controlPt1 = start + Point2D<Meter>(std::cos(initialDirection), std::sin(initialDirection)) * ctrlPtDistance;
+    Point2D<Meter> controlPt1 = start + initialDirection.normalize() * ctrlPtDistance;
 
     Vector2D<Meter> finalDirection;
     if (next) {
@@ -33,25 +33,28 @@ BezierCurve generateBezier(Point2D<Meter> start, Point2D<Meter> end, Angle initi
     return {start, controlPt1, controlPt2, end};
 }
 
-PathTrajectory::PathTrajectory(Angle initialDirection, std::vector<Point2D<Meter>> points)
-    : m_points(points), m_currentArcIndex(0), m_currentArc(), m_currentArcPosition(0), m_currentDerivative(), m_remainingLength(0) {
+PathTrajectory::PathTrajectory(std::optional<Angle> initialDirection, std::vector<Point2D<Meter>> points)
+    : m_points(points), m_currentArcIndex(0), m_currentArc(), m_currentArcPosition(0), m_currentArcDistance(0), m_currentDerivative(),
+      m_remainingLength(0) {
     if (points.size() < 2) {
         abort("Trajectory must have at least 2 points");
     }
 
-    Angle preferredDirection = initialDirection;
+    Vector2D<Meter> preferredDirection;
     if (points.size() > 2) {
-        preferredDirection = angleBisector(points[1] - points[0], 2 * points[1] - (points[0] + points[2])).argument();
+        preferredDirection = angleBisector(points[1] - points[0], 1.5 * points[1] - (points[0] + 0.5 * points[2]));
     } else {
-        preferredDirection = (points[1] - points[0]).argument();
+        preferredDirection = points[1] - points[0];
     }
-    if (abs(initialDirection - preferredDirection) > Angle::Pi / 3) {
-        // Force the controller to enter state "initial rotation" before starting the trajectory
-        // As we are not moving yet, it is more efficient (and safer) to turn now than starting to move in the wrong direction.
-        initialDirection = preferredDirection;
+    // If the robot is already heading in the right direction, we bypass state "initial rotation" and immediately start the trajectory
+    // Otherwise, as we are not moving yet, it is more efficient (and safer) to turn now than starting to move in the wrong direction.
+    if (initialDirection) {
+        if (abs(*initialDirection - preferredDirection.argument()) <= Angle::Pi / 3) {
+            preferredDirection = {std::cos(*initialDirection), std::sin(*initialDirection)};
+        }
     }
 
-    m_currentArc.emplace(generateArc(0, initialDirection));
+    m_currentArc.emplace(generateArc(0, preferredDirection));
     updateRemainingLength();
 
     m_currentDerivative = m_currentArc->curve.derivative(0);
@@ -61,21 +64,20 @@ std::optional<PathTrajectory::BezierArc> PathTrajectory::generateNextArc() const
     size_type nextIndex = m_currentArcIndex + 1 + m_generatedArcs.size();
     if (nextIndex < numberOfArcs()) {
         const BezierArc &lastGeneratedArc = (m_generatedArcs.empty() ? *m_currentArc : m_generatedArcs.back());
-        return generateArc(nextIndex, lastGeneratedArc.curve.derivative(1).argument());
+        return generateArc(nextIndex, lastGeneratedArc.curve.derivative(1));
     } else {
         return std::nullopt;
     }
 }
 
-PathTrajectory::BezierArc PathTrajectory::generateArc(size_type index, Angle initialDirection) const {
+PathTrajectory::BezierArc PathTrajectory::generateArc(size_type index, Vector2D<Meter> initialDirection) const {
     std::optional<Point2D<Meter>> next = std::nullopt;
     if (index + 1 < numberOfArcs()) {
         next = std::make_optional(m_points[index + 2]);
     }
     BezierCurve curve = generateBezier(m_points[index], m_points[index + 1], initialDirection, next);
-    double_t length = curve.computeLength();
 
-    return {std::move(curve), length};
+    return curve;
 }
 
 void PathTrajectory::setupNextArc() {
