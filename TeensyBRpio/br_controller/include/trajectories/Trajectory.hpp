@@ -28,6 +28,8 @@ class Trajectory {
      * outside the trajectory, then the position should be advanced to the end of the trajectory instead.
      * @return true if the position was advanced. false if the position is already at the end of the trajectory. If this method returns false,
      * subsequent calls to advance() must also return false.
+     * 
+     * If `distance < 0`, the behavior is undefined.
      */
     virtual bool advance(double_t distance) = 0;
 
@@ -58,6 +60,7 @@ class Trajectory {
      * - Returning a negative value is illegal and unspecified behavior.
      *
      * The default implementation currently returns 0, but trajectories could be required to override this method in the future.
+     * If `distance < 0`, the behavior is undefined.
      */
     virtual double_t getMaxCurvature(double_t distance) const;
 

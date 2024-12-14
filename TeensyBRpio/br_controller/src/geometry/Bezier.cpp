@@ -1,7 +1,7 @@
 #include "geometry/Bezier.hpp"
 #include "logging.hpp"
 
-#define INTEGRAL_NUM_STEPS 1000
+#define SAMPLE_PRECISION 0.005
 
 /**
  * Iterator over (n choose i) for 0 <= i <= n.
@@ -63,7 +63,7 @@ Polynomial<Point2D<Meter>> bezierToPolynomial(const std::vector<Point2D<Meter>> 
         coeffs.push_back(coeff * binom.value);
     }
 
-    return std::move(coeffs);
+    return coeffs;
 }
 
 BezierCurve::BezierCurve(std::vector<Point2D<Meter>> points)
@@ -88,18 +88,29 @@ double_t BezierCurve::curvature(double_t t) const {
     return (derivative.x * secondDerivative.y - derivative.y * secondDerivative.x) / (derivativeNorm * derivativeNorm * derivativeNorm);
 }
 
-double_t BezierCurve::computeLength() const {
-    return computeLength(INTEGRAL_NUM_STEPS);
+BezierCurve::LengthSamples BezierCurve::sampleLength() const {
+    return sampleLength(SAMPLE_PRECISION);
 }
-double_t BezierCurve::computeLength(unsigned int num_steps) const {
-    double_t length = 0;
-    Point2D<Meter> lastPoint = m_points.at(0);
-    for (int i = 1; i <= INTEGRAL_NUM_STEPS; i++) {
-        Point2D<Meter> currentPoint = this->operator()((double_t)i / INTEGRAL_NUM_STEPS);
-        length += Vector2D<Meter>::distance(lastPoint, currentPoint);
-        lastPoint = currentPoint;
+BezierCurve::LengthSamples BezierCurve::sampleLength(double_t step) const {
+    std::vector<double_t> samples({0});
+   
+    double_t remaining;
+    double_t t = 0;
+    while (t < 1) {
+        double_t derivative = m_derivative(t).norm();
+        double_t increment = step / derivative;
+        if(t + increment <= 1) {
+            t += increment;
+            samples.push_back(t);
+        } else{
+            remaining = (1-t)*derivative;
+            break;
+        }
     }
-    return length;
+    double_t sampledLength = step * (samples.size()-1);
+    double_t length = sampledLength + remaining;
+
+    return {length, Samples(std::move(samples), 0, sampledLength)};
 }
 
 const std::vector<Point2D<Meter>> &BezierCurve::points() const {

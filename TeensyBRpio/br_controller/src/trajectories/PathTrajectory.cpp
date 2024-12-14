@@ -88,6 +88,7 @@ void PathTrajectory::setupNextArc() {
         m_generatedArcs.pop_front();
     }
     m_currentArcPosition = 0;
+    m_currentArcDistance = 0;
     m_currentArcIndex++;
 
     m_currentDerivative = m_currentArc->curve.derivative(0);
@@ -108,13 +109,11 @@ bool PathTrajectory::advance(double_t distance) {
     }
 
     do {
-        double_t remainingOnArc = m_currentArc->length * (1 - m_currentArcPosition);
+        double_t remainingOnArc = m_currentArc->length - m_currentArcDistance;
         if (distance < remainingOnArc) {
             double_t increment = distance / m_currentDerivative.norm();
+            m_currentArcDistance += distance;
             m_currentArcPosition += increment;
-            if (m_currentArcPosition > 1) {
-                m_currentArcPosition = 1;
-            }
             distance = 0;
         } else {
             m_currentArcPosition = 1;
@@ -135,27 +134,13 @@ Position2D<Meter> PathTrajectory::getCurrentPosition() const {
 }
 
 std::optional<double_t> PathTrajectory::getRemainingDistance() const {
-    return m_remainingLength + m_currentArc->length * (1 - m_currentArcPosition);
+    return m_remainingLength + m_currentArc->length - m_currentArcDistance;
 }
 
 double_t PathTrajectory::getMaxCurvature(double_t distance) const {
-    // We assume the curvature is maximal when the (absolute value of the) second derivative is maximal, which is NOT true
-    // but should give an acceptable approximation for the kind of curves we are using.
-
-    auto __maxCurvatureInner = [](const BezierArc &arc, double_t start, double_t *distance) {
-        // This interpolation assumes dB/dt = cste, which is obviously NOT true but should give an acceptable approximation.
-        double_t end = start + *distance / arc.length;
-        if (end >= 1) {
-            *distance -= arc.length * (1 - start);
-        } else {
-            *distance = -1;
-        }
-
-        // We are using cubic Bézier curves, so the second derivative is monotonic.
-        return std::max(abs(arc.curve.curvature(start)), distance == 0 ? 0 : abs(arc.curve.curvature(std::min((double_t)1., end))));
-    };
-
-    double_t curvature = __maxCurvatureInner(*m_currentArc, m_currentArcPosition, &distance);
+    double_t end = m_currentArc->interpolatePosition(m_currentArcDistance + distance);
+    double_t curvature = m_currentArc->curvature.getMaximum(m_currentArcPosition, end);
+    distance -= m_currentArc->length - m_currentArcDistance;
 
     size_type anticipationCount = 0;
     while (distance >= 0) {
@@ -167,11 +152,20 @@ double_t PathTrajectory::getMaxCurvature(double_t distance) const {
                 break;
             }
         }
-        curvature = std::max(curvature, __maxCurvatureInner(m_generatedArcs[anticipationCount], 0, &distance));
+        const BezierArc &arc = m_generatedArcs[anticipationCount];
+        end = arc.interpolatePosition(distance);
+        curvature = std::max(curvature, arc.curvature.getMaximum(0, end));
+        distance -= arc.length;
         anticipationCount++;
     }
-
     return curvature;
+}
+
+double_t PathTrajectory::BezierArc::interpolatePosition(double_t distance) const {
+    if (distance > lengthSamples.domainEnd()) {
+        return 1;
+    }
+    return lengthSamples.interpolate(distance);
 }
 
 const std::vector<Point2D<Meter>> &PathTrajectory::getPathPoints() const {
