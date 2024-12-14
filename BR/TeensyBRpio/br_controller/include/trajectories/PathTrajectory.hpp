@@ -2,6 +2,7 @@
 #define _PATH_TRAJECTORY_HPP_
 
 #include "geometry/Bezier.hpp"
+#include "math/RollingMax.hpp"
 #include "trajectories/Trajectory.hpp"
 #include <deque>
 #include <vector>
@@ -63,11 +64,27 @@ class PathTrajectory : public Trajectory {
 
   private:
     struct BezierArc {
-        BezierArc(BezierCurve curve, double_t length) : curve(std::move(curve)), length(length) {}
+        BezierArc(BezierCurve curve)
+            : curve(std::move(curve)), length(), lengthSamples(), curvature([&](double_t t) { return abs(this->curve.curvature(t)); }, 0, 1, 100) {
+            auto samples = this->curve.sampleLength();
+            length = samples.totalLength;
+            lengthSamples = std::move(samples.samples);
+        }
 
         BezierCurve curve;
         /// In meters
         double_t length;
+        /// Maps distance from start (in meters) to the curve parameter (t between 0 and 1)
+        Samples<> lengthSamples;
+        RollingMax curvature;
+
+        /**
+         * Interpolates the curve parameter `t` such that `B(t)` is the position on the curve after walking `distance` meters.
+         *
+         * If `distance` is greater than the length of the curve, this returns 1.
+         * If `distance` is negative, the behavior is undefined.
+         */
+        double_t interpolatePosition(double_t distance) const;
     };
 
     inline size_type numberOfArcs() const { return m_points.size() - 1; }
@@ -84,6 +101,8 @@ class PathTrajectory : public Trajectory {
     std::optional<BezierArc> m_currentArc;
     /// Between 0 and 1
     double_t m_currentArcPosition;
+    /// In meters
+    double_t m_currentArcDistance;
     Vector2D<Meter> m_currentDerivative;
 
     /// A lower bound of the cumulative length of the remaining arcs (excluding the current arc).

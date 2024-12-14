@@ -3,13 +3,22 @@
 
 #include "geometry/Position2D.hpp"
 #include "math/Polynomial.hpp"
+#include "math/Samples.hpp"
 #include <vector>
 
 class BezierCurve {
   public:
     /// @param points There must be at least two points.
+    /// @{
     BezierCurve(std::vector<Point2D<Meter>> points);
     BezierCurve(std::initializer_list<Point2D<Meter>> points);
+    /// @}
+
+    struct LengthSamples {
+        double_t totalLength;
+        /// Maps distance from start (in meters) to the curve parameter (t between 0 and 1)
+        Samples<> samples;     
+    };
 
     /**
      * Returns `B(t)` where `B` is the function describing this Bézier curve.
@@ -30,15 +39,22 @@ class BezierCurve {
     double_t curvature(double_t t) const;
 
     /**
-     * Estimates the length of the curve using a discrete numerical method with the default number of steps.
+     * Calls `sampleLength(double_t)` with the default step size.
+     * @see BezierCurve::sampleLength(double_t)`.
      */
-    double_t computeLength() const;
+    LengthSamples sampleLength() const;
 
     /**
-     * Estimates the length of the curve using a discrete numerical method.
-     * Time complexity: O(num_steps).
+     * Walks the curve in steps of (approximately) `step` meters to estimate the length of the curve. Although `step` determines the
+     * accuracy of the estimation, the estimation error may be smaller than `step`.
+     *
+     * @return The estimated length of the curve (denoted `L`) and the samples of function `t(l)` that converts the distance from the
+     * start of the curve to the curve parameter (i.e. B(t(l)) is the position on the curve after walking `l` meters from the start,
+     * i.e. Integral_0^{t(l)} || B'(x) dx || = l).
+     * 
+     * Time and space complexity is linear with respect to `L / step`.
      */
-    double_t computeLength(unsigned int num_steps) const;
+    LengthSamples sampleLength(double_t step) const;
 
     const std::vector<Point2D<Meter>> &points() const;
 

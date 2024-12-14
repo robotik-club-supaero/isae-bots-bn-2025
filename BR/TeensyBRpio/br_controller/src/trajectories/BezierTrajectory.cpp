@@ -1,7 +1,7 @@
 #include "trajectories/BezierTrajectory.hpp"
 
 BezierTrajectory::BezierTrajectory(std::vector<Point2D<Meter>> points)
-    : m_curve(std::move(points)), m_position(0), m_totalLength(m_curve.computeLength()) {}
+    : m_curve(std::move(points)), m_position(0), m_totalLength(m_curve.sampleLength().totalLength) {}
 
 bool BezierTrajectory::advance(double_t distance) {
     if (m_position == 1) {
