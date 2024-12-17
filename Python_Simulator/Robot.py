@@ -1,6 +1,5 @@
 import re
 import time
-
 import config as cf
 import vars as vr
 import utils as u
@@ -8,6 +7,7 @@ import tools as t
 import pygame as pg
 from math import cos, sin, pi, radians, atan2, asin
 from Pathfinding import Pathfinding
+from ZoneInterdites import getZonesInterdites
 
 class Robot:
     def __init__(self, coord, radius, angle=0, team='default', target=None):
@@ -43,7 +43,8 @@ class Robot:
             if tirette is False: self.state = 'STOP'
             else: self.state = 'INIT'
         elif self.state == 'MVT':
-            path, target_reached = Pathfinding(self.coord, self.target) # A* (to make)
+            vr.zones = getZonesInterdites(self.getVision(), self.coord, self.angle)
+            path, target_reached = Pathfinding(self.coord, self.target, vr.zones) # A* (to make)
             if target_reached:
                 self.state = 'STOP'
                 self.target = None
@@ -101,7 +102,7 @@ class Robot:
         return [t.makeSeg(self.hitbox[i % len(self.hitbox)], self.hitbox[(i+1) % len(self.hitbox)]) for i in range(len(self.hitbox))]
 
     def getVision(self) -> tuple[list[float], list[float]]:
-        return self.vision_right.getVision(), self.vision_left.getVision()
+        return self.vision_left.getVision(), self.vision_right.getVision()
 
     def draw(self):
         pg.draw.circle(vr.window, self.color, self.coord, self.radius)
