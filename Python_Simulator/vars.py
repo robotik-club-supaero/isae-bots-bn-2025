@@ -21,6 +21,7 @@ info_txt = ""
 id = 0
 
 robot = None
+zones = []
 robots = []
 geo = []
 

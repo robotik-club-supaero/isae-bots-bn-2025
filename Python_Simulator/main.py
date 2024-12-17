@@ -8,6 +8,7 @@ import time
 from Robot import Robot
 from Geometry import Rectangle, Shape
 from random import randint
+from ZoneInterdites import PosToCoord, coordToPos
 
 def init():
 
@@ -85,6 +86,10 @@ def pre_update():
     return
 
 def post_update():
+    for i in range(len(vr.zones) - 1):
+        topleft = PosToCoord(vr.zones[i])
+        pg.draw.rect(vr.window, 'orange', [topleft, [cf.cell_x, cf.cell_y]], 5)
+
     pg.display.update()
     return
 
