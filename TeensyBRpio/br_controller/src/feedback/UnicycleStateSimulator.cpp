@@ -26,8 +26,8 @@ Position2D<Meter> UnicycleStateSimulator::getRobotPosition() const {
     return m_position;
 }
 
-MotorStub2 UnicycleStateSimulator::createMotorStub() const {
-    return MotorStub2(m_speeds);
+MotorStub UnicycleStateSimulator::createMotorStub() const {
+    return MotorStub(m_speeds);
 }
 
 UnicycleStateSimulator::Noise::Noise(double_t standardDeviation) {

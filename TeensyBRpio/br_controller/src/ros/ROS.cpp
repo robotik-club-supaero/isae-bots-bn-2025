@@ -24,8 +24,8 @@ constexpr bool hasTwoWheels = requires(const T &t) {
 TEMPLATE
 _ROS::ROS(TClock clock, duration_t sendPositionInterval, duration_t logInterval)
     : ROSImpl::node_t("base_roulante"), m_clock(std::move(clock)), m_sendInterval(sendPositionInterval), m_logInterval(logInterval), m_lastSend(0),
-      m_lastLog(0), m_wasActive(false), m_pendingPath(std::make_shared<std::vector<Point2D<Meter>>>()), m_subOrder(), m_subIdle(), m_subGains(), m_subSpeed(),
-      m_pubPositionFeedback(this->template createPublisher<Position2D<Millimeter>>("current_position")),
+      m_lastLog(0), m_wasActive(false), m_pendingPath(std::make_shared<std::vector<Point2D<Meter>>>()), m_subOrder(), m_subIdle(), m_subGains(),
+      m_subSpeed(), m_pubPositionFeedback(this->template createPublisher<Position2D<Millimeter>>("current_position")),
       m_pubHN(this->template createPublisher<int16_t>("okPosition")), //
       m_pubLog(this->template createPublisher<log_entry_t>("logTotaleArray")),
       m_pubOdosTicks(this->template createPublisher<std::pair<int32_t, int32_t>>("odos_count")) {}
@@ -49,7 +49,7 @@ typename _ROS::subscription_t<typename _ROS::disp_order_t> _ROS::createSubOrder(
     return this->template createSubscription<disp_order_t>( //
         "nextPositionTeensy", [manager_weak = std::weak_ptr(m_manager), path_weak = std::weak_ptr(m_pendingPath)](const disp_order_t &order) {
             if (auto lock = manager_weak.lock()) {
-                if(auto path = path_weak.lock()) {
+                if (auto path = path_weak.lock()) {
                     order(*lock, *path);
                 }
             }
@@ -112,7 +112,7 @@ void _ROS::loop() {
             m_pubHN.publish(OK_POS);
         }
         if ((event & UpdateResultCode::TERMINAL) && event != UpdateResultCode::STOPPED) {
-             m_pubHN.publish(OK_ORDER);
+            m_pubHN.publish(OK_ORDER);
         }
     });
 

@@ -14,7 +14,7 @@ class PositionFeedback {
      * @param interval The time elapsed since the last update. 
      */
     void update(double_t interval);
-    void resetPosition(Position2D<Meter> position);
+    void resetPosition(Position2D<Millimeter> position);
     Position2D<Meter>> getRobotPosition() const;
 };
 #endif

@@ -22,7 +22,6 @@
 // y offset of the the tracking point (can be set to 0 if the point is centered)
 #define ASSERV_BETA 0.0 // m
 
-// TODO: measure the acceptable tick rate on Arduino.
 #define UPDATE_INTERVAL 5000 // µS (NOT milliseconds)
 
 /* TRAJECTORIES */
@@ -58,12 +57,12 @@
 #define UNITS_ODOS 51.54179961710274L // ticks.mm^(-1)
 #define L_R_ODOS 1.0011809854125424L  // Correction factor between the encoders
 
-/* WHEELS - Not used by simulation*/
+/* WHEELS */
 
 #define WHEEL_DISTANCE 0.22  // m
 #define WHEEL_DIAMETER 0.06  // m
-#define TRANSMISSION_RATIO 1 // reduction factor
-#define MAX_MOTOR_SPEED 8    // turns/s
+#define TRANSMISSION_RATIO 1 // reduction factor (not used by simulation)
+#define MAX_MOTOR_SPEED 8    // turns/s (not used by simulation)
 
 /* PINS - Not used by simulation */
 
@@ -73,7 +72,9 @@
 
 /* SIMULATION - Not used on the Teensy */
 
-// To test robustness
-#define NOISE_STD_DEV 0.1 // TODO improve the way the noise is implemented
+#define NOISE_STD_DEV 0.1
+#define SIM_MIN_WHEEL_SPEED 0.2  // rad/s (simulates static friction) // TODO measure actual value
+#define SIM_MAX_WHEEL_SPEED 50 // rad/s (simulates saturation, roughly corresponds to MAX_MOTOR_SPEED)
+#define SIM_MAX_WHEEL_ACCEL 100 // rad/s² (simulates damping + robot inertia) // TODO measure actual value
 
 #endif

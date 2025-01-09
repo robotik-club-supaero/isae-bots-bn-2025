@@ -4,7 +4,7 @@
 #include "configuration.hpp"
 #include "geometry/Position2D.hpp"
 #include "geometry/Speeds.hpp"
-#include "motors/MotorStub2.hpp"
+#include "motors/MotorStub.hpp"
 
 #include <memory>
 #include <optional>
@@ -27,7 +27,7 @@ class UnicycleStateSimulator {
     void update(double_t interval);
 
     Position2D<Meter> getRobotPosition() const;
-    MotorStub2 createMotorStub() const;
+    MotorStub createMotorStub() const;
 
   private:
     class Noise {

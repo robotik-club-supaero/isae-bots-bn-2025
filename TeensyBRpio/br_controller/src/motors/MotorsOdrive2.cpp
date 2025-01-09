@@ -16,21 +16,18 @@ MotorsOdrive2::MotorsOdrive2(uint8_t odriveRxPin, uint8_t odriveTxPin, double_t 
 }
 
 void MotorsOdrive2::sendCommand(Speeds speeds) {
-
-    double_t rightWheelSpeed = speeds.linear + speeds.angular * m_wheelDistance / 2;
-    double_t leftWheelSpeed = speeds.linear - speeds.angular * m_wheelDistance / 2;
-
     // transform velCmd into odrive command (nb_turn/s)
     //  knowing the wheel diameter and the transmission ratio
-    double_t conversionFactor = m_transmissionRatio / (std::numbers::pi_v<double_t> * m_wheelDistance);
-
+    double_t conversionFactor = m_transmissionRatio / (2 * std::numbers::pi_v<double_t>);
+    WheelSpeeds wheelSpeeds = speeds.toWheelSpeeds(m_wheelDiameter, m_wheelDistance) * conversionFactor;
+  
 #ifdef _DEBUG
-    m_lastLeftSpeed = -leftWheelSpeed * conversionFactor;
-    m_lastRightSpeed = rightWheelSpeed * conversionFactor;
+    m_lastLeftSpeed = -wheelSpeeds.left;
+    m_lastRightSpeed = wheelSpeeds.right;
 #endif
 
-    sendCommand(BR_LEFT, -leftWheelSpeed * conversionFactor);
-    sendCommand(BR_RIGHT, rightWheelSpeed * conversionFactor);
+    sendCommand(BR_LEFT, -wheelSpeeds.left);
+    sendCommand(BR_RIGHT, wheelSpeeds.right);
 }
 
 void MotorsOdrive2::sendCommand(int motor_number, double_t velCmd) {

@@ -3,9 +3,9 @@
 
 #ifdef _SIMULATION
 
-#include "motors/MotorStub2.hpp"
+#include "motors/MotorStub.hpp"
 
-using actuators_t = MotorStub2;
+using actuators_t = MotorStub;
 
 #elif defined(ARDUINO)
 

@@ -9,11 +9,11 @@
  * Motor stub for a unicycle robot. This class sends the requested command to its consumer (usually UnicycleStateSimulator) and does
  * nothing else.
  */
-class MotorStub2 {
+class MotorStub {
   public:
     /// Use UnicycleStateSimulator::createMotorStub() to create a motor stub connected to the simulator.
     /// @param speedsPtr must not be null.
-    MotorStub2(std::shared_ptr<Speeds> speedsPtr);
+    MotorStub(std::shared_ptr<Speeds> speedsPtr);
 
     // See Actuators.hpp
 

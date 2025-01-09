@@ -3,9 +3,9 @@
 
 #ifdef _SIMULATION
 
-#include "feedback/UnicycleStateSimulator.hpp"
+#include "feedback/TwoWheelSimulator.hpp"
 
-using feedback_t = UnicycleStateSimulator;
+using feedback_t = TwoWheelSimulator;
 
 #elif defined(ARDUINO)
 

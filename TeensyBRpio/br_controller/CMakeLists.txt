@@ -19,10 +19,11 @@ include_directories(include)
 file(GLOB_RECURSE base_SRCS
    "${PROJECT_SOURCE_DIR}/src/controller/*.cpp" 
     "${PROJECT_SOURCE_DIR}/src/feedback/UnicycleStateSimulator.cpp" 
+    "${PROJECT_SOURCE_DIR}/src/feedback/TwoWheelSimulator.cpp" 
     "${PROJECT_SOURCE_DIR}/src/geometry/*.cpp" 
     "${PROJECT_SOURCE_DIR}/src/manager/*.cpp" 
     "${PROJECT_SOURCE_DIR}/src/math/*.cpp" 
-    "${PROJECT_SOURCE_DIR}/src/motors/MotorStub2.cpp" 
+    "${PROJECT_SOURCE_DIR}/src/motors/MotorStub.cpp" 
     "${PROJECT_SOURCE_DIR}/src/rotations/*.cpp" 
     "${PROJECT_SOURCE_DIR}/src/trajectories/*.cpp"
 )
