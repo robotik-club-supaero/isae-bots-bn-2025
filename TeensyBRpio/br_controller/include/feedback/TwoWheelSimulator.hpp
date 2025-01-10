@@ -38,7 +38,7 @@ class TwoWheelSimulator {
     MotorStub createMotorStub() const;
 
   private:
-    double_t m_wheelDiameter;
+    double_t m_wheelRadius;
     double_t m_wheelDistance;
 
     double_t m_minWheelSpeed;

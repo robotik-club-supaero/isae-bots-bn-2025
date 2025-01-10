@@ -45,8 +45,8 @@ class MotorsOdrive2 {
     std::unique_ptr<SoftwareSerial> m_serial;
     ODriveArduino m_odrive;
 
-    double_t m_transmissionRatio;
-    double_t m_wheelDiameter;
+    double_t m_conversionFactor;
+    double_t m_wheelRadius;
     double_t m_wheelDistance;
     double_t m_maxMotorSpeed;
 };

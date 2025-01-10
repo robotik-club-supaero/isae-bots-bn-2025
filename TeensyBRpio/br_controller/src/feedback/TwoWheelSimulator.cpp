@@ -4,7 +4,7 @@
 
 TwoWheelSimulator::TwoWheelSimulator(double_t wheelDiameter, double_t wheelDistance, double_t minWheelSpeed, double_t maxWheelSpeed,
                                      double_t maxWheelAcceleration, double_t noise_stddev)
-    : m_wheelDiameter(wheelDiameter), m_wheelDistance(wheelDistance), m_minWheelSpeed(minWheelSpeed), m_maxWheelSpeed(maxWheelSpeed), m_noise(),
+    : m_wheelRadius(wheelDiameter / 2), m_wheelDistance(wheelDistance), m_minWheelSpeed(minWheelSpeed), m_maxWheelSpeed(maxWheelSpeed), m_noise(),
       m_requestedSpeeds(std::make_shared<Speeds>()), m_leftWheelSpeed(0, maxWheelAcceleration), m_rightWheelSpeed(0, maxWheelAcceleration),
       m_position() {
     if (noise_stddev > 0) {
@@ -16,7 +16,7 @@ void TwoWheelSimulator::update(double_t interval) {
     static std::default_random_engine generator(SystemClock().micros());
 
     // Apply max acceleration to wheel speed (simulates damping)
-    WheelSpeeds wheelSpeeds = m_requestedSpeeds->toWheelSpeeds(m_wheelDiameter, m_wheelDistance);
+    WheelSpeeds wheelSpeeds = m_requestedSpeeds->toWheelSpeeds(m_wheelRadius, m_wheelDistance);
     m_leftWheelSpeed.setTargetSpeed(wheelSpeeds.left);
     m_rightWheelSpeed.setTargetSpeed(wheelSpeeds.right);
 
@@ -40,7 +40,7 @@ void TwoWheelSimulator::update(double_t interval) {
     }
 
     // Update position
-    Speeds speeds = wheelSpeeds.toUnicycleSpeeds(m_wheelDiameter, m_wheelDistance);
+    Speeds speeds = wheelSpeeds.toUnicycleSpeeds(m_wheelRadius, m_wheelDistance);
 
     double_t linOffset = speeds.linear * interval;
     m_position.x += std::cos(m_position.theta) * linOffset;

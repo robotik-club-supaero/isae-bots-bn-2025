@@ -67,7 +67,7 @@ TEMPLATE
 typename _ROS::subscription_t<typename _ROS::gains_t> _ROS::createSubGain() {
     return this->template createSubscription<gains_t>("gains", [manager_weak = std::weak_ptr(m_manager)](const gains_t &gains) {
         if (auto lock = manager_weak.lock()) {
-            ProportionalIntegralDerivative<Vector2D<Meter>> pid = lock->getController().getErrorConverter();
+            converter_t pid = lock->getController().getErrorConverter();
             lock->getController().setErrorConverter(
                 {gains.kp, gains.ti, gains.td, pid.filter(), pid.saturation(), pid.integralSaturation(), pid.derivativeSaturation()});
         }

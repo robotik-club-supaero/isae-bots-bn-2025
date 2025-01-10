@@ -7,7 +7,7 @@
 #include "controller/UnicycleController.hpp"
 #include "geometry/Position2D.hpp"
 #include "manager/ControllerManager.hpp"
-#include "math/ProportionalIntegralDerivative.hpp"
+#include "specializations/controller.hpp"
 
 #include <vector>
 
@@ -38,15 +38,14 @@ enum GoalType {
 
 class DisplacementOrder {
   public:
-    using controller_t = controller::UnicycleController<ProportionalIntegralDerivative<Vector2D<Meter>>>;
     template <Actuators TActuators, PositionFeedback TFeedback, Clock TClock>
     using manager_t = manager::ControllerManager<TActuators, controller_t, TFeedback, TClock>;
 
     DisplacementOrder(GoalType type, Position2D<Millimeter> goalPosition);
     DisplacementOrder(int type, Position2D<Millimeter> goalPosition);
 
-/// Sends the order to the manager or the controller depending on the goal type.
-    template <Actuators TActuators, PositionFeedback TFeedback, Clock TClock>    
+    /// Sends the order to the manager or the controller depending on the goal type.
+    template <Actuators TActuators, PositionFeedback TFeedback, Clock TClock>
     void operator()(manager_t<TActuators, TFeedback, TClock> &manager, std::vector<Point2D<Meter>> &pendingPath) const;
 
     GoalType type;
@@ -59,11 +58,11 @@ class DisplacementOrder {
     template <Actuators TActuators, PositionFeedback TFeedback, Clock TClock>
     static void goTo(manager_t<TActuators, TFeedback, TClock> &manager, DisplacementKind kind, Point2D<Millimeter> goalPosition,
                      std::optional<Angle> finalOrientation);
-    
-     /// Starts path
+
+    /// Starts path
     template <Actuators TActuators, PositionFeedback TFeedback, Clock TClock>
     static void startPath(manager_t<TActuators, TFeedback, TClock> &manager, DisplacementKind kind, std::vector<Point2D<Meter>> &path,
-                     std::optional<Angle> finalOrientation);
+                          std::optional<Angle> finalOrientation);
 };
 
 #endif

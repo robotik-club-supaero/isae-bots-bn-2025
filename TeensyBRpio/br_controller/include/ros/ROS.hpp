@@ -22,7 +22,6 @@
 template <typename ROSImpl, Actuators TActuators, PositionFeedback TFeedback, Clock TClock>
 class ROS : public ROSImpl::node_t {
   public:
-    using controller_t = controller::UnicycleController<ProportionalIntegralDerivative<Vector2D<Meter>>>;
     using manager_t = manager::ControllerManager<TActuators, controller_t, TFeedback, TClock>;
 
     template <typename T>

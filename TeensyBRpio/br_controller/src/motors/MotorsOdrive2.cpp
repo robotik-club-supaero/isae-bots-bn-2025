@@ -10,17 +10,15 @@
 
 MotorsOdrive2::MotorsOdrive2(uint8_t odriveRxPin, uint8_t odriveTxPin, double_t transmissionRatio, double_t wheelDiameter, double_t wheelDistance,
                              double_t maxMotorSpeed)
-    : m_serial(std::make_unique<SoftwareSerial>(odriveRxPin, odriveTxPin)), m_odrive(*m_serial), m_transmissionRatio(transmissionRatio),
-     m_wheelDiameter(wheelDiameter), m_wheelDistance(wheelDistance), m_maxMotorSpeed(maxMotorSpeed) {
+    : m_serial(std::make_unique<SoftwareSerial>(odriveRxPin, odriveTxPin)), m_odrive(*m_serial),
+      m_conversionFactor(transmissionRatio / (2 * std::numbers::pi_v<double_t>)), m_wheelRadius(wheelDiameter / 2), m_wheelDistance(wheelDistance),
+      m_maxMotorSpeed(maxMotorSpeed) {
     m_serial->begin(115200);
 }
 
 void MotorsOdrive2::sendCommand(Speeds speeds) {
-    // transform velCmd into odrive command (nb_turn/s)
-    //  knowing the wheel diameter and the transmission ratio
-    double_t conversionFactor = m_transmissionRatio / (2 * std::numbers::pi_v<double_t>);
-    WheelSpeeds wheelSpeeds = speeds.toWheelSpeeds(m_wheelDiameter, m_wheelDistance) * conversionFactor;
-  
+    WheelSpeeds wheelSpeeds = speeds.toWheelSpeeds(m_wheelRadius, m_wheelDistance) * m_conversionFactor;
+
 #ifdef _DEBUG
     m_lastLeftSpeed = -wheelSpeeds.left;
     m_lastRightSpeed = wheelSpeeds.right;

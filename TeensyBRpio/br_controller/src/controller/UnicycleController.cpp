@@ -42,8 +42,7 @@ Speeds UnicycleController<TConverter>::updateCommand(double_t interval, Position
             [](Ongoing &r) {},
             [&](InitialRotationComplete &r) {
                 m_event = UpdateResultCode::INITIAL_ROTATION_COMPLETE;
-                setCurrentState<StateTrajectoryWithRamp>(std::move(r.trajectory), m_maxSpeeds, m_maxAccelerations.linear, r.kind,
-                                                         r.finalOrientation);
+                setCurrentState<StateTrajectoryWithRamp>(std::move(r.trajectory), m_maxSpeeds, m_maxAccelerations.linear, r.kind, r.finalOrientation);
             },
             [&](TrajectoryComplete &r) {
                 if (r.finalOrientation) {

@@ -23,7 +23,7 @@ class Speeds {
     Speeds operator/(double_t factor) const;
 
     /// Convert from (linear, angular) to (left wheel, right wheel)
-    WheelSpeeds toWheelSpeeds(double_t wheelDiameter, double_t wheelDistance) const;
+    WheelSpeeds toWheelSpeeds(double_t wheelRadius, double_t wheelDistance) const;
 
     /// (Maybe signed) linear speed or acceleration (m/s or m/s²)
     double_t linear;
@@ -41,7 +41,7 @@ class WheelSpeeds {
     WheelSpeeds operator/(double_t factor) const;
 
     /// Convert from (left wheel, right wheel) to (linear, angular)
-    Speeds toUnicycleSpeeds(double_t wheelDiameter, double_t wheelDistance) const;
+    Speeds toUnicycleSpeeds(double_t wheelRadius, double_t wheelDistance) const;
 
     /// (Maybe signed) angular speed of the left wheel (rad/s)
     double_t left;
