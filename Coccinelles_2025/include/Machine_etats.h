@@ -23,7 +23,7 @@ class Machine_etats
     {
         INIT,
         MVT,
-        AVOID, // Etat pour éviter un obstacle (non implémenté)
+        EMERGENCY, // Etat pour éviter un obstacle de dernière minute
         STOP,
         END,
 
@@ -50,12 +50,15 @@ public:
     float pos_y = 0;
     float angle = 0;
 
+    int m_vision[16];
+
     Asserv *m_p_asserv;
 
     Mesure_pos *m_p_mesure_pos;
-    Irsensor *m_p_ir_sensor;
+    Irsensor *m_p_ir_sensor_right;
+    Irsensor *m_p_ir_sensor_left;
 
-    Machine_etats(Asserv *p_asserv, Mesure_pos *p_mesure_pos, Irsensor *p_ir_sensor);
+    Machine_etats(Asserv *p_asserv, Mesure_pos *p_mesure_pos, Irsensor *p_ir_sensor_right,  Irsensor *p_ir_sensor_left);
     void setup();
     void loop();
 };

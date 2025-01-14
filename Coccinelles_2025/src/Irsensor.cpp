@@ -88,8 +88,21 @@ void Irsensor::loop()
                     }
                 }
                 */
-                
-                m_minimum_distance = measurementData.distance_mm[35];
+
+               // Recupère les distances de gauche à droite et fait la moyenne vertical de chaque colonne
+               // Recupère le minimum au passage
+               int min_distance = 10000;
+                for (int col = 0; col < 8; col++){
+                    int tot_tmp = 0;
+                    for (int line = 0; line < 8; line++){
+                        tot_tmp += measurementData.distance_mm[line * col] ;
+                    }
+                    vision[col] = tot_tmp / 8 ;
+                    if (min_distance == -1 || vision[col] < min_distance){
+                        min_distance = vision[col] ;
+                    }
+                }
+                minimum_distance = min_distance ;
 
                 // Print minimum distance
                 // Serial.print("Minimum distance: ");
