@@ -11,7 +11,7 @@ namespace fsm {
 /**
  * A state machine.
  *
- * Thse machine is created in an undefined state. It is undefined behaviour to call getCurrentState() before setCurrentState().
+ * The machine is created in an undefined state. It is undefined behaviour to call getCurrentState() before setCurrentState().
  * @tparam TState The base type of the machine's states. This can be a virtual type.
  */
 template <typename TState>

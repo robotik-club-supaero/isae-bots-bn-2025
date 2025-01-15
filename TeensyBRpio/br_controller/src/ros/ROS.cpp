@@ -12,7 +12,7 @@ using UpdateResultCode = controller::UpdateResultCode;
 template <typename T>
 constexpr bool hasOdos = requires(const T &t) {
     t.getLeftOdoCount();
-    t.getRighttOdoCount();
+    t.getRightOdoCount();
 };
 
 template <typename T>
