@@ -28,7 +28,7 @@ file(GLOB_RECURSE base_SRCS
     "${PROJECT_SOURCE_DIR}/src/trajectories/*.cpp"
 )
 set(ros_SRCS ${PROJECT_SOURCE_DIR}/src/ros/ROS.cpp ${PROJECT_SOURCE_DIR}/src/ros/DisplacementOrder.cpp)
-set(test_SRCS ${PROJECT_SOURCE_DIR}/test/logging.cpp)
+set(test_SRCS ${PROJECT_SOURCE_DIR}/test/test_logging.cpp)
 
 add_executable(simulation_br src/main_simulation.cpp ${base_SRCS} ${ros_SRCS})
 target_link_libraries(simulation_br m)

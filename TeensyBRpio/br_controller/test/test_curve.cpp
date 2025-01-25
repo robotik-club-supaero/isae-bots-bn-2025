@@ -1,4 +1,8 @@
 #include "Window.hpp"
+#include "drawables/BezierTrajectoryDrawable.hpp"
+#include "drawables/PointDrawable.hpp"
+#include "drawables/RobotDrawable.hpp"
+#include "test_logging.hpp"
 #include "specializations/manager.hpp"
 #include "trajectories/PathTrajectory.hpp"
 
@@ -6,15 +10,28 @@
 
 constexpr controller::ControllerStatus Still = controller::ControllerStatus::Still;
 
+manager_t startTrajectorySimulation(std::unique_ptr<Trajectory> trajectory) {
+    manager_t manager = createManager(trajectory->getCurrentPosition());
+    manager.setActive(true);
+    while (!manager.isActive()) {
+        manager.update(UPDATE_INTERVAL / 1e6);
+    }
+
+    manager.sendOrder(
+        [&](controller_t &controller, Position2D<Meter> position) { controller.startTrajectory(FORWARD, std::move(trajectory), std::nullopt); });
+    return manager;
+}
+
 int main() {
-    double_t step = 0.001;
+    constexpr double_t STEP = 0.001;
     std::vector<Point2D<Meter>> points;
 
     Window window("Bezier Curve");
 
-    sf::VertexArray bezierCurve(sf::LinesStrip);
-    std::vector<sf::CircleShape> sfCtrlPoints;
-    std::vector<sf::CircleShape> sfPathPoints;
+    std::vector<PointDrawable> pointDrawables;
+
+    std::optional<BezierTrajectoryDrawable> trajectoryDrawable;
+    RobotDrawable robotDrawable;
 
     bool paused;
     std::optional<manager_t> manager;
@@ -32,69 +49,40 @@ int main() {
                         // -- ADD A POINT --
                         Point2D<Meter> coords = window.toPhysicalCoordinates(event.mouseButton.x, event.mouseButton.y);
                         points.push_back(coords);
+                        pointDrawables.push_back(PointDrawable(sf::Vector2f(event.mouseButton.x, event.mouseButton.y)));
                         std::cout << "Added point at " << std::string(coords) << std::endl;
-
-                        sf::CircleShape sfPoint(10); // Radius of 10 pixels
-                        sfPoint.setFillColor(sf::Color::Blue);
-                        sfPoint.setPosition(event.mouseButton.x, event.mouseButton.y);
-                        sfPoint.move(-10, -10); // Center the circle
-                        sfPathPoints.push_back(sfPoint);
-
-                    } else if (event.mouseButton.button == sf::Mouse::Right && points.size() > 1) {
-                        // -- CREATE TRAJECTORY --
-                        bezierCurve.clear();
-                        sfCtrlPoints.clear();
-
-                        PathTrajectory trajectory(std::nullopt, points);
-                        while (trajectory.advance(step)) {
-                            bezierCurve.append(sf::Vertex(window.toScreenCoordinates(trajectory.getCurrentPosition()), sf::Color::Red));
-                        }
-
-                        // Intermediary control points for Bézier curves
-                        trajectory = PathTrajectory(std::nullopt, points);
-                        do {
-                            const std::vector<Point2D<Meter>> &controlPoints = trajectory.getCurrentCurve().points();
-                            for (unsigned int i = 1; i < controlPoints.size() - 1; i++) {
-                                sf::CircleShape sfPoint(4); // Radius of 5 pixels
-                                sfPoint.setFillColor(sf::Color(0, 100, 0));
-                                sfPoint.setPosition(window.toScreenCoordinates(controlPoints[i]));
-                                sfPoint.move(-4, -4); // Center the circle
-                                sfCtrlPoints.push_back(sfPoint);
-                            }
-                        } while (trajectory.skipToNextCurve());
-
-                    } else if (event.mouseButton.button == sf::Mouse::Middle) {
+                    } else if (event.mouseButton.button == sf::Mouse::Right) {
                         // -- REMOVE LAST POINT --
-                        bezierCurve.clear();
-                        sfCtrlPoints.clear();
                         if (!points.empty()) {
                             points.pop_back();
-                            sfPathPoints.pop_back();
+                            pointDrawables.pop_back();
                         }
+                    }
+                    if (points.size() > 1) {
+                        PathTrajectory trajectory(std::nullopt, points);
+                        trajectoryDrawable.emplace(BezierTrajectoryDrawable(window, trajectory, STEP));
+                    } else {
+                        trajectoryDrawable.reset();
                     }
                     break;
 
                 case sf::Event::KeyPressed:
                     if (event.key.code == sf::Keyboard::Key::R && points.size() > 1) {
                         // -- SIMULATE TRAJECTORY --
-                        feedback_t feedback;
-                        feedback.resetPosition(Position2D<Meter>(points[0], 0));
-                        actuators_t motors = feedback.createMotorStub();
-                        manager.emplace(std::move(motors), std::move(feedback));
-                        manager->setActive(true);
-                        while (!manager->isActive()) {
-                            manager->update();
-                        }
-
                         paused = false;
-                        manager->sendOrder([&](controller_t &controller, Position2D<Meter> position) {
-                            std::unique_ptr<Trajectory> trajectory = std::make_unique<PathTrajectory>(std::nullopt, points);
-                            controller.startTrajectory(FORWARD, std::move(trajectory), std::nullopt);
-                        });
-                    } else if (event.key.code == sf::Keyboard::Key::Space && manager) {
+                        manager.emplace(startTrajectorySimulation(std::make_unique<PathTrajectory>(std::nullopt, points)));
+
+                    } else if (event.key.code == sf::Keyboard::Key::P) {
                         paused = !paused;
                         if (!paused) {
+                            if (manager) {
                             manager->resyncClock();
+                            }
+                        }
+                    } else if (event.key.code == sf::Keyboard::Key::Space) {
+                        auto brakeOrder = [&](controller_t &controller, Position2D<Meter> robotPosition) { controller.brakeToStop(); };
+                        if (manager) {
+                            manager->sendOrder(brakeOrder);
                         }
                     }
                     break;
@@ -104,40 +92,24 @@ int main() {
         }
 
         window.clear(sf::Color(220, 220, 220));
-        for (const auto &point : sfPathPoints) {
+        for (const auto &point : pointDrawables) {
             window.draw(point);
         }
-        for (const auto &point : sfCtrlPoints) {
-            window.draw(point);
+        if (trajectoryDrawable) {
+            window.draw(*trajectoryDrawable);
         }
-        window.draw(bezierCurve);
 
         if (manager) {
-            Position2D<Meter> robotPosition = manager->getPositionFeedback().getRobotPosition();
-            sf::Vector2f screenPosition = window.toScreenCoordinates(robotPosition);
-            double_t rotation = 180. / Angle::Pi * (Angle::Pi / 2 - robotPosition.theta.value());
-
-            const unsigned int DRAW_SIZE = 20;
-            sf::RectangleShape robotMarker(sf::Vector2f(2 * DRAW_SIZE, 2 * DRAW_SIZE));
-            robotMarker.setFillColor(sf::Color(128, 0, 128));
-            robotMarker.setOrigin(DRAW_SIZE, DRAW_SIZE);
-            robotMarker.setPosition(screenPosition);
-            robotMarker.setRotation(rotation);
-
-            const unsigned int HEAD_SIZE = 3;
-            sf::RectangleShape headMarker(sf::Vector2f(2 * HEAD_SIZE, DRAW_SIZE));
-            headMarker.setFillColor(sf::Color::White);
-            headMarker.setPosition(screenPosition.x, screenPosition.y);
-            headMarker.setRotation(rotation + 180);
-
-            window.draw(robotMarker);
-            window.draw(headMarker);
+            robotDrawable.setPosition(window, manager->getPositionFeedback().getRobotPosition());
+            window.draw(robotDrawable);           
 
             if (!paused) {
                 manager->update();
             }
-        }
-
+            if (manager->getController().getStatus() == Still && !manager->getController().isMoving()) {
+                manager.reset();
+            }
+            }
         window.display();
     }
 }
