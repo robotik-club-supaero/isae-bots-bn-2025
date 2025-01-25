@@ -59,10 +59,9 @@ class Trajectory {
      *   0 is also a valid default value for trajectories that do not support curvature estimation.
      * - Returning a negative value is illegal and unspecified behavior.
      *
-     * The default implementation currently returns 0, but trajectories could be required to override this method in the future.
      * If `distance < 0`, the behavior is undefined.
      */
-    virtual double_t getMaxCurvature(double_t distance) const;
+    virtual double_t getMaxCurvature(double_t distance) const = 0;
 
   protected:
     Trajectory() = default;

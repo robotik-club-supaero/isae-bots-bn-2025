@@ -19,6 +19,9 @@ class LinearTrajectory : public Trajectory {
     /// @copydoc Trajectory::getRemainingDistance()
     std::optional<double_t> getRemainingDistance() const override;
 
+    /// @copydoc Trajectory::getMaxCurvature()
+    double_t getMaxCurvature(double_t distance) const override;
+
   private:
     Point2D<Meter> m_origin;
     Point2D<Meter> m_destination;

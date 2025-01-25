@@ -51,7 +51,7 @@ int main() {
                         // Intermediary control points for Bézier curves
                         trajectory = PathTrajectory(std::nullopt, points);
                         do {
-                            const std::vector<Point2D<Meter>> &controlPoints = trajectory.getCurrentBezierArc().points();
+                            const std::vector<Point2D<Meter>> &controlPoints = trajectory.getCurrentCurve().points();
                             for (unsigned int i = 1; i < controlPoints.size() - 1; i++) {
                                 sf::CircleShape sfPoint(4); // Radius of 5 pixels
                                 sfPoint.setFillColor(sf::Color(0, 100, 0));
@@ -59,7 +59,7 @@ int main() {
                                 sfPoint.move(-4, -4); // Center the circle
                                 sfCtrlPoints.push_back(sfPoint);
                             }
-                        } while (trajectory.skipToNextArc());
+                        } while (trajectory.skipToNextCurve());
 
                     } else if (event.mouseButton.button == sf::Mouse::Middle) {
                         // -- REMOVE LAST POINT --

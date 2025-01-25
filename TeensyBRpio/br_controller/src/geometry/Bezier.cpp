@@ -1,8 +1,6 @@
 #include "geometry/Bezier.hpp"
 #include "logging.hpp"
 
-#define SAMPLE_PRECISION 0.005
-
 /**
  * Iterator over (n choose i) for 0 <= i <= n.
  *
@@ -45,7 +43,7 @@ struct BinomialIterator {
  * The curve is defined by: `B(t) = sum((n i) * t^i * (1 - t)^(n-i) * P_i)`, hence
  * `B(t) = sum[t^i *
  *                   (n i) * sum_{j<=i} ((-1)^(i-j) * (i j) * P_j)
- *         ]}`.
+ *         ]`.
  *
  * The second form allows to precompute the coefficients of the polynomial and can be evaluated using Horner's method.
  */
@@ -86,31 +84,6 @@ double_t BezierCurve::curvature(double_t t) const {
     Vector2D<Meter> secondDerivative = m_secondDerivative(t);
 
     return (derivative.x * secondDerivative.y - derivative.y * secondDerivative.x) / (derivativeNorm * derivativeNorm * derivativeNorm);
-}
-
-BezierCurve::LengthSamples BezierCurve::sampleLength() const {
-    return sampleLength(SAMPLE_PRECISION);
-}
-BezierCurve::LengthSamples BezierCurve::sampleLength(double_t step) const {
-    std::vector<double_t> samples({0});
-   
-    double_t remaining;
-    double_t t = 0;
-    while (t < 1) {
-        double_t derivative = m_derivative(t).norm();
-        double_t increment = step / derivative;
-        if(t + increment <= 1) {
-            t += increment;
-            samples.push_back(t);
-        } else{
-            remaining = (1-t)*derivative;
-            break;
-        }
-    }
-    double_t sampledLength = step * (samples.size()-1);
-    double_t length = sampledLength + remaining;
-
-    return {length, Samples(std::move(samples), 0, sampledLength)};
 }
 
 const std::vector<Point2D<Meter>> &BezierCurve::points() const {
