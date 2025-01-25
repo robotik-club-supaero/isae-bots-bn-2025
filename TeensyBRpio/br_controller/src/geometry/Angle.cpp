@@ -39,22 +39,10 @@ void Angle::operator+=(Angle other) {
 void Angle::operator-=(Angle other) {
     *this = *this - other;
 }
-void Angle::operator*=(double_t factor) {
-    *this = *this * factor;
-}
-void Angle::operator/=(double_t factor) {
-    *this = *this / factor;
-}
 
 Angle Angle::operator+(Angle other) const {
     return Angle(m_value + other.m_value);
 }
 Angle Angle::operator-(Angle other) const {
     return Angle(m_value - other.m_value);
-}
-Angle Angle::operator*(double_t factor) const {
-    return Angle(m_value * factor);
-}
-Angle Angle::operator/(double_t factor) const {
-    return Angle(m_value / factor);
 }

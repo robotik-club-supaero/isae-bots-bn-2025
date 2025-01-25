@@ -17,10 +17,13 @@ class Speeds {
     Speeds() = default;
     Speeds(double_t linear, double_t angular);
 
+    bool operator==(const Speeds &other) const = default;
     Speeds operator+(Speeds other) const;
     Speeds operator-(Speeds other) const;
     Speeds operator*(double_t factor) const;
     Speeds operator/(double_t factor) const;
+
+    Speeds operator-() const;
 
     /// Convert from (linear, angular) to (left wheel, right wheel)
     WheelSpeeds toWheelSpeeds(double_t wheelRadius, double_t wheelDistance) const;

@@ -24,25 +24,16 @@ class Angle {
 
     void operator+=(Angle other);
     void operator-=(Angle other);
-    void operator*=(double_t factor);
-    void operator/=(double_t factor);
 
     bool operator==(const Angle &other) const = default;
     Angle operator+(Angle other) const;
     Angle operator-(Angle other) const;
-    Angle operator*(double_t factor) const;
-    Angle operator/(double_t factor) const;
 
     static constexpr double_t Pi = std::numbers::pi_v<double_t>;
 
   private:
     double_t m_value;
 };
-
-template <typename Unit>
-inline Angle operator*(double_t factor, Angle angle) {
-    return angle * factor;
-}
 
 namespace std {
 inline double_t cos(Angle angle) {

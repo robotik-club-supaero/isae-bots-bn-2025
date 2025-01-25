@@ -19,19 +19,19 @@ namespace controller {
 template <ErrorConverter TConverter>
 UnicycleController<TConverter>::UnicycleController(Vector2D<Meter> trackingOffset, TConverter converter, Accelerations brakeAccelerations,
                                                    Speeds maxSpeeds, Accelerations maxAccelerations)
-    : m_offset(trackingOffset), m_brakeAccelerations(brakeAccelerations), m_maxSpeeds(maxSpeeds), m_maxAccelerations(maxAccelerations), m_setpoint(),
-      m_goalPointSpeed(), m_actualSpeed(), m_estimatedRelSpeed(), m_converter(std::move(converter)), m_event() {
+    : m_offset(trackingOffset), m_brakeAccelerations(brakeAccelerations), m_maxSpeeds(maxSpeeds), m_maxAccelerations(maxAccelerations),
+      m_setpoint(Position2D<Meter>()), m_goalPointSpeed(), m_actualSpeed(), m_trackingPointSpeed(1, 0.2), m_converter(std::move(converter)),
+      m_event() {
     setCurrentState<StateUninitialized>();
 }
 
 template <ErrorConverter TConverter>
 Speeds UnicycleController<TConverter>::updateCommand(double_t interval, Position2D<Meter> robotPosition) {
     m_event = UpdateResultCode();
-
-    // Update estimated speed
     m_actualSpeed.update(robotPosition, interval);
-    m_estimatedRelSpeed.linear = robotPosition.makeRelative(m_actualSpeed).x;
-    m_estimatedRelSpeed.angular = m_actualSpeed.value().theta;
+
+    Vector2D<Meter> trackingPoint = applyOffset(robotPosition);
+    m_trackingPointSpeed.update(trackingPoint, interval);
 
     // Update setpoint
     StateUpdateResult result = this->getCurrentState().update(interval, m_setpoint, robotPosition);
@@ -56,7 +56,7 @@ Speeds UnicycleController<TConverter>::updateCommand(double_t interval, Position
             },
             [&](BadRobotOrientation &r) {
                 m_setpoint.theta = robotPosition.theta;
-                setCurrentState<StateSuspendTrajectory>(m_estimatedRelSpeed, m_brakeAccelerations, std::move(r));
+                setCurrentState<StateSuspendTrajectory>(getEstimatedRelativeRobotSpeed(), m_brakeAccelerations, std::move(r));
             },
             [&](FinalRotationComplete &r) {
                 m_event = UpdateResultCode::FINAL_ROTATION_COMPLETE;
@@ -86,8 +86,8 @@ Speeds UnicycleController<TConverter>::updateCommand(double_t interval, Position
 
     if (inverted) {
         goalPoint = applyOffset(m_setpoint, true);
+        trackingPoint = applyOffset(robotPosition, true);
     }
-    Vector2D<Meter> trackingPoint = applyOffset(robotPosition, inverted);
 
     // Compute error
     m_converter.update(goalPoint - trackingPoint, interval);
@@ -137,7 +137,7 @@ void UnicycleController<TConverter>::setSetpointSpeed(Speeds speeds, bool enforc
 template <ErrorConverter TConverter>
 void UnicycleController<TConverter>::brakeToStop() {
     if ((getStatus() & (ROTATING | MOVING | TRAJECTORY)) != 0) {
-        setCurrentState<StateBraking>(m_estimatedRelSpeed, m_brakeAccelerations);
+        setCurrentState<StateBraking>(getEstimatedRelativeRobotSpeed(), m_brakeAccelerations);
     }
 }
 
@@ -178,9 +178,8 @@ void UnicycleController<TConverter>::reset(Position2D<Meter> robotPosition) {
 
     m_setpoint = robotPosition;
     m_goalPointSpeed.reset(applyOffset(robotPosition));
-    m_actualSpeed.reset(robotPosition);
+    m_trackingPointSpeed.reset(applyOffset(robotPosition));
     m_converter.reset();
-    makeStill(robotPosition);
 }
 
 // Getters and setters
@@ -208,10 +207,13 @@ template <ErrorConverter TConverter>
 Vector2D<Meter> UnicycleController<TConverter>::getGoalPoint() const {
     return applyOffset(m_setpoint);
 }
-
 template <ErrorConverter TConverter>
 Vector2D<Meter> UnicycleController<TConverter>::getGoalPointSpeed() const {
-    return m_goalPointSpeed;
+    return m_goalPointSpeed.value();
+}
+template <ErrorConverter TConverter>
+Speeds UnicycleController<TConverter>::getEstimatedRelativeRobotSpeed() const {
+    return Speeds(m_actualSpeed.getLastInput().makeRelative(m_actualSpeed.value()).x, m_actualSpeed.value().theta);
 }
 
 template <ErrorConverter TConverter>

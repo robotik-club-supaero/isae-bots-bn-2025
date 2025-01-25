@@ -157,6 +157,9 @@ class UnicycleController : private fsm::StateMachine<ControllerState> {
 #endif
 
   private:
+
+    Speeds getEstimatedRelativeRobotSpeed() const;
+  
     /// Convenience function to avoid writing "this->template setCurrentState" every time.
     template <Derived<ControllerState> TNewState, typename... Args>
     void setCurrentState(Args &&...args) {
@@ -176,8 +179,8 @@ class UnicycleController : private fsm::StateMachine<ControllerState> {
     Position2D<Meter> m_setpoint;
     Derivative<Vector2D<Meter>> m_goalPointSpeed;
     /// Estimated speed of the robot
-    Derivative<Position2D<Meter>> m_actualSpeed;
-    Speeds m_estimatedRelSpeed;
+    Derivative<Position2D<Meter, double_t>, Position2D<Meter>> m_actualSpeed;
+    Derivative<Vector2D<Meter>> m_trackingPointSpeed;
 
     TConverter m_converter;
     UpdateResultCode m_event;

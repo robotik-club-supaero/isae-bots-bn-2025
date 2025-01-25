@@ -14,6 +14,11 @@ Speeds Speeds::operator*(double_t factor) const {
 Speeds Speeds::operator/(double_t factor) const {
     return Speeds(linear / factor, angular / factor);
 }
+
+Speeds Speeds::operator-() const {
+    return Speeds(-linear, -angular);
+}
+
 WheelSpeeds Speeds::toWheelSpeeds(double_t wheelRadius, double_t wheelDistance) const {
     double_t rightWheelSpeed = linear + angular * wheelDistance / 2;
     double_t leftWheelSpeed = linear - angular * wheelDistance / 2;

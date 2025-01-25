@@ -8,11 +8,12 @@
 #include <string>
 #endif
 
-/** A 2D-vector.
+/** 
+ * A 2D-vector.
  *
  * @tparam Unit The unit of x and y. Only `Meter` and `Millimeter` are supported.
  */
-template <typename Unit>
+template <typename Unit = Meter>
 class Vector2D {
   public:
     Vector2D();

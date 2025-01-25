@@ -18,8 +18,8 @@
  *
  * See http://www.bedwani.ch/regul/discret/top/df.htm
  */
-template <typename TValue = double_t>
-    requires Add<TValue> && Mul<TValue> && Default<TValue> && Clampable<TValue>
+template <typename TDerivative = double_t, typename TValue = TDerivative>
+    requires Add<TValue> && Mul<TValue, TDerivative> && Default<TValue> && Clampable<TValue>
 class Derivative {
   public:
     /**
@@ -41,8 +41,12 @@ class Derivative {
      */
     void reset(TValue initialValue = {});
 
-    operator TValue() const;
-    TValue value() const;
+    operator TDerivative() const;
+    /// Returns the value of the derivative
+    TDerivative value() const;
+
+    /// Returns the last input value used in function `update`. 
+    TValue getLastInput() const;
 
     double_t gain() const;
     double_t filter() const;
@@ -52,7 +56,7 @@ class Derivative {
     double_t m_gain;
     double_t m_filter;
     TValue m_lastValue;
-    TValue m_lastDerivative;
+    TDerivative m_lastDerivative;
     std::optional<double_t> m_saturation;
 };
 
