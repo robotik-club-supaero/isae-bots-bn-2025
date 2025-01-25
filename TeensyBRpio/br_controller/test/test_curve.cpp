@@ -1,4 +1,3 @@
-#include "TestClock.hpp"
 #include "Window.hpp"
 #include "specializations/manager.hpp"
 #include "trajectories/PathTrajectory.hpp"
@@ -6,7 +5,6 @@
 #include <iostream>
 
 constexpr controller::ControllerStatus Still = controller::ControllerStatus::Still;
-
 
 int main() {
     double_t step = 0.001;
@@ -18,6 +16,7 @@ int main() {
     std::vector<sf::CircleShape> sfCtrlPoints;
     std::vector<sf::CircleShape> sfPathPoints;
 
+    bool paused;
     std::optional<manager_t> manager;
 
     while (window.isOpen()) {
@@ -87,16 +86,15 @@ int main() {
                             manager->update();
                         }
 
+                        paused = false;
                         manager->sendOrder([&](controller_t &controller, Position2D<Meter> position) {
                             std::unique_ptr<Trajectory> trajectory = std::make_unique<PathTrajectory>(std::nullopt, points);
                             controller.startTrajectory(FORWARD, std::move(trajectory), std::nullopt);
                         });
                     } else if (event.key.code == sf::Keyboard::Key::Space && manager) {
-                        TestClock &clock = manager->getClock();
-                        if (clock.paused()) {
-                            clock.resume();
-                        } else {
-                            clock.pause();
+                        paused = !paused;
+                        if (!paused) {
+                            manager->resyncClock();
                         }
                     }
                     break;
@@ -135,7 +133,7 @@ int main() {
             window.draw(robotMarker);
             window.draw(headMarker);
 
-            if (!manager->getClock().paused()) {
+            if (!paused) {
                 manager->update();
             }
         }

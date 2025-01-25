@@ -135,7 +135,6 @@ class ControllerManager : private fsm::StateMachine<ManagerState<TActuators, TCo
     const TFeedback &getPositionFeedback() const;
 
     const TClock &getClock() const;
-    TClock &getClock();
 
   private:
     using Self = ControllerManager<TActuators, TController, TFeedback, TClock>;

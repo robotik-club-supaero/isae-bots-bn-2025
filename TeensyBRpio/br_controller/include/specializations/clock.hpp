@@ -3,15 +3,6 @@
 
 #include "Clock.hpp"
 
-#ifdef USE_TEST_CLOCK
-
-#include "TestClock.hpp"
-using _clock_t = TestClock;
-
-#else
-
 using _clock_t = SystemClock;
-
-#endif
 
 #endif

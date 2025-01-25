@@ -13,7 +13,7 @@ concept Clock = requires(T c) {
 };
 
 inline duration_t getDurationMicros(instant_t before, instant_t now) {
-    if (now > before) {
+    if (now >= before) {
         return now - before;
     } else {
         // Overflow

@@ -151,10 +151,6 @@ TEMPLATE
 const TClock &MANAGER::getClock() const {
     return m_clock;
 }
-TEMPLATE
-TClock &MANAGER::getClock() {
-    return m_clock;
-}
 
 } // namespace manager
 
