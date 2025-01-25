@@ -28,7 +28,7 @@ class Trajectory {
      * outside the trajectory, then the position should be advanced to the end of the trajectory instead.
      * @return true if the position was advanced. false if the position is already at the end of the trajectory. If this method returns false,
      * subsequent calls to advance() must also return false.
-     * 
+     *
      * If `distance < 0`, the behavior is undefined.
      */
     virtual bool advance(double_t distance) = 0;
@@ -54,7 +54,7 @@ class Trajectory {
     /**
      * Returns the maximum absolute curvature of the trajectory for the next `distance` meters, starting at the current position.
      * The curvature is used to anticipate deceleration in turns.
-     * 
+     *
      * - Returning 0 means the trajectory is a straight line and effectively disables turn anticipation.
      *   0 is also a valid default value for trajectories that do not support curvature estimation.
      * - Returning a negative value is illegal and unspecified behavior.
@@ -62,6 +62,22 @@ class Trajectory {
      * If `distance < 0`, the behavior is undefined.
      */
     virtual double_t getMaxCurvature(double_t distance) const = 0;
+
+    /**
+     * Attempts to recompute the trajectory such that:
+     * - The new start position is `newStartPosition`. The initial direction of the trajectory is not required to match the robot's orientation.
+     * - The current position is reset to the beginning of the trajectory.
+     * - The recomputed trajectory eventually catches up with the remaining part of the initial trajectory (what this exactly means depends on the
+     * trajectory). If the initially trajectory is finite, this usually means the recomputed trajectory is finite as well and has the same final
+     * position.
+     *
+     * @returns true if the trajectory was successfully recomputed, false otherwise. If this returns false, the state of this object must not have
+     * changed.
+     *
+     * The default implementation always returns false.
+     *
+     */
+    virtual bool recompute(Position2D<Meter> newStartPosition) { return false; }
 
   protected:
     Trajectory() = default;

@@ -29,3 +29,7 @@ double_t LinearTrajectory::getMaxCurvature(double_t distance) const {
     return 0;
 }
 
+bool LinearTrajectory::recompute(Position2D<Meter> newStartPosition) {
+    *this = LinearTrajectory(newStartPosition, m_destination);
+    return true;
+}

@@ -22,6 +22,9 @@ class LinearTrajectory : public Trajectory {
     /// @copydoc Trajectory::getMaxCurvature()
     double_t getMaxCurvature(double_t distance) const override;
 
+    /// @copydoc Trajectory::recompute()
+    bool recompute(Position2D<Meter> newStartPosition) override;
+
   private:
     Point2D<Meter> m_origin;
     Point2D<Meter> m_destination;

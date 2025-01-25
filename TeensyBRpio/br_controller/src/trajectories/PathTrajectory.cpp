@@ -81,3 +81,14 @@ PathTrajectory::PathTrajectory(std::optional<Angle> initialDirection, std::vecto
 const std::vector<Point2D<Meter>> &PathTrajectory::getPathPoints() const {
     return getGenerator().getPoints();
 }
+
+bool PathTrajectory::recompute(Position2D<Meter> newStartPosition) {
+    const std::vector<Point2D<Meter>> &initialPath = getPathPoints();
+    std::vector<Point2D<Meter>> newPoints;
+    newPoints.push_back(newStartPosition);
+    newPoints.insert(newPoints.end(), initialPath.begin() + getCurrentCurveIndex() + 1, initialPath.end());
+
+    *this = PathTrajectory(newStartPosition.theta, newPoints);
+
+    return true;
+}

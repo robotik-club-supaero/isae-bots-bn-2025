@@ -49,6 +49,9 @@ class PathTrajectory : public MultiCurveTrajectory<BezierCurve, BezierCurvesGene
 
     /// The crosspoints the trajectory must pass through.
     const std::vector<Point2D<Meter>> &getPathPoints() const;
+
+    /// @copydoc Trajectory::recompute()
+    bool recompute(Position2D<Meter> newStartPosition) override;
     
 };
 
