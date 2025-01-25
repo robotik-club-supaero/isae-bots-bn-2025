@@ -1,49 +1,42 @@
-#include "controller/states/StateTrajectoryWithRamp.hpp"
+#include "controller/states/StateTrajectory.hpp"
 #include "defines/func.hpp"
 #include "logging.hpp"
 
 namespace controller {
 
-StateTrajectoryWithRamp::StateTrajectoryWithRamp(std::unique_ptr<Trajectory> trajectory, Speeds maxSpeeds, double_t maxLinAcceleration,
-                                                 DisplacementKind kind, std::optional<Angle> finalOrientation)
-    : m_trajectory(std::move(trajectory)), m_maxSpeeds(maxSpeeds), m_ramp(maxSpeeds.linear, maxLinAcceleration), m_kind(kind),
-      m_finalOrientation(finalOrientation) {
-    log(INFO, "Entering controller state: Forward");
+StateTrajectory::StateTrajectory(DisplacementKind kind, std::shared_ptr<Trajectory> trajectory, Speeds maxSpeeds, double_t maxLinAcceleration)
+    : m_kind(kind), m_trajectory(std::move(trajectory)), m_lastDirection(m_trajectory->getCurrentPosition().theta), m_maxSpeeds(maxSpeeds),
+      m_ramp(maxSpeeds.linear, maxLinAcceleration) {
+    log(INFO, "Entering controller state: Moving");
 }
 
-ControllerStatus StateTrajectoryWithRamp::getStatus() const {
+ControllerStatus StateTrajectory::getStatus() const {
     if (m_kind == FORWARD) {
-        return Forward;
+        return ControllerStatus::MOVING;
     } else {
-        return Reversing;
+        return ControllerStatus::REVERSE;
     }
 }
 
-StateUpdateResult StateTrajectoryWithRamp::update(double_t interval, Position2D<Meter> &setpoint, Position2D<Meter> actualRobotPosition) {
+StateUpdateResult StateTrajectory::update(double_t interval) {
     if (m_trajectory) {
         m_ramp.update(interval);
         double_t currentRampSpeed = m_ramp.getCurrentSpeed();
 
-        if (m_trajectory->advance(currentRampSpeed * interval)) {
-            Angle oldTheta = setpoint.theta;
-
-            Position2D<Meter> position = m_trajectory->getCurrentPosition();
-            setpoint.x = position.x;
-            setpoint.y = position.y;
-            setpoint.theta = position.theta + m_kind.getAlignmentOffset();
-
+        if (m_trajectory->advance(currentRampSpeed * interval)) {           
             m_ramp.setTargetSpeed(m_maxSpeeds.linear);
             std::optional<double_t> remainingDistance = m_trajectory->getRemainingDistance();
             if (remainingDistance) {
                 m_ramp.ensureCanBrake(*remainingDistance);
             }
 
-            double_t angularSpeed = abs(setpoint.theta - oldTheta) / interval;
+            Position2D<Meter> position = m_trajectory->getCurrentPosition();
+            double_t angularSpeed = abs(position.theta - m_lastDirection) / interval;
+
             // V_lin = R V_ang; curvature = 1 / R
             double_t actualCurvature = currentRampSpeed == 0 ? 0 : angularSpeed / currentRampSpeed;
 
             double_t distanceToCheck = m_ramp.getBrakingDistance();
-           
             while (distanceToCheck) {
                 double_t maxCurvature = std::max(actualCurvature, m_trajectory->getMaxCurvature(distanceToCheck));
                 if (maxCurvature == 0) {
@@ -57,26 +50,22 @@ StateUpdateResult StateTrajectoryWithRamp::update(double_t interval, Position2D<
                 if (distanceToCheck > distanceToAdaptSpeed) {
                     distanceToCheck = distanceToAdaptSpeed;
                 } else {
-                    m_ramp.setTargetSpeed(maxSpeedForCurvature);               
+                    m_ramp.setTargetSpeed(maxSpeedForCurvature);
                     break;
                 }
             }
 
+            m_lastDirection = position.theta;
+            position.theta += m_kind.getAlignmentOffset();
+            return PositionControl(position);
         } else {
             m_trajectory.reset();
         }
     }
-    if (m_trajectory) {
-        if (abs(setpoint.theta - actualRobotPosition.theta) > std::numbers::pi_v<double_t> / 2.0) {
-            return BadRobotOrientation(std::move(m_trajectory), m_kind, m_finalOrientation);
-        }
-        return Ongoing();
-    } else {
-        return TrajectoryComplete(m_kind, m_finalOrientation);
-    }
+    return TrajectoryComplete();
 }
 
-void StateTrajectoryWithRamp::notify(ControllerEvent event) {
+void StateTrajectory::notify(ControllerEvent event) {
     std::visit(overload{[&](const MaxSpeedsChanged &event) { m_maxSpeeds = event.newSpeeds; }, [](auto) {}}, event);
 }
 

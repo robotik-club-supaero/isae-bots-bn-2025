@@ -1,64 +1,55 @@
 #ifndef _CONTROLLER_STATE_RESULT_HPP_
 #define _CONTROLLER_STATE_RESULT_HPP_
 
-#include "controller/DisplacementKind.hpp"
 #include "geometry/Angle.hpp"
-#include "trajectories/Trajectory.hpp"
+#include "geometry/Position2D.hpp"
 
 #include <cstdint>
-#include <memory>
-#include <numbers>
 #include <optional>
 #include <variant>
 
 namespace controller {
 
-class TrajectoryContainer {
+/// Requests to move the robot to the requested position
+class PositionControl {
   public:
-    /// @param trajectory must not be null
-    TrajectoryContainer(std::unique_ptr<Trajectory> trajectory, DisplacementKind kind, std::optional<Angle> finalOrientation)
-        : trajectory(std::move(trajectory)), kind(kind), finalOrientation(finalOrientation) {}
+    /// Requests that the setpoint do not move
+    PositionControl() : setpoint(), relative(true) {}
+    PositionControl(Position2D<Meter> setpoint, bool relative = false) : setpoint(setpoint), relative(relative) {}
 
-    std::unique_ptr<Trajectory> trajectory;
-    DisplacementKind kind;
-    std::optional<Angle> finalOrientation;
+    /// The new position of the setpoint
+    Position2D<Meter> setpoint;
+    /// Whether the position is absolute or relative to the previous setpoint
+    bool relative;
 };
-
-class Ongoing {};
-
-class InitialRotationComplete : public TrajectoryContainer {
+/// Requests to change the robot's heading without moving its center
+class OrientationControl {
   public:
-    using TrajectoryContainer::TrajectoryContainer;
+    OrientationControl(Angle orientation, bool relative = false) : orientation(orientation), relative(relative) {}
+
+    Angle orientation;
+    /// Whether the new orientation is absolute or relative to the previous setpoint
+    bool relative;
+};
+/// Requests to move the robot with the requested speed
+class SpeedControl {
+  public:
+    SpeedControl(Speeds speeds) : speeds(speeds) {}
+    Speeds speeds;
 };
 
 class TrajectoryComplete {
   public:
-    TrajectoryComplete(DisplacementKind kind, std::optional<Angle> finalOrientation) : kind(kind), finalOrientation(finalOrientation) {}
+    TrajectoryComplete(std::optional<Angle> finalOrientation = std::nullopt) : finalOrientation(finalOrientation) {}
 
-    DisplacementKind kind;
     std::optional<Angle> finalOrientation;
 };
-
-class BadRobotOrientation : public TrajectoryContainer {
-  public:
-    using TrajectoryContainer::TrajectoryContainer;
-};
-
-class FinalRotationComplete {};
-
-class BrakingComplete {
-  public:
-    BrakingComplete() : suspendedTrajectory(std::nullopt) {};
-    BrakingComplete(TrajectoryContainer suspendedTrajectory) : suspendedTrajectory(std::move(suspendedTrajectory)) {};
-
-    std::optional<TrajectoryContainer> suspendedTrajectory;
-};
-
 class RotationComplete {};
+class BrakingComplete {};
 
-using StateUpdateResult =
-    std::variant<Ongoing, InitialRotationComplete, TrajectoryComplete, BadRobotOrientation, FinalRotationComplete, BrakingComplete, RotationComplete>;
+using StateUpdateResult = std::variant<PositionControl, OrientationControl, SpeedControl, TrajectoryComplete, RotationComplete, BrakingComplete>;
 
+/// Code returned by the controller to help implement ROS's callbacks. 
 class UpdateResultCode {
   public:
     enum Flag : uint8_t {

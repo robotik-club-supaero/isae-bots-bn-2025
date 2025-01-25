@@ -4,17 +4,19 @@
 #include "controller/ControllerState.hpp"
 #include "math/Ramp.hpp"
 
+#include <memory>
+
 class OrientationProfile;
 
 namespace controller {
 
-class StateRotationWithRamp : public ControllerState {
+class StateRotation : public ControllerState {
   public:
-    StateUpdateResult update(double_t interval, Position2D<Meter> &setpoint, Position2D<Meter> actualRobotPosition) override;
+    /// @param profile must not be null
+    StateRotation(std::unique_ptr<OrientationProfile> profile, double_t maxAngSpeed, double_t maxAngAcceleration);
+    ControllerStatus getStatus() const override;
+    StateUpdateResult update(double_t interval) override;
     void notify(ControllerEvent event) override;
-
-  protected:
-    StateRotationWithRamp(std::unique_ptr<OrientationProfile> profile, double_t maxAngSpeed, double_t maxAngAcceleration);
 
   private:
     std::unique_ptr<OrientationProfile> m_profile;

@@ -2,6 +2,8 @@
 #include "defines/func.hpp"
 #include "logging.hpp"
 
+constexpr bool FORCE_POSITION_CONTROL = false;
+
 namespace controller {
 
 StateManualControl::StateManualControl(Accelerations maxAcceleration)
@@ -10,17 +12,19 @@ StateManualControl::StateManualControl(Accelerations maxAcceleration)
 }
 
 ControllerStatus StateManualControl::getStatus() const {
-    return ManualControl;
+    return ControllerStatus::ManualControl;
 }
 
-StateUpdateResult StateManualControl::update(double_t interval, Position2D<Meter> &setpoint, Position2D<Meter> actualRobotPosition) {
+StateUpdateResult StateManualControl::update(double_t interval) {
     m_linearRamp.update(interval);
     m_angularRamp.update(interval);
 
-    setpoint = setpoint.relativeOffset(m_linearRamp.getCurrentSpeed() * interval);
-    setpoint.theta += m_angularRamp.getCurrentSpeed() * interval;
-
-    return Ongoing();
+    if constexpr (FORCE_POSITION_CONTROL) {
+        Speeds speeds(m_linearRamp.getCurrentSpeed(), m_angularRamp.getCurrentSpeed());
+        return PositionControl(Position2D<Meter>() + speeds * interval, /* relative = */ true);
+    } else {
+        return SpeedControl(Speeds(m_linearRamp.getCurrentSpeed(), m_angularRamp.getCurrentSpeed()));
+    }
 }
 
 void StateManualControl::notify(ControllerEvent event) {

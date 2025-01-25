@@ -3,20 +3,18 @@
 
 namespace controller {
 
-StateStandStill::StateStandStill(Position2D<Meter> &setpoint, Position2D<Meter> actualRobotPosition, bool preserveCurrentSetpoint)
-    : m_restPosition(preserveCurrentSetpoint ? setpoint : actualRobotPosition) {
-    log(INFO, "Entering controller state: Ready (standing still)");
-
-    setpoint = m_restPosition;
+StateStandStill::StateStandStill(Position2D<Meter> restPosition, bool advertize) : m_restPosition(restPosition) {
+    if (advertize) {
+        log(INFO, "Entering controller state: Ready (standing still)");
+    }
 }
 
 ControllerStatus StateStandStill::getStatus() const {
-    return Still;
+    return ControllerStatus::Still;
 }
 
-StateUpdateResult StateStandStill::update(double_t interval, Position2D<Meter> &setpoint, Position2D<Meter> actualRobotPosition) {
-    setpoint = m_restPosition;
-    return Ongoing();
+StateUpdateResult StateStandStill::update(double_t interval) {
+    return PositionControl(m_restPosition);
 }
 
 } // namespace controller

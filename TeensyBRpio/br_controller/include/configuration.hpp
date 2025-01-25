@@ -36,6 +36,9 @@
 #define BRAKING_LINEAR_ACCELERATION 1.5   // m/s^2, >= DEFAULT_LINEAR_ACCELERATION
 #define BRAKING_ROTATION_ACCELERATION 3.0 // rad/s^2, >= DEFAULT_ROTATION_ACCELERATION
 
+// threshold to determine if the robot is moving or stopped
+#define STOPPED_SPEED_THRESHOLD 0.001 // m/s // TODO set
+
 /* ROS */
 
 #ifdef _SIMULATION

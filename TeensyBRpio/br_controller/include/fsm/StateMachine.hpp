@@ -30,6 +30,24 @@ class StateMachine {
         m_currentState = std::make_unique<TNewState>(std::forward<Args>(args)...);
     }
 
+    /**
+     * Sets the state of the machine and returns the previous state.
+     */
+    std::unique_ptr<TState> replaceCurrentState(std::unique_ptr<TState> state) {
+        state.swap(m_currentState);
+        return state;
+    }
+    /**
+     * Sets the state of the machine and returns the previous state.
+     *
+     * @tparam TNewState The type of the new state.
+     * @param args The parameters to pass to the constructor of the new state.
+     */
+    template <Derived<TState> TNewState, typename... Args>
+    std::unique_ptr<TState> replaceCurrentState(Args &&...args) {
+        return replaceCurrentState(std::make_unique<TNewState>(std::forward<Args>(args)...));
+    }
+
     /// Make sure to call setCurrentState() first!
     const TState &getCurrentState() const {
         checkHasState();

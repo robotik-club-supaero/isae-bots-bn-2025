@@ -5,6 +5,9 @@
 
 #include <iostream>
 
+constexpr controller::ControllerStatus Still = controller::ControllerStatus::Still;
+
+
 int main() {
     double_t step = 0.001;
     std::vector<Point2D<Meter>> points;
