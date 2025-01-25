@@ -20,7 +20,7 @@ void got_signal(int) {
     quit.store(true);
 }
 
-int main(int argc, char **argv) { 
+int main(int argc, char **argv) {
     struct sigaction sa;
     memset(&sa, 0, sizeof(sa));
     sa.sa_handler = got_signal;
@@ -31,9 +31,7 @@ int main(int argc, char **argv) {
 
     ros.emplace();
 
-    feedback_t feedback;
-    actuators_t actuators(feedback.createMotorStub());
-    std::shared_ptr<manager_t> manager(std::make_shared<manager_t, actuators_t, feedback_t>(std::move(actuators), std::move(feedback)));
+    std::shared_ptr<manager_t> manager(std::make_shared<manager_t>(createManager()));
     ros->attachManager(manager);
 
     manager->setActive(true);

@@ -15,7 +15,7 @@ void setup() {
     blinkingLed.emplace();
 
     rosInstance.emplace();
-    rosInstance->attachManager(std::make_shared<manager_t>());
+    rosInstance->attachManager();
 }
 
 void loop() {

@@ -51,15 +51,15 @@ void DisplacementOrder::operator()(manager_t<TActuators, TFeedback, TClock> &man
             manager.resetPosition(position.toMeters());
             break;
         case CONTROL: {
-            Vector2D<Millimeter> speedFactor = position / CONTROL_MAX_SPEED;
+            Vector2D<Millimeter> speedFactor = static_cast<Vector2D<Millimeter>>(position) / CONTROL_MAX_SPEED;
             manager.sendOrder([&](controller_t &controller, Position2D<Meter> robotPosition) {
-                controller.setSetpointSpeed({speedFactor.x * controller.getMaxSpeeds().linear, speedFactor.y * controller.getMaxSpeeds().angular})
-                    /*, enforceMaxSpeeds = true */;
+                controller.setSetpointSpeed({speedFactor.x * controller.getMaxSpeeds().linear,
+                                             speedFactor.y * controller.getMaxSpeeds().angular} /*, enforceMaxSpeeds = true */);
             });
             break;
         }
         case PATH_ADD_POINT:
-            pendingPath.push_back(position.toMeters());
+            addPathPoint(pendingPath, position.toMeters());
             if (position.theta.value() == 1) {
                 startPath(manager, FORWARD, pendingPath, {});
             } else if (position.theta.value() == 2) {
@@ -71,7 +71,7 @@ void DisplacementOrder::operator()(manager_t<TActuators, TFeedback, TClock> &man
         case PATH_START_FORWARD:
         case PATH_START_BACKWARD: {
             DisplacementKind kind = (type == PATH_START_BACKWARD) ? REVERSE : FORWARD;
-            pendingPath.push_back(position.toMeters());
+            addPathPoint(pendingPath, position.toMeters());
             startPath(manager, kind, pendingPath, position.theta);
             break;
         }
@@ -87,8 +87,7 @@ template <Actuators TActuators, PositionFeedback TFeedback, Clock TClock>
 void DisplacementOrder::goTo(manager_t<TActuators, TFeedback, TClock> &manager, DisplacementKind kind, Point2D<Millimeter> goalPosition,
                              std::optional<Angle> finalOrientation) {
     manager.sendOrder([&](controller_t &controller, Position2D<Meter> robotPosition) {
-        controller.template startTrajectory<LinearTrajectory, Point2D<Meter>, Point2D<Meter>>(
-            kind, (Point2D<Meter>)robotPosition, (Point2D<Meter>)goalPosition.toMeters(), finalOrientation);
+        controller.startTrajectory(kind, std::make_unique<LinearTrajectory>(robotPosition, goalPosition.toMeters()), finalOrientation);
     });
 }
 
@@ -97,13 +96,17 @@ void DisplacementOrder::startPath(manager_t<TActuators, TFeedback, TClock> &mana
                                   std::optional<Angle> finalOrientation) {
     manager.sendOrder([&](controller_t &controller, Position2D<Meter> robotPosition) {
         path.insert(path.begin(), robotPosition);
-        Angle initialDirection = robotPosition.theta;
-        if (kind == REVERSE) {
-            initialDirection = initialDirection.reverse();
-        }
-        controller.template startTrajectory<PathTrajectory, Angle &, std::vector<Point2D<Meter>>>(kind, initialDirection, std::move(path),
-                                                                                                  finalOrientation);
+        Angle initialDirection = robotPosition.theta + kind.getAlignmentOffset();
+        controller.startTrajectory(kind, std::make_unique<PathTrajectory>(initialDirection, std::move(path)), finalOrientation);
     });
+}
+
+void DisplacementOrder::addPathPoint(std::vector<Point2D<Meter>> &path, Point2D<Meter> point) {
+    if (path.empty() || path.back() != point) {
+        path.push_back(point);
+    } else {
+        log(WARN, "Point " + std::string(point) + " ignored because it is already added to the path.");
+    }
 }
 
 #include "specializations/manager.hpp"

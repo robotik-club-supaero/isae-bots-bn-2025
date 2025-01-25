@@ -31,7 +31,7 @@ class OrientationProfile {
      * Returns the absolute angular distance between the current position and the end of the profile. This allows to implement a deceleration ramp to
      * stop the robot as close to the final orientation as possible (without overshoot and ringing).
      *
-     * - 0 means the profile is complete It is a logic error to return 0 unless advance() would return false.
+     * - 0 means the profile is complete. It is a logic error to return 0 unless advance() would return false.
      * - An empty optional means the profile is inifite or the remaining distance cannot be determined.
      * - Negative values are illegal and will lead to unspecified behaviour.
      *

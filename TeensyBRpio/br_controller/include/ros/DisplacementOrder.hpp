@@ -1,11 +1,7 @@
 #ifndef _ROS_POSITION_ORDER_HPP_
 #define _ROS_POSITION_ORDER_HPP_
 
-#include "Actuators.hpp"
-#include "Clock.hpp"
-#include "PositionFeedback.hpp"
 #include "controller/UnicycleController.hpp"
-#include "geometry/Position2D.hpp"
 #include "manager/ControllerManager.hpp"
 #include "specializations/controller.hpp"
 
@@ -63,6 +59,8 @@ class DisplacementOrder {
     template <Actuators TActuators, PositionFeedback TFeedback, Clock TClock>
     static void startPath(manager_t<TActuators, TFeedback, TClock> &manager, DisplacementKind kind, std::vector<Point2D<Meter>> &path,
                           std::optional<Angle> finalOrientation);
+
+    static void addPathPoint(std::vector<Point2D<Meter>> &path, Point2D<Meter> point);
 };
 
 #endif

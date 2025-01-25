@@ -1,6 +1,6 @@
 #include "feedback/TwoWheelSimulator.hpp"
-
 #include "Clock.hpp"
+#include "geometry/WheelSpeeds.hpp"
 
 TwoWheelSimulator::TwoWheelSimulator(double_t wheelDiameter, double_t wheelDistance, double_t minWheelSpeed, double_t maxWheelSpeed,
                                      double_t maxWheelAcceleration, double_t noise_stddev)

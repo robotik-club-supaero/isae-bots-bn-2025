@@ -9,6 +9,9 @@
 #include <string>
 #endif
 
+/// A dense univariate polynomial.
+///
+/// @tparam T The type of the coefficients. Must be a complete type that implements addition with itself and multiplication with double.
 template <Add T>
 class Polynomial {
 

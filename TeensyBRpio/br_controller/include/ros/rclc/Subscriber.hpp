@@ -10,22 +10,27 @@ namespace ros_rclc {
 class Node;
 
 template <typename T>
+class Subscription;
+
+template <typename T>
 class MessageWrapper : public Messages<T>::type {
+    friend class Subscription<T>;
+
   public:
     MessageWrapper(std::function<void(const T &)> callback) : Messages<T>::type(), m_callback(callback) {}
 
+  private:
     /**
      * @param msg Must point to a valid, allocated and properly initialized `const MessageWrapper<T>` object.
      * Calling this method with an argument that does not satisfy those requirements is undefined behaviour.
      */
-    /* unsafe */ static void dispatch(const void *msg) {
+    static void dispatch(const void *msg) {
         const MessageWrapper<T> *msgCast = static_cast<const MessageWrapper<T> *>(msg);
         const typename Messages<T>::type *rawMsg = static_cast<const typename Messages<T>::type *>(msgCast);
         T data = Messages<T>::extract(*rawMsg);
         msgCast->m_callback(data);
     }
 
-  private:
     std::function<void(const T &)> m_callback;
 };
 

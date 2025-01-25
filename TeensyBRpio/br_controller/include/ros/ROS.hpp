@@ -3,7 +3,6 @@
 
 #include "configuration.hpp"
 
-#include "Clock.hpp"
 #include "logging.hpp"
 #include "ros/DisplacementOrder.hpp"
 
@@ -44,6 +43,11 @@ class ROS : public ROSImpl::node_t {
     /// The manager is attached later to enable logging of early errors during creation of the manager or its dependencies.
     /// The subscribtions are not created until this method is called. This method must be called exactly once.
     void attachManager(std::shared_ptr<manager_t> manager);
+
+    template <typename... Args>
+    void attachManager(Args &&...args) {
+        attachManager(std::make_shared<manager_t>(std::forward<Args>(args)...));
+    }
 
     /// Spins the ROS node and call "loop" on the attached manager. It is an error to call this function before a manager is attached.
     void loop();

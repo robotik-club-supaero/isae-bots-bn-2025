@@ -21,7 +21,7 @@ namespace ros_rclc {
 using support_t = const rosidl_message_type_support_t *const;
 
 /**
- * Utility functions to convert type `T` from/to the implementation-specific corresponding message type.
+ * Utility functions to convert C++'s type `T` from/to the implementation-specific corresponding message type.
  * This allows to use implementation-agnostic types in class ROS.
  */
 template <typename T>
@@ -83,7 +83,7 @@ class Messages<DisplacementOrder> {
     static void copy(type &msg, const DisplacementOrder &data) {
         msg.x = data.position.x;
         msg.y = data.position.y;
-        msg.z = Angle(data.position.theta);
+        msg.z = data.position.theta;
         msg.w = data.type;
     }
     static DisplacementOrder extract(const type &msg) { return DisplacementOrder((int)msg.w, Position2D<Millimeter>(msg.x, msg.y, msg.z)); }

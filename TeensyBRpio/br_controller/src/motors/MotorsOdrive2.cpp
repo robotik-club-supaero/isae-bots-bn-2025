@@ -1,4 +1,5 @@
 #include "motors/MotorsOdrive2.hpp"
+#include "geometry/WheelSpeeds.hpp"
 #include <ODriveEnums.h>
 
 #include <algorithm>
@@ -49,7 +50,6 @@ void MotorsOdrive2::update(double_t interval) {
 }
 
 bool MotorsOdrive2::isReady() {
-    return true;
     return m_odrive.getCurrentAxisState(BR_LEFT) == AXIS_STATE_CLOSED_LOOP_CONTROL &&
            m_odrive.getCurrentAxisState(BR_RIGHT) == AXIS_STATE_CLOSED_LOOP_CONTROL;
 }

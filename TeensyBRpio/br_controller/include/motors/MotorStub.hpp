@@ -6,12 +6,14 @@
 #include <memory>
 
 /**
- * Motor stub for a unicycle robot. This class sends the requested command to its consumer (usually UnicycleStateSimulator) and does
- * nothing else.
+ * Motor stub for a unicycle robot. This class sends the requested command to its consumer and does nothing else.
+ *
+ * @see TwoWheelSimulator
+ * @see UnicycleStateSimulator
  */
 class MotorStub {
   public:
-    /// Use UnicycleStateSimulator::createMotorStub() to create a motor stub connected to the simulator.
+  /// Use TwoWheelSimulator::createMotorStub() to create a motor stub connected to the simulator.
     /// @param speedsPtr must not be null.
     MotorStub(std::shared_ptr<Speeds> speedsPtr);
 

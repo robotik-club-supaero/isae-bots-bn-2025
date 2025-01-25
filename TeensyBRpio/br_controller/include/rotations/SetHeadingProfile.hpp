@@ -21,7 +21,7 @@ class SetHeadingProfile : public OrientationProfile {
     Angle getCurrentOrientation() const override;
 
     /**
-     * @copydoc OrientationProfile::getCurrentOrientation()
+     * @copydoc OrientationProfile::getRemainingAngle()
      */
     std::optional<double_t> getRemainingAngle() const override;
 
