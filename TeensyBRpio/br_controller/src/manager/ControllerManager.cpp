@@ -45,7 +45,26 @@ void MANAGER::setActive(bool active) {
 }
 
 TEMPLATE
-void MANAGER::loop(std::optional<std::function<void()>> tickCallback) {
+bool MANAGER::update() {
+    instant_t nowMicros = m_clock.micros();
+    if (!m_lastUpdate) {
+        m_lastUpdate.emplace(nowMicros);
+        return false;
+    }
+
+    duration_t intervalMicros = getDurationMicros(*m_lastUpdate, nowMicros);
+    if (intervalMicros >= m_minUpdateInterval) {
+        duration_t tickInterval = std::min(m_maxUpdateInterval, intervalMicros);
+        *m_lastUpdate += tickInterval;
+        update((double_t)tickInterval / 1e6);
+        return true;
+    } else {
+        return false;
+    }
+}
+
+TEMPLATE
+void MANAGER::update(double_t interval) {
     ManagerStatus status = this->getCurrentState().update(m_actuators);
     if (status != this->getStatus()) {
         switch (status) {
@@ -64,49 +83,19 @@ void MANAGER::loop(std::optional<std::function<void()>> tickCallback) {
             default:
                 log(ERROR, "Invalid response from manager state!" + std::to_string(status));
         }
-        return;
     }
 
-    instant_t nowMicros = m_clock.micros();
-    if (!m_lastUpdate) {
-        m_lastUpdate.emplace(nowMicros);
-        return;
-    }
-
-    duration_t intervalMicros = getDurationMicros(*m_lastUpdate, nowMicros);
-    while (intervalMicros >= m_minUpdateInterval) {
-        duration_t tickInterval = std::min(m_maxUpdateInterval, intervalMicros);
-        intervalMicros -= tickInterval;
-        *m_lastUpdate += tickInterval;
-
-        double_t interval = (double_t)tickInterval / (double_t)1000000.0;
-
-        m_feedback.update(interval);
-        sendOrderInternal([&](TController &controller, Position2D<Meter> robotPosition) {
-            auto command = controller.updateCommand(interval, robotPosition);
-            m_actuators.sendCommand(command);
-        });
-        m_actuators.update(interval);
-
-        if (tickCallback) {
-            tickCallback->operator()();
-        }
-    }
+    m_feedback.update(interval);
+    if (isActive()) {
+        auto command = m_controller.updateCommand(interval, m_feedback.getRobotPosition());
+        m_actuators.sendCommand(command);
+    };
+    m_actuators.update(interval);
 }
 
 TEMPLATE
-bool MANAGER::sendOrder(std::function<void(TController &, Position2D<Meter>)> order) {
-    bool result = sendOrderInternal(order);
-    if (!result) {
-        log(WARN, "The order cannot be processed due to the current state of the manager.");
-    }
-    return result;
-}
-
-// Private
-TEMPLATE
-bool MANAGER::sendOrderInternal(std::function<void(TController &, Position2D<Meter>)> order) {
-    return this->getCurrentState().sendOrder(m_controller, m_feedback.getRobotPosition(), order);
+void MANAGER::resyncClock() {
+    m_lastUpdate.reset();
 }
 
 TEMPLATE
@@ -137,7 +126,9 @@ void MANAGER::setUpdateInterval(duration_t updateInterval) {
 TEMPLATE
 void MANAGER::resetPosition(Position2D<Meter> newPosition) {
     m_feedback.resetPosition(newPosition);
-    sendOrderInternal([=](TController &controller, Position2D<Meter> robotPosition) { controller.reset(newPosition); });
+    if (isActive()) {
+        m_controller.reset(newPosition);
+    }
 }
 
 TEMPLATE

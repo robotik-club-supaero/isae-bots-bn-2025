@@ -84,7 +84,7 @@ int main() {
                         manager.emplace(std::move(motors), std::move(feedback));
                         manager->setActive(true);
                         while (!manager->isActive()) {
-                            manager->loop();
+                            manager->update();
                         }
 
                         manager->sendOrder([&](controller_t &controller, Position2D<Meter> position) {
@@ -136,7 +136,7 @@ int main() {
             window.draw(headMarker);
 
             if (!manager->getClock().paused()) {
-                manager->loop();
+                manager->update();
             }
         }
 

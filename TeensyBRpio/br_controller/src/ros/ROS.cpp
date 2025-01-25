@@ -92,7 +92,7 @@ void _ROS::loop() {
         return;
     }
 
-    m_manager->loop([&]() {
+    while (m_manager->update()) {
         if (!m_wasActive && m_manager->getStatus() == manager::Active) {
             m_wasActive = true;
             m_pubHN.publish(OK_READY);
@@ -114,7 +114,7 @@ void _ROS::loop() {
         if ((event & UpdateResultCode::TERMINAL) && event != UpdateResultCode::STOPPED) {
             m_pubHN.publish(OK_ORDER);
         }
-    });
+    }
 
     duration_t now = m_clock.micros();
     if (getDurationMicros(m_lastSend, now) > m_sendInterval) {

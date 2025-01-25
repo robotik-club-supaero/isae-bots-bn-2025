@@ -19,13 +19,6 @@ ManagerStatus StateActive<TActuators, TController>::update(TActuators &actuators
     return Active;
 }
 
-template <Actuators TActuators, typename TController>
-bool StateActive<TActuators, TController>::sendOrder(TController &controller, Position2D<Meter> robotPosition,
-                                                     std::function<void(TController &, Position2D<Meter>)> order) {
-    order(controller, robotPosition);
-    return true;
-}
-
 } // namespace manager
 
 #include "specializations/actuators.hpp"

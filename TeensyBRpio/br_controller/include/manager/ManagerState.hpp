@@ -2,7 +2,6 @@
 #define _MANAGER_STATE_HPP_
 
 #include "Actuators.hpp"
-#include <functional>
 
 namespace manager {
 
@@ -17,18 +16,13 @@ enum ManagerStatus {
     Active
 };
 
-/// State of a controller.
+/// State of the manager
 template <Actuators TActuators, typename TController>
 class ManagerState {
   public:
     virtual ManagerStatus getStatus() const = 0;
     /// @param actuators The reference must not escape the function
     virtual ManagerStatus update(TActuators &actuators) = 0;
-    /// Optionally calls "order" with arguments "controller" and "robotPosition" if the current state of the manager allows to do so.
-    /// @param controller The reference must not escape the function
-    /// @param order The closure has no lifetime specification and should not escape this function.
-    /// @return true if order was called, false otherwise.
-    virtual bool sendOrder(TController &controller, Position2D<Meter> robotPosition, std::function<void(TController &, Position2D<Meter>)> order);
 
   protected:
     ManagerState();

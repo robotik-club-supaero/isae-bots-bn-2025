@@ -15,7 +15,6 @@
 #include "manager/states/StateDeactivating.hpp"
 #include "manager/states/StateIdle.hpp"
 
-#include <functional>
 #include <memory>
 #include <optional>
 
@@ -39,17 +38,10 @@ namespace manager {
 template <Actuators TActuators, CanControl<TActuators> TController, PositionFeedback TFeedback, Clock TClock>
 class ControllerManager : private fsm::StateMachine<ManagerState<TActuators, TController>> {
   public:
-    using Self = ControllerManager<TActuators, TController, TFeedback, TClock>;
-    using StateIdle = manager::StateIdle<TActuators, TController>;
-    using StateDeactivating = manager::StateDeactivating<TActuators, TController>;
-    using StateActivating = manager::StateActivating<TActuators, TController>;
-    using StateActive = manager::StateActive<TActuators, TController>;
-
     /**
-     * @param updateInterval The interval (in microseconds) between two updates of the command to send to the motors. Multiple calls of loop()) within
-     * this interval will result in the command being updated only once. Conversely, one call to loop() may result in the command being updated more
-     * than once if the previous call to loop() was too old. In other words, `interval` will always have the same value when calling
-     * "feedback.update()", "controller.updateCommand()" and "actuators.update()".
+     * @param updateInterval The interval (in microseconds) between two updates of the command to send to the motors. Multiple calls to update()
+     * within this interval will result in the command being updated only once. In other words, `interval` will always have the same value when
+     * calling "feedback.update()", "controller.updateCommand()" and "actuators.update()".
      */
     ControllerManager(duration_t updateInterval, TClock clock, TController controller, TActuators actuators, TFeedback feedback);
 
@@ -67,25 +59,60 @@ class ControllerManager : private fsm::StateMachine<ManagerState<TActuators, TCo
         : ControllerManager(UPDATE_INTERVAL, TClock(), TController(), std::move(actuators), std::move(feedback)) {}
 
     ManagerStatus getStatus() const;
-    inline bool isActive() const { return getStatus() == Active; }
+    bool isActive() const { return getStatus() == Active; }
     void setActive(bool active);
 
     /**
      * Sends an order to the controller if this manager is active. If the manager is not active, this does nothing.
      *
+     * @param order A callable that takes the controller and the current robot position as parameters.
      * @return true if the order was sent, false otherwise.
      */
-    bool sendOrder(std::function<void(TController &, Position2D<Meter>)> order);
+    template <typename Fun>
+        requires std::invocable<Fun &, TController &, Position2D<Meter>>
+    bool sendOrder(Fun order) {
+        if (isActive()) {
+            order(m_controller, m_feedback.getRobotPosition());
+            return true;
+        } else {
+            log(WARN, "The order cannot be processed due to the current state of the manager.");
+            return false;
+        }
+    }
 
     /**
-     * Updates the state of the manager. Updates and sends the command to the actuators if the manager is active.
-     * Does not loop despite the name; must be called repeatedly.
+     * Updates the state of the manager based on the manager's clock and tick interval.
+     * If the manager is active, this also updates and sends the command to the actuators.
      *
-     * @param tickCallback Optional callback to be called every time the state of the controller is updated. The callback may be called zero,
-     * one or multiple times depending on the update interval (see constructor documentation) and the last time function loop() was called.
-     * The callback will not be called if the manager is currently inactive.
+     * @return If the time elapsed since the last update is less than the minimum tick interval, this does nothing
+     * and return false. Otherwise, this does exactly one udpate and returns true.
+     *
+     * If the time elapsed since the last update was greater than the maximum tick interval, this still does only one update,
+     * and this function must be called again to catch up on overdue updates.
      */
-    void loop(std::optional<std::function<void()>> tickCallback = {});
+    bool update();
+
+    /**
+     * Updates the state of the manager based on the provided interval.
+     * If the manager is active, this also updates and sends the command to the actuators.
+     *
+     * This bypasses the manager's clock and tick interval and allows the use of an external clock (especially in tests).
+     *
+     * # Caveat
+     * This desynchronizes the manager from its internal clock. Calling `update(void)` after `update(double_t)` is a logic error
+     * and will lead to inconsistent update rates. To avoid this, you must call `resyncClock()` before calling `update(void)` again.
+     *
+     * @param interval The time elapsed since the last update. Must be positive.
+     */
+    void update(double_t interval);
+
+    /**
+     * Resynchronizes the manager with its internal clock. This resets the time of the last update.
+
+     * This should be called when `update(void)` has not been called for a while and you want to skip overdue ticks.
+     */
+    void resyncClock();
+
     void resetPosition(Position2D<Meter> newPosition);
 
     // Getters and setters
@@ -95,6 +122,7 @@ class ControllerManager : private fsm::StateMachine<ManagerState<TActuators, TCo
 
     void setMinUpdateInterval(duration_t updateInterval);
     void setMaxUpdateInterval(duration_t updateInterval);
+    /// Sets both the min and max update intervals (in µs)
     void setUpdateInterval(duration_t updateInterval);
 
     const TController &getController() const;
@@ -110,7 +138,11 @@ class ControllerManager : private fsm::StateMachine<ManagerState<TActuators, TCo
     TClock &getClock();
 
   private:
-    bool sendOrderInternal(std::function<void(TController &, Position2D<Meter>)> order);
+    using Self = ControllerManager<TActuators, TController, TFeedback, TClock>;
+    using StateIdle = manager::StateIdle<TActuators, TController>;
+    using StateDeactivating = manager::StateDeactivating<TActuators, TController>;
+    using StateActivating = manager::StateActivating<TActuators, TController>;
+    using StateActive = manager::StateActive<TActuators, TController>;
 
     TClock m_clock;
     duration_t m_minUpdateInterval; // µS

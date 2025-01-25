@@ -11,7 +11,6 @@ class StateActive : public ManagerState<TActuators, TController> {
     StateActive();
     ManagerStatus getStatus() const override;
     ManagerStatus update(TActuators &actuators) override;
-    bool sendOrder(TController &controller, Position2D<Meter> robotPosition, std::function<void(TController &, Position2D<Meter>)> order) override;
 };
 
 } // namespace manager
