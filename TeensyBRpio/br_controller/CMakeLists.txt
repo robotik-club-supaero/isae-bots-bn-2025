@@ -43,9 +43,13 @@ if(BUILD_TESTING)
   add_executable(test_curve test/test_curve.cpp ${base_SRCS} ${test_SRCS})
   target_link_libraries(test_curve m sfml-graphics sfml-window sfml-system)
   target_include_directories(test_curve PRIVATE test)
-  
+
+  add_executable(test_speed_control test/test_speed_control.cpp ${base_SRCS} ${test_SRCS})
+  target_link_libraries(test_speed_control m sfml-graphics sfml-window sfml-system)
+  target_include_directories(test_speed_control PRIVATE test)
+
   install(TARGETS
-    test_curve
+    test_curve test_speed_control
     DESTINATION lib/${PROJECT_NAME}
   )
 endif()
