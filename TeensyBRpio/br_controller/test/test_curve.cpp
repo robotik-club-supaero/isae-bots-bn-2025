@@ -76,7 +76,7 @@ int main() {
                     if (event.key.code == sf::Keyboard::Key::R && points.size() > 1) {
                         // -- SIMULATE TRAJECTORY --
                         feedback_t feedback;
-                        feedback.resetPosition(Position2D<Millimeter>(points[0].toMillimeters(), 0));
+                        feedback.resetPosition(Position2D<Meter>(points[0], 0));
                         actuators_t motors = feedback.createMotorStub();
                         manager.emplace(std::move(motors), std::move(feedback));
                         manager->setActive(true);

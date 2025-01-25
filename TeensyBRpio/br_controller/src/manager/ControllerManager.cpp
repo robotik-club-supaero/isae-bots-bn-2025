@@ -135,9 +135,9 @@ void MANAGER::setUpdateInterval(duration_t updateInterval) {
 }
 
 TEMPLATE
-void MANAGER::resetPosition(Position2D<Millimeter> newPosition) {
+void MANAGER::resetPosition(Position2D<Meter> newPosition) {
     m_feedback.resetPosition(newPosition);
-    sendOrderInternal([=](TController &controller, Position2D<Meter> robotPosition) { controller.reset(newPosition.toMeters()); });
+    sendOrderInternal([=](TController &controller, Position2D<Meter> robotPosition) { controller.reset(newPosition); });
 }
 
 TEMPLATE

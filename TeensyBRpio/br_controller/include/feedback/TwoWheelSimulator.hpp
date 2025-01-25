@@ -32,7 +32,7 @@ class TwoWheelSimulator {
         : TwoWheelSimulator(WHEEL_DIAMETER, WHEEL_DISTANCE, SIM_MIN_WHEEL_SPEED, SIM_MAX_WHEEL_SPEED, SIM_MAX_WHEEL_ACCEL, NOISE_STD_DEV) {}
 
     void update(double_t interval);
-    void resetPosition(Position2D<Millimeter> position);
+    void resetPosition(Position2D<Meter> position);
     Position2D<Meter> getRobotPosition() const;
 
     MotorStub createMotorStub() const;

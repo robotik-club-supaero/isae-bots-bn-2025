@@ -86,7 +86,7 @@ class ControllerManager : private fsm::StateMachine<ManagerState<TActuators, TCo
      * The callback will not be called if the manager is currently inactive.
      */
     void loop(std::optional<std::function<void()>> tickCallback = {});
-    void resetPosition(Position2D<Millimeter> newPosition);
+    void resetPosition(Position2D<Meter> newPosition);
 
     // Getters and setters
 

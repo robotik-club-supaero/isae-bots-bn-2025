@@ -8,7 +8,7 @@ PositionEstimatorOdo<T, TMethod>::PositionEstimatorOdo(T encoder, double_t ticks
       m_filter(1e-2), m_position(), m_odoLeftCount(0), m_odoRightCount(0), m_positionThetaOdo(0), m_positionThetaOffset(0) {}
 
 template <OdoEncoder T, typename TMethod>
-void PositionEstimatorOdo<T, TMethod>::resetPosition(Position2D<Millimeter> pos) {
+void PositionEstimatorOdo<T, TMethod>::resetPosition(Position2D<Meter> pos) {
     m_position = pos;
     m_positionThetaOffset += pos.theta - Angle(m_positionThetaOdo);
     m_positionThetaOdo = ((double_t)m_odoRightCount * m_correctionFactorLR - (double_t)m_odoLeftCount) / m_ticksPerRad + m_positionThetaOffset;
@@ -16,7 +16,7 @@ void PositionEstimatorOdo<T, TMethod>::resetPosition(Position2D<Millimeter> pos)
 
 template <OdoEncoder T, typename TMethod>
 Position2D<Meter> PositionEstimatorOdo<T, TMethod>::getRobotPosition() const {
-    return m_position.toMeters();
+    return m_position;
 }
 
 template <OdoEncoder T, typename TMethod>
@@ -54,7 +54,7 @@ void PositionEstimatorOdo<T, TMethod>::update(double_t interval) {
         double_t old_positionTheta = m_positionThetaOdo;
         m_positionThetaOdo = ((double_t)m_odoRightCount * m_correctionFactorLR - (double_t)m_odoLeftCount) / m_ticksPerRad + m_positionThetaOffset;
 
-        double_t R = ((double_t)deltaR * m_correctionFactorLR + (double_t)deltaL) / 2. / m_ticksPerMillimeter;
+        double_t R = ((double_t)deltaR * m_correctionFactorLR + (double_t)deltaL) / 2000. / m_ticksPerMillimeter;
 
         // Dans le repere local du roobot (x etant devant)
         double_t dx = R;

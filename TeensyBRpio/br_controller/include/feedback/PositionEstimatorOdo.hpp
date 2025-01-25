@@ -30,7 +30,7 @@ class PositionEstimatorOdo {
      * @param interval The time elapsed since the last call to update. Must be strictly positive.
      */
     void update(double_t interval);
-    void resetPosition(Position2D<Millimeter> pos);
+    void resetPosition(Position2D<Meter> pos);
 
     Position2D<Meter> getRobotPosition() const;
 
@@ -49,7 +49,7 @@ class PositionEstimatorOdo {
     T m_encoder;
     LowPassFilter<double_t> m_filter;
 
-    Position2D<Millimeter> m_position;
+    Position2D<Meter> m_position;
 
     int32_t m_odoLeftCount;
     int32_t m_odoRightCount;

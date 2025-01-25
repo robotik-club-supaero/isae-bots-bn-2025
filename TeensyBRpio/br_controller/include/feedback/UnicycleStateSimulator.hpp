@@ -14,16 +14,18 @@
 class UnicycleStateSimulator {
   public:
     /**
+     * This simulator has been deprecated in favor of `TwoWheelSimulator`.
+     * 
      * @param noise_stddev Standard deviation for the simulation noise. Must be positive, or zero to disable the noise.
      * Currently, the noise follows a centered normal distribution and is added to both the linear and the angular speeds.
-     * The standard deviation is the same for both speeds (which may not be physically homogeneous).
+     * The standard deviation is the same for both Speeds (which may not be physically homogeneous).
      * TODO: improve how the noise is implemented
      */
     UnicycleStateSimulator(double_t noise_stddev);
     UnicycleStateSimulator() : UnicycleStateSimulator(NOISE_STD_DEV) {}
 
     void setSpeeds(Speeds speeds);
-    void resetPosition(Position2D<Millimeter> pos);
+    void resetPosition(Position2D<Meter> pos);
     void update(double_t interval);
 
     Position2D<Meter> getRobotPosition() const;

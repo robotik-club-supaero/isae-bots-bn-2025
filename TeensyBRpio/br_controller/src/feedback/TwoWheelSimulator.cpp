@@ -48,8 +48,11 @@ void TwoWheelSimulator::update(double_t interval) {
     m_position.theta += Angle(speeds.angular * interval);
 }
 
-void TwoWheelSimulator::resetPosition(Position2D<Millimeter> position) {
-    m_position = position.toMeters();
+void TwoWheelSimulator::resetPosition(Position2D<Meter> position) {
+    m_position = position;
+    m_leftWheelSpeed.overwriteCurrentSpeed(0);
+    m_rightWheelSpeed.overwriteCurrentSpeed(0);
+    *m_requestedSpeeds = {0, 0};
 }
 Position2D<Meter> TwoWheelSimulator::getRobotPosition() const {
     return m_position;

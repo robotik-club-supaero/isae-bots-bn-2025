@@ -14,7 +14,7 @@ class PositionFeedback {
      * @param interval The time elapsed since the last update. 
      */
     void update(double_t interval);
-    void resetPosition(Position2D<Millimeter> position);
+    void resetPosition(Position2D<Meter> position);
     Position2D<Meter>> getRobotPosition() const;
 };
 #endif
@@ -23,7 +23,7 @@ class PositionFeedback {
 template <typename T>
 concept PositionFeedback = requires(T fb, const T fb_const, double_t interval, Position2D<Meter> pos) {
     fb.update(interval);
-    fb.resetPosition(pos.toMillimeters());
+    fb.resetPosition(pos);
     { fb_const.getRobotPosition() } -> std::convertible_to<Position2D<Meter>>;
 };
 

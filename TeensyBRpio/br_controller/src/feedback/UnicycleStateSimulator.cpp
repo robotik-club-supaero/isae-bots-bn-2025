@@ -10,8 +10,8 @@ void UnicycleStateSimulator::setSpeeds(Speeds speeds) {
     m_speeds->angular = speeds.angular;
 }
 
-void UnicycleStateSimulator::resetPosition(Position2D<Millimeter> pos) {
-    m_position = pos.toMeters();
+void UnicycleStateSimulator::resetPosition(Position2D<Meter> pos) {
+    m_position = pos;
 }
 
 void UnicycleStateSimulator::update(double_t interval) {

@@ -48,7 +48,7 @@ void DisplacementOrder::operator()(manager_t<TActuators, TFeedback, TClock> &man
             manager.sendOrder([&](controller_t &controller, Position2D<Meter> robotPosition) { controller.brakeToStop(); });
             break;
         case RESET:
-            manager.resetPosition(position);
+            manager.resetPosition(position.toMeters());
             break;
         case CONTROL: {
             Vector2D<Millimeter> speedFactor = position / CONTROL_MAX_SPEED;
