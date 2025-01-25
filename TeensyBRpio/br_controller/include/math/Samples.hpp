@@ -2,7 +2,6 @@
 #define _SAMPLES_HPP_
 
 #include "defines/math.hpp"
-#include <functional>
 #include <vector>
 
 /**
@@ -16,6 +15,10 @@ class Samples {
   public:
     using size_type = std::size_t;
 
+    /**
+     * Creates empty samples (i.e. `numOfSamples() == 0`).
+     * `domainStart()` and `domainEnd()` are initialized to 0.
+     */
     Samples() = default;
 
     /**
@@ -23,9 +26,11 @@ class Samples {
      * @param domainStart,domainEnd The endpoints of the function's domain of definition.
      * @param domainLen The number of sampling steps. `function` will be called exactly `domainLen + 1` times.
      *
-     * The behavior is undefined if `domainStart >= domainEnd`.
+     * The behavior is undefined if `domainStart > domainEnd` or (`domainStart == domainEnd` and `numOfSteps > 0`).
      */
-    Samples(const std::function<T(double_t)> &function, double_t domainStart, double_t domainEnd, size_type numOfSteps)
+    template <typename Fun>
+        requires std::is_invocable_r_v<T, Fun, double_t>
+    Samples(const Fun &function, double_t domainStart, double_t domainEnd, size_type numOfSteps)
         : m_domainStart(domainStart), m_domainEnd(domainEnd), m_samples() {
         if (numOfSteps == 0) {
             m_samples.push_back(function(domainStart));
@@ -40,7 +45,7 @@ class Samples {
     /**
      * @param samples Vector of pre-sampled values between `domainStart` and `domainEnd`.
      *
-     * The behavior is undefined if `domainStart >= domainEnd`.
+     * The behavior is undefined if `samples` is empty, `domainStart > domainEnd` or (`domainStart == domainEnd` and `samples.size() != 1`).
      */
     Samples(std::vector<T> samples, double_t domainStart, double_t domainEnd)
         : m_domainStart(domainStart), m_domainEnd(domainEnd), m_samples(std::move(samples)) {}
@@ -48,7 +53,7 @@ class Samples {
     /**
      * Returns a reference to the last sampled value before domain point `arg`.
      *
-     * The behavior is undefined if `arg < domainStart()` or `arg > domainEnd()`.
+     * The behavior is undefined if `numOfSamples() == 0`, `arg < domainStart()` or `arg > domainEnd()`.
      */
     /// @{
     const T &operator()(double_t arg) const { return this->operator[](indexOf(arg)); }
@@ -68,12 +73,12 @@ class Samples {
     /**
      * Interpolates the value at point `arg` based on the immediately preceding and immediately following sampled values.
      *
-     * The behavior is undefined if `arg < domainStart()` or `arg > domainEnd()`.
+     * The behavior is undefined if `numOfSamples() == 0`, `arg < domainStart()` or `arg > domainEnd()`.
      */
     T interpolate(double_t arg) const {
         size_type index = indexOf(arg);
         double_t argLow = domainPointAt(index);
-        if (argLow < arg) {
+        if (argLow < arg && index + 1 < numOfSamples()) {
             double_t argHigh = domainPointAt(index + 1);
             T low = this->operator[](index);
             T high = this->operator[](index + 1);
@@ -88,11 +93,18 @@ class Samples {
      *
      * The result is unspecified if `numOfSamples() == 0`, `arg < domainStart()` or `arg > domainEnd()`.
      */
-    size_type indexOf(double_t arg) const { return std::floor((arg - m_domainStart) / (m_domainEnd - m_domainStart) * (numOfSamples() - 1)); }
-    
+    size_type indexOf(double_t arg) const { return std::floor(doubleIndexOf(arg)); }
+
+    /**
+     * Returns the index of the smallest sampling point that is greater than `arg`.
+     *
+     * The result is unspecified if `numOfSamples() == 0`, `arg < domainStart()` or `arg > domainEnd()`.
+     */
+    size_type ceilingIndexOf(double_t arg) const { return std::ceil(doubleIndexOf(arg)); }
+
     /**
      * Returns the domain point that corresponds to the `index`-th sampled value.
-     * 
+     *
      * The result is unspecified if `index >= numOfSamples()`.
      */
     double_t domainPointAt(size_type index) const {
@@ -108,6 +120,14 @@ class Samples {
     size_type numOfSamples() const { return m_samples.size(); }
 
   private:
+    inline double_t doubleIndexOf(double_t arg) const {
+        size_type numSamples = numOfSamples();
+        if (numSamples == 1) {
+            return 0;
+        }
+        return (arg - m_domainStart) / (m_domainEnd - m_domainStart) * (numSamples - 1);
+    }
+
     double_t m_domainStart;
     double_t m_domainEnd;
     std::vector<T> m_samples;

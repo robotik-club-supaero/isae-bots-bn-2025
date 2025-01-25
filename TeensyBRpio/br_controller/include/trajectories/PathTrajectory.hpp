@@ -65,7 +65,8 @@ class PathTrajectory : public Trajectory {
   private:
     struct BezierArc {
         BezierArc(BezierCurve curve)
-            : curve(std::move(curve)), length(), lengthSamples(), curvature([&](double_t t) { return abs(this->curve.curvature(t)); }, 0, 1, 100) {
+            : curve(std::move(curve)), length(), lengthSamples(),
+              curvature(Samples([&](double_t t) { return abs(this->curve.curvature(t)); }, 0, 1, 100)) {
             auto samples = this->curve.sampleLength();
             length = samples.totalLength;
             lengthSamples = std::move(samples.samples);

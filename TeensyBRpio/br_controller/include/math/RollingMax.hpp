@@ -3,11 +3,9 @@
 
 #include "defines/math.hpp"
 #include "math/Samples.hpp"
-#include <functional>
-#include <vector>
 
 /**
- * Amortized constant time estimation of the maximum of a function on compact variable-length intervals.
+ * Amortized constant-time estimation of the maximum of a function on compact variable-length intervals.
  *
  * This samples the function and divides its domain of definition in subdomains where the function is monotonic.
  *
@@ -21,26 +19,24 @@ class RollingMax {
   public:
     using size_type = std::size_t;
 
+    RollingMax() = default;
+
     /**
-     * @param function The function to study.
-     * @param domainStart,domainEnd The endpoints of the function's domain of definition.
-     * @param domainLen The number of sampling steps. Must not be zero. `function` will be called exactly `domainLen + 1` times.
-     *
-     * The behavior is undefined if `domainStart >= domainEnd` or `domainLen == 0`.
+     * @param samples Pre-samples values of the function
      */
-    RollingMax(const std::function<double_t(double_t)> &function, double_t domainStart, double_t domainEnd, size_type numOfSteps);
+    RollingMax(const Samples<double_t> &samples);
 
     /**
      * Returns an estimation of the maximum of the function on interval [start, end].
      *
-     * If `start < domainStart`, `end > domainEnd` or `start > end`, the behavior is undefined.
+     * If `start < domainStart`, `end > domainEnd`, `start > end` or `numOfSamples() == 0`, the behavior is undefined.
      */
     double_t getMaximum(double_t start, double_t end) const;
 
     /**
      * Returns an estimation of the function's value at point `arg`.
      *
-     * The behavior is undefined if `arg < domainStart()` or `arg > domainEnd()`.
+     * The behavior is undefined if `arg < domainStart()`, `arg > domainEnd()` or `numOfSamples() == 0`.
      */
     double_t operator()(double_t arg) const;
 

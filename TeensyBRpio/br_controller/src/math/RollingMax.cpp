@@ -1,16 +1,16 @@
 #include "math/RollingMax.hpp"
 #include <limits>
 
-RollingMax::RollingMax(const std::function<double_t(double_t)> &function, double_t domainStart, double_t domainEnd, size_type numOfSteps)
-    : m_samples(), m_subdomains() {
-    std::vector<Evaluation> samples;
-    samples.reserve(numOfSteps + 1);
-    double_t step = (domainEnd - domainStart) / numOfSteps;
+RollingMax::RollingMax(const Samples<double_t> &samples) : m_samples(), m_subdomains() {
+    size_type numOfSamples = samples.numOfSamples();
+
+    std::vector<Evaluation> evaluations;
+    evaluations.reserve(numOfSamples);
 
     MonotonicityKind currentMonotonicity = CONSTANT;
     double_t oldValue;
-    for (size_type i = 0; i <= numOfSteps; i++) {
-        double_t value = function(domainStart + i * step);
+    for (size_type i = 0; i < numOfSamples; i++) {
+        double_t value = samples[i];
         if (i > 0) {
             MonotonicityKind monotonicity = (value == oldValue) ? CONSTANT : ((value > oldValue) ? INCREASING : DECREASING);
             if (currentMonotonicity != monotonicity && monotonicity != CONSTANT) {
@@ -20,16 +20,16 @@ RollingMax::RollingMax(const std::function<double_t(double_t)> &function, double
                 currentMonotonicity = monotonicity;
             }
         }
-        samples.push_back({value, m_subdomains.size()});
+        evaluations.push_back({value, m_subdomains.size()});
         oldValue = value;
     }
-    m_subdomains.push_back({currentMonotonicity, samples.size() - 1});
-    m_samples = Samples(std::move(samples), domainStart, domainEnd);
+    m_subdomains.push_back({currentMonotonicity, evaluations.size() - 1});
+    m_samples = Samples(std::move(evaluations), samples.domainStart(), samples.domainEnd());
 }
 
 double_t RollingMax::getMaximum(double_t start, double_t end) const {
     size_type startIndex = m_samples.indexOf(start);
-    size_type endIndex = m_samples.indexOf(end);
+    size_type endIndex = m_samples.ceilingIndexOf(end);
 
     Evaluation startEval = m_samples[startIndex];
     Evaluation endEval = m_samples[endIndex];
