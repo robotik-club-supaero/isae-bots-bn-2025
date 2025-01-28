@@ -19,18 +19,15 @@ class Vector2D {
     Vector2D(double_t x, double_t y);
 
     template <typename To>
-        requires Convertible<Unit, To>
     Vector2D<To> convert() const {
         return Vector2D<To>(Unit::template convert<To>(x), Unit::template convert<To>(y));
     }
 
     Vector2D<Millimeter> toMillimeters() const
-        requires Convertible<Unit, Millimeter>
     {
         return convert<Millimeter>();
     }
     Vector2D<Meter> toMeters() const
-        requires Convertible<Unit, Meter>
     {
         return convert<Meter>();
     }
@@ -52,7 +49,7 @@ class Vector2D {
     void operator*=(double_t factor);
     void operator/=(double_t factor);
 
-    bool operator==(const Vector2D<Unit> &pos) const = default;
+    bool operator==(const Vector2D<Unit> &pos) {return (x == pos.x && y == pos.y); }
     Vector2D<Unit> operator+(Vector2D<Unit> pos) const;
     Vector2D<Unit> operator-(Vector2D<Unit> pos) const;
     Vector2D<Unit> operator*(double_t factor) const;

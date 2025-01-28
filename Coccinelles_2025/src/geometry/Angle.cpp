@@ -1,6 +1,5 @@
 #include "geometry/Angle.hpp"
 #include <cmath>
-#include <numbers>
 
 constexpr double_t Pi = Angle::Pi;
 

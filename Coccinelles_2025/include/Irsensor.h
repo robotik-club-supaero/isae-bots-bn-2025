@@ -21,7 +21,7 @@ public:
     // Constructor
     Irsensor(int Ir_PIN);
 
-    int m_minimum_distance = 1000; // Distance absolue que l'on récupère du capteur
+    int ir_minimum_distance = 1000; // Distance absolue que l'on récupère du capteur
     int vision[8]; // liste des 8 distances mouyennes des capteurs de gauche à droite
     long m_time;
 

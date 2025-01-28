@@ -102,7 +102,7 @@ void Irsensor::loop()
                         min_distance = vision[col] ;
                     }
                 }
-                minimum_distance = min_distance ;
+                ir_minimum_distance = min_distance ;
 
                 // Print minimum distance
                 // Serial.print("Minimum distance: ");

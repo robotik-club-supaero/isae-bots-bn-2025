@@ -27,13 +27,13 @@ class Angle {
     void operator*=(double_t factor);
     void operator/=(double_t factor);
 
-    bool operator==(const Angle &other) const = default;
+    bool operator==(const Angle &other){ return (m_value == other.m_value); }
     Angle operator+(Angle other) const;
     Angle operator-(Angle other) const;
     Angle operator*(double_t factor) const;
     Angle operator/(double_t factor) const;
 
-    static constexpr double_t Pi = std::numbers::pi_v<double_t>;
+    static constexpr double_t Pi = 3.14159265359;
 
   private:
     double_t m_value;

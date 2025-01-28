@@ -17,7 +17,8 @@
 
 #define IR_PIN 4 //  ne sert à rien pour le moment , sert pour l'interruption
 
-Irsensor irsensor = Irsensor(IR_PIN);
+Irsensor irsensor_right = Irsensor(IR_PIN);
+Irsensor irsensor_left = Irsensor(IR_PIN);
 Moteur moteur_d = Moteur(EN_R, IN1_R, IN2_R);
 Moteur moteur_g = Moteur(EN_L, IN1_L, IN2_L);
 Encodeur encoder_R = Encodeur(CLK_R, DT_R);
@@ -25,12 +26,13 @@ Encodeur encoder_L = Encodeur(CLK_L, DT_L);
 Mesure_pos mesure_pos = Mesure_pos(&encoder_R, &encoder_L);
 Asserv asserv = Asserv(&moteur_d, &moteur_g, &mesure_pos);
 
-Machine_etats machine_etats = Machine_etats(&asserv, &mesure_pos, &irsensor);
+Machine_etats machine_etats = Machine_etats(&asserv, &mesure_pos, &irsensor_right, &irsensor_left);
 
 void setup()
 {
 
-  irsensor.setup();
+  irsensor_right.setup();
+  irsensor_left.setup();
   mesure_pos.setup();
   // Si on veut tester les encodeurs , on les setup
   /*
@@ -58,7 +60,8 @@ void loop()
   encoder_R.loop();
   */
 
-  irsensor.loop();
+  irsensor_right.loop();
+  irsensor_left.loop();
   mesure_pos.loop();
   // #DEBUG Si on veut tester les asservissements , on decommente la lige suivante et on commente machine_etats.loop()
   // asserv.loop();

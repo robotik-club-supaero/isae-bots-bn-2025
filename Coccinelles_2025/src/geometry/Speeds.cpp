@@ -40,7 +40,3 @@ Speeds WheelSpeeds::toUnicycleSpeeds(double_t wheelRadius, double_t wheelDistanc
     double linear = (left + right) * wheelRadius / 2;
     return Speeds(linear, angular);
 }
-
-WheelSpeeds clamp(WheelSpeeds speeds, double_t minBound, double_t maxBound) {
-    return WheelSpeeds(std::clamp(speeds.left, minBound, maxBound), std::clamp(speeds.right, minBound, maxBound));
-}

@@ -51,6 +51,7 @@ public:
     float angle = 0;
 
     int m_vision[16];
+    int m_minimum_distance = 1000;
 
     Asserv *m_p_asserv;
 

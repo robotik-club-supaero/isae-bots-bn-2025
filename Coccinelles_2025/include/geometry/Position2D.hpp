@@ -22,7 +22,7 @@ class Position2D : public Vector2D<Unit> {
     Position2D(Vector2D<Unit> position, Angle theta = 0);
 
     template <typename To>
-        requires Convertible<Unit, To>
+    requires Convertible<Unit, To>
     Position2D<To> convert() const {
         return Position2D<To>(Vector2D<Unit>::template convert<To>(), theta);
     }
