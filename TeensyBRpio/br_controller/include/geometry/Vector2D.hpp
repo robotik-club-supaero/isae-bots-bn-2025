@@ -4,9 +4,7 @@
 #include "defines/math.hpp"
 #include "geometry/Angle.hpp"
 
-#ifdef _DEBUG
 #include <string>
-#endif
 
 /** 
  * A 2D-vector.
@@ -72,9 +70,7 @@ class Vector2D {
     double_t x;
     double_t y;
 
-#ifdef _DEBUG
     operator std::string() const { return "(" + std::to_string(x) + ", " + std::to_string(y) + ")"; }
-#endif
 };
 
 template <typename Unit>
