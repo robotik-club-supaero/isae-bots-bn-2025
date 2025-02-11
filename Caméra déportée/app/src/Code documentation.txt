@@ -1,0 +1,36 @@
+The provided code defines a class Undistort in the calibrate_camera.py file, which is designed to handle the undistortion of images using camera calibration parameters. The class constructor (__init__) accepts three optional parameters: mtx, dist, and path. The mtx and dist parameters represent the camera matrix and distortion coefficients, respectively, while the path parameter is a file path to a .npz file containing these calibration parameters. The constructor ensures that either both mtx and dist are provided or the path is provided, but not both. If the path is provided, it loads the calibration parameters from the file using numpy.load.
+
+The undistort method takes an image as input, which can be either an image file path or an image array. It uses the loadImage function to load the image if a file path is provided. The method then retrieves the image dimensions and computes an optimal new camera matrix using cv2.getOptimalNewCameraMatrix. It undistorts the image using cv2.undistort and crops the resulting image based on the region of interest (ROI) returned by the new camera matrix computation. The undistorted and cropped image is then returned.
+
+The __call__ method is a special method that allows an instance of the Undistort class to be called as a function. It simply calls the undistort method, making the class instance behave like a function that undistorts images.
+
+The loadImage function is a utility function that loads an image from a file path if the input is a string. If the input is already an image array, it returns the input as-is. If the image cannot be loaded from the provided file path, it raises a ValueError.
+
+The load function from numpy is also provided, which is used to load arrays or pickled objects from .npy, .npz, or pickled files. This function handles various file types and ensures secure loading of data, especially when dealing with pickled objects. It includes parameters for memory mapping, pickle handling, and encoding, among others.
+
+Overall, the Undistort class and its associated functions provide a robust mechanism for undistorting images using precomputed camera calibration parameters, either directly provided or loaded from a file.
+
+
+calibrateAruco
+
+Class Attributes:
+
+_dictionary: A predefined dictionary of Aruco markers (4x4 grid with 50 unique markers) obtained using cv2.aruco.getPredefinedDictionary.
+_params: Default parameters for the Aruco marker detector created using cv2.aruco.DetectorParameters.
+Constructor (__init__ method):
+
+Initializes an instance of the ArucoDetector class.
+self._detector: Creates an Aruco detector using the predefined dictionary and parameters.
+detect Method:
+
+Takes an image as input and detects Aruco markers in it.
+tags = {}: Initializes an empty dictionary to store detected tags.
+corners, ids, _ = self._detector.detectMarkers(image): Detects markers in the image, returning their corners and IDs.
+for box, tag in zip(corners, ids): Iterates over detected corners and IDs.
+tags[tag.item()] = box.squeeze(): Adds the detected marker's ID and its corners to the tags dictionary. box.squeeze() removes any singleton dimensions from the corners array.
+return ArucoTags(image, tags): Returns an ArucoTags object containing the image and detected tags.
+__call__ Method:
+
+Allows the instance to be called like a function.
+return self.detect(image): Calls the detect method with the provided image.
+In summary, the ArucoDetector class is designed to detect Aruco markers in images, storing the detected markers' IDs and their corner coordinates. The class can be used by creating an instance and calling it with an image, which will return the detected markers.
