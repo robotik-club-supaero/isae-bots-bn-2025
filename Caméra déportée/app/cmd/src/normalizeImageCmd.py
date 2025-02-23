@@ -1,4 +1,5 @@
 """ Script to normalize images using Aruco tags on the platform """
+"""                    Command line version                     """
 
 # To normalize an image of the platform, we need to take a reference image of the platform with the markers,
 #  and a real image of the same scene taken by the camera.
@@ -25,7 +26,7 @@ parser.add_argument('--output', '-o', default=".", required=False, help="output 
 args = parser.parse_args()
 
 # Command example:
-# python normalizeImage.py ../platformImages/reference.jpg ../platformImages/capture.jpg -c ../calibrationResults/calibration.npz -o ../normalizedImages
+# python normalizeImage.py ../platformImages/reference.jpg ../platformImages/capture.jpg -c ../npz/calibration.npz -o ../normalizedImages
 
 # Output directory
 os.makedirs(args.output, exist_ok=True)

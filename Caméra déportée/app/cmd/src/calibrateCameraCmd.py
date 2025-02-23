@@ -1,4 +1,5 @@
 """ Camera calibration script """
+"""   Command line version    """
 
 # To calibrate the camera, we need to take several pictures of a chessboard pattern from different angles and distances.
 # The script will detect the corners of the chessboard in each image and use them to calibrate the camera, using the calibration.json file.
@@ -23,7 +24,7 @@ parser.add_argument('--max-count', '-c', required=False, type=int, default=30, h
 args = parser.parse_args()
 
 # Command example:
-# python calibrateCamera.py ../json/calibration.json -o ../calibrationResults --draw --epsilon 1e-3 --max-count 30
+# python calibrateCamera.py ../json/calibration.json -o ../../calibration/calibrationResults --draw --epsilon 1e-3 --max-count 30
 
 # The calibration file should be a JSON file with the following structure:
 # {

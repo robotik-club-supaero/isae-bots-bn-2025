@@ -1,5 +1,5 @@
 # Image compatible avec Raspberry Pi (ARM) et PC Windows/Linux
-FROM python:3.9
+FROM ubuntu/python
 
 # Définir le répertoire de travail
 WORKDIR /app  

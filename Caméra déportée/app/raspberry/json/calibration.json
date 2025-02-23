@@ -1,0 +1,5 @@
+{
+    "cols": 5,
+    "rows": 3,
+    "images": "./calibrationImages/*.jpg"
+}
