@@ -108,7 +108,7 @@ def detect_objects_inside_aruco(reference_image_path, capture_image_path, aruco_
 
     # Initialize lists to store the rectangles and Aruco tags in the objects
     rectangles = []
-    aruco_tags_in_objects = []
+    #aruco_tags_in_objects = []
 
     # Detect Aruco tags in the ROI with objects
     tags_in_roi = aruco_detector(roi_with_objects)
@@ -123,7 +123,9 @@ def detect_objects_inside_aruco(reference_image_path, capture_image_path, aruco_
         (x, y, w, h) = cv2.boundingRect(contour)
 
         # Store the coordinates of the rectangles
-        rectangles.append([x, y, x + w, y + h])
+        # (x,y) is the top-left corner of the rectangle
+        # (w,h) is the width and height of the rectangle
+        rectangles.append([x, y, w, h])
 
         # Check if the center of the Aruco tag is inside the rectangle
         for tag_corners, tag_id in zip(corners_in_roi, ids_in_roi):
@@ -139,17 +141,19 @@ def detect_objects_inside_aruco(reference_image_path, capture_image_path, aruco_
                     tag_key = id_to_key[tag_id]
                     safety_distance = safety_distances[tag_key]
                     
+                    # Refine the rectangle around the object
                     rectangles[-1] = [tag_center_x - safety_distance, tag_center_y - safety_distance,
                                       tag_center_x + safety_distance, tag_center_y + safety_distance]
 
-                    (x, y, w, h) = (tag_center_x - safety_distance, tag_center_y - safety_distance,
+                    # Store the Aruco tags in the objects
+                    """ (x, y, w, h) = (tag_center_x - safety_distance, tag_center_y - safety_distance,
                                     2 * safety_distance, 2 * safety_distance)
 
                     aruco_tags_in_objects.append({
                         "tag_id": tag_id,
                         "corners": tag_corners.tolist(),
                         "rectangle": [x, y, x + w, y + h]
-                    })
+                    })"""
 
                 # Draw the Aruco tag in the ROI with objects
                 cv2.polylines(roi_with_objects, [tag_corners], isClosed=True, color=(255, 0, 0), thickness=2)
@@ -158,4 +162,4 @@ def detect_objects_inside_aruco(reference_image_path, capture_image_path, aruco_
             cv2.rectangle(roi_with_objects, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
     # Return the rectangles and Aruco tags in the objects
-    return rectangles, aruco_tags_in_objects
+    return rectangles

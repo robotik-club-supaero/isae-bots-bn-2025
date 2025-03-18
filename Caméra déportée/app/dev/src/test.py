@@ -42,27 +42,19 @@ print("Capturing image.\n")
 print("Normalizing image.\n")
 normalize_image(reference_image_path, capture_image_path, calibration_path, output_dir=normalized_image_dir)
 
-# Detect objects inside Aruco tags
-rectangles, aruco_tags_in_objects = detect_objects_inside_aruco(
+# Detect objects inside Aruco tags and return the coordinates
+rectangles = detect_objects_inside_aruco(
     reference_image_path, normalized_image_path, aruco_json_path, distances_json_path
 )
-
-# Prepare the coordinates to be sent via LoRa
-coordinates = {
-    "rectangles": rectangles,
-    "aruco_tags_in_objects": aruco_tags_in_objects
-}
-print(coordinates)
-print("\n")
-
-# Convert the coordinates to a list
-coordinates = list(coordinates.items())
-print(coordinates)
+print(rectangles)
 print("\n")
 
 # Send the coordinates via LoRa
 print("Sending data.\n")
-lora.send(coordinates, header_to)
+for rectangle in rectangles:
+    for item in rectangle:
+        item = int(item)
+        lora.send(item, header_to)
 
 # Wait for the next iteration
 print("Sleeping.\n")
