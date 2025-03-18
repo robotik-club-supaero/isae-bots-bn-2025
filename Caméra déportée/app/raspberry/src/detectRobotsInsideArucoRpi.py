@@ -1,4 +1,4 @@
-""" Script to detetc objects inside an Aruco tag in a reference image and a capture image """
+""" Script to detect objects inside an Aruco tag in a reference image and a capture image """
 """                                Version for Raspberry Pi                               """
 
 import cv2
@@ -144,7 +144,7 @@ def detect_objects_inside_aruco(reference_image_path, capture_image_path, aruco_
 
                     (x, y, w, h) = (tag_center_x - safety_distance, tag_center_y - safety_distance,
                                     2 * safety_distance, 2 * safety_distance)
-                    
+
                     aruco_tags_in_objects.append({
                         "tag_id": tag_id,
                         "corners": tag_corners.tolist(),
