@@ -26,7 +26,7 @@ parser.add_argument('--output', '-o', default=".", required=False, help="output 
 args = parser.parse_args()
 
 # Command example:
-# python normalizeImage.py ../platformImages/reference.jpg ../platformImages/capture.jpg -c ../npz/calibration.npz -o ../normalizedImages
+# python normalizeImageCmd.py ../platformImages/reference.jpg ../platformImages/capture.jpg -c ../npz/calibration.npz -o ../normalizedImages
 
 # Output directory
 os.makedirs(args.output, exist_ok=True)

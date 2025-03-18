@@ -25,7 +25,7 @@ parser.add_argument('distances_json', help="path of the json file with the safet
 args = parser.parse_args()
 
 # Command example:
-# python detectRobotsInsideAruco.py ../platformImages/reference.jpg ../normalizedImages/normalized_platform.jpg ../json/aruco.json ../json/distances.json
+# python detectRobotsInsideArucoCmd.py ../platformImages/reference.jpg ../normalizedImages/normalized_capture.jpg ../json/aruco.json ../json/distances.json
 
 # Charger les images
 image_reference = loadImage(args.reference)

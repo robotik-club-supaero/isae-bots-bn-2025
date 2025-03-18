@@ -29,7 +29,7 @@ def capture_image(output_path):
 
 if __name__ == "__test__":
 
-    lora = LoRa(channel=0, interrupt=17, this_address=2, modem_config=ModemConfig.Bw500Cr45Sf128, tx_power=14, acks=False)
+    #lora = LoRa(channel=0, interrupt=17, this_address=2, modem_config=ModemConfig.Bw500Cr45Sf128, tx_power=14, acks=False)
     
 
     # Capture an image using the camera
@@ -50,8 +50,8 @@ if __name__ == "__test__":
     }
     
     # Send the coordinates via LoRa
-    header_to = 1
-    lora.send(coordinates, header_to)
+    #header_to = 1
+    #lora.send(coordinates, header_to)
     
     # Wait for the next iteration
     time.sleep(10)  # Adjust this value as needed
