@@ -4,39 +4,36 @@
 #include "configuration.hpp"
 
 #include "logging.hpp"
-#include "ros/DisplacementOrder.hpp"
+#include "ros/ros_impl.hpp"
 
-#include <cstdint>
+#include "manager/ControllerManager.hpp"
+#include "ros/Dispatcher.hpp"
+#include "specializations/controller.hpp"
+
 #include <memory>
 #include <optional>
-#include <utility>
 #include <vector>
 
 /**
  * ROS2 node to receive displacement orders and send callbacks.
  *
- * @tparam ROSImpl The implementation of ROS to use on this system (micro_ros only supports the C library rclc)
  * @tparam TActuators,TFeedback must be the same as the manager
  */
-template <typename ROSImpl, Actuators TActuators, PositionFeedback TFeedback, Clock TClock>
-class ROS : public ROSImpl::node_t {
+template <Actuators TActuators, PositionFeedback TFeedback, Clock TClock>
+class ROS : public ros_impl::node_t {
   public:
     using manager_t = manager::ControllerManager<TActuators, controller_t, TFeedback, TClock>;
 
     template <typename T>
-    using subscription_t = typename ROSImpl::template subscription_t<T>;
+    using subscription_t = ros_impl::subscription_t<T>;
     template <typename T>
-    using publisher_t = typename ROSImpl::template publisher_t<T>;
-
-    using gains_t = typename ROSImpl::gains_t;
-    using disp_order_t = DisplacementOrder;
-    using log_entry_t = typename ROSImpl::log_entry_t;
+    using publisher_t = ros_impl::publisher_t<T>;
 
     /**
      * @param sendPositionInterval,logInterval In microseconds
      */
     ROS(TClock clock, duration_t sendPositionInterval, duration_t logInterval);
-    ROS(const ROS<ROSImpl, TActuators, TFeedback, TClock> &) = delete;
+    ROS(const ROS<TActuators, TFeedback, TClock> &) = delete;
 
     ROS() : ROS(TClock(), SEND_POSITION_INTERVAL * 1000, ROS_LOG_INTERVAL * 1000) {}
 
@@ -54,45 +51,31 @@ class ROS : public ROSImpl::node_t {
     void sendLog(LogSeverity severity, const string_t &message);
 
   private:
-    subscription_t<disp_order_t> createSubOrder();
-    subscription_t<bool> createSubIdle();
-    subscription_t<gains_t> createSubGain();
-    subscription_t<int16_t> createSubSpeed();
+    std::shared_ptr<manager_t> m_manager;
 
     TClock m_clock;
     duration_t m_sendInterval;
     duration_t m_logInterval;
-    std::shared_ptr<manager_t> m_manager;
 
     instant_t m_lastSend;
     instant_t m_lastLog;
     bool m_wasActive;
 
-    log_entry_t m_log;
-
-    std::shared_ptr<std::vector<Point2D<Meter>>> m_pendingPath;
+    ros_impl::messages::log_entry_t m_log;
 
     /* SUBSCRIBERS */
-
-    /// /nextPositionTeensy
-    std::optional<subscription_t<disp_order_t>> m_subOrder;
-    /// /br/idle
-    std::optional<subscription_t<bool>> m_subIdle;
-    /// /gains
-    std::optional<subscription_t<gains_t>> m_subGains;
-    /// /teensy/obstacle_seen
-    std::optional<subscription_t<int16_t>> m_subSpeed;
+    std::optional<Dispatcher<manager_t>> m_dispatcher;
 
     /* PUBLISHERS */
 
-    /// /current_position
-    publisher_t<Position2D<Millimeter>> m_pubPositionFeedback;
-    /// /okPosition
-    publisher_t<int16_t> m_pubHN;
-    /// /logTotaleArray
-    publisher_t<log_entry_t> m_pubLog;
-    /// /odos_count
-    publisher_t<std::pair<int32_t, int32_t>> m_pubOdosTicks;
+    /// /br/currentPosition
+    publisher_t<ros_impl::messages::position_t> m_pubPositionFeedback;
+    /// /br/callbacks
+    publisher_t<ros_impl::messages::msg_int16_t> m_pubHN;
+    /// /br/logTotaleArray
+    publisher_t<ros_impl::messages::log_entry_t> m_pubLog;
+    /// /br/odosCount
+    publisher_t<ros_impl::messages::odos_count_t> m_pubOdosTicks;
 };
 
 #endif

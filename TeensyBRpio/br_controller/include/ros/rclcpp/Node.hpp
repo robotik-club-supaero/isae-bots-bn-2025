@@ -1,11 +1,8 @@
-#ifndef _ROS_IMPL_RCLCPP_HPP_
-#define _ROS_IMPL_RCLCPP_HPP_
+#ifndef _ROS_IMPL_NODE_HPP_
+#define _ROS_IMPL_NODE_HPP_
 
 #include "defines/string.h"
-#include "ros/rclcpp/Messages.hpp"
 #include "ros/rclcpp/Publisher.hpp"
-
-#include <functional>
 
 #include "rclcpp/rclcpp.hpp"
 
@@ -17,17 +14,14 @@ class Node {
     void spin_once() { rclcpp::spin_some(m_node); }
 
     template <typename T>
-    rclcpp::Subscription<typename Messages<T>::type>::SharedPtr createSubscription(const string_t &topic, std::function<void(const T &)> callback) {
-        return m_node->template create_subscription<typename Messages<T>::type>( //
-            topic, 10, [callback](std::unique_ptr<typename Messages<T>::type> msg) -> void {
-                T data = Messages<T>::extract(*msg);
-                callback(data);
-            });
+    rclcpp::Subscription<T>::SharedPtr createSubscription(const string_t &topic, std::function<void(const T &)> callback) {
+        return m_node->template create_subscription<T>( //
+            topic, 10, [callback](std::unique_ptr<T> msg) -> void { callback(*msg); });
     }
 
     template <typename T>
     Publisher<T> createPublisher(const string_t &topic) {
-        return Publisher<T>(m_node->template create_publisher<typename Messages<T>::type>(topic, 10));
+        return Publisher<T>(m_node->template create_publisher<T>(topic, 10));
     }
 
     void sendLog(LogSeverity severity, const string_t &message) {
@@ -53,18 +47,5 @@ class Node {
   private:
     std::shared_ptr<rclcpp::Node> m_node;
 };
-
-class ROSImpl {
-  public:
-    using node_t = Node;
-    template <typename T>
-    using publisher_t = Publisher<T>;
-    template <typename T>
-    using subscription_t = rclcpp::Subscription<typename Messages<T>::type>::SharedPtr;
-
-    using gains_t = br_messages::msg::GainsPid;
-    using log_entry_t = br_messages::msg::LogEntry;
-};
 } // namespace ros_rclcpp
-
 #endif

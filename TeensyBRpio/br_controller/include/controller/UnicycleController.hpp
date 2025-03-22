@@ -37,6 +37,8 @@ using setpoint_t = std::variant<Position2D<Meter>, Speeds>;
 template <ErrorConverter TConverter>
 class UnicycleController : private fsm::StateMachine<ControllerState> {
   public:
+    using converter_t = TConverter;
+
     /**
      * Creates a controller. If the initial positon of the robot is not (0,0,0), the controller must be initialized with method reset() before it is
      * used.

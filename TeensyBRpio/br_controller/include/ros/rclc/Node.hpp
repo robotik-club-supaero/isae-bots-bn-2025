@@ -1,33 +1,36 @@
-#ifndef _ROS_IMPL_RCLC_HPP_
-#define _ROS_IMPL_RCLC_HPP_
-
-#define TEENSY_RESTART SCB_AIRCR = 0x05FA0004
-
-#define RCCHECK_HARD(fn)                                                                                                                             \
-    {                                                                                                                                                \
-        rcl_ret_t temp_rc = fn;                                                                                                                      \
-        if ((temp_rc != RCL_RET_OK)) {                                                                                                               \
-            delay(2000);                                                                                                                             \
-            TEENSY_RESTART;                                                                                                                          \
-        }                                                                                                                                            \
-    }
-
-#define RCCHECK_SOFT(fn)                                                                                                                             \
-    { std::ignore = fn; }
+#ifndef _ROS_IMPL_NODE_HPP_
+#define _ROS_IMPL_NODE_HPP_
 
 #include "defines/string.h"
-#include "ros/rclc/Messages.hpp"
+#include "logging.hpp"
+#include "ros/message_cast.hpp"
 #include "ros/rclc/Publisher.hpp"
 #include "ros/rclc/Subscriber.hpp"
+#include "ros/rclc/macros.hpp"
 
-#include <optional>
 #include <rcl/rcl.h>
+#include <rcl_interfaces/msg/log.h>
 #include <rclc/executor.h>
 #include <rclc/rclc.h>
 #include <rcutils/logging_macros.h>
-#include <utility>
+
+#include <functional>
+#include <memory>
+#include <optional>
 
 namespace ros_rclc {
+
+template <>
+class type_support_t<rcl_interfaces__msg__Log> {
+  public:
+    static support_t get() { return ROSIDL_GET_MSG_TYPE_SUPPORT(rcl_interfaces, msg, Log); }
+};
+
+template <typename T>
+class Publisher;
+
+template <typename T>
+class Subscription;
 
 class Node {
 
@@ -98,18 +101,6 @@ class Node {
     string_t m_name;
     rcl_interfaces__msg__Log m_msgLog;
     std::optional<Publisher<rcl_interfaces__msg__Log>> m_logger;
-};
-
-class ROSImpl {
-  public:
-    using node_t = Node;
-    template <typename T>
-    using publisher_t = Publisher<T>;
-    template <typename T>
-    using subscription_t = Subscription<T>;
-
-    using gains_t = br_messages__msg__GainsPid;
-    using log_entry_t = br_messages__msg__LogEntry;
 };
 } // namespace ros_rclc
 

@@ -10,7 +10,6 @@ add_compile_definitions(_BR_DEBUG)
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
-find_package(geometry_msgs REQUIRED)
 find_package(br_messages REQUIRED)
 # find_package(...) # Add dependencies here
 
@@ -27,12 +26,12 @@ file(GLOB_RECURSE base_SRCS
     "${PROJECT_SOURCE_DIR}/src/rotations/*.cpp" 
     "${PROJECT_SOURCE_DIR}/src/trajectories/*.cpp"
 )
-set(ros_SRCS ${PROJECT_SOURCE_DIR}/src/ros/ROS.cpp ${PROJECT_SOURCE_DIR}/src/ros/DisplacementOrder.cpp)
+set(ros_SRCS ${PROJECT_SOURCE_DIR}/src/ros/ROS.cpp ${PROJECT_SOURCE_DIR}/src/ros/Dispatcher.cpp)
 set(test_SRCS ${PROJECT_SOURCE_DIR}/test/test_logging.cpp)
 
 add_executable(simulation_br src/main_simulation.cpp ${base_SRCS} ${ros_SRCS})
 target_link_libraries(simulation_br m)
-ament_target_dependencies(simulation_br rclcpp std_msgs geometry_msgs br_messages)
+ament_target_dependencies(simulation_br rclcpp std_msgs br_messages)
 
 install(TARGETS
   simulation_br

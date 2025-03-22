@@ -1,5 +1,7 @@
-#ifndef _ROS_IMPL_RCLCPP_PUBLISHER_HPP_
-#define _ROS_IMPL_RCLCPP_PUBLISHER_HPP_
+#ifndef _ROS_IMPL_PUBLISHER_HPP_
+#define _ROS_IMPL_PUBLISHER_HPP_
+
+#include "ros/message_cast.hpp"
 
 #include "rclcpp/rclcpp.hpp"
 
@@ -10,19 +12,18 @@ class Node;
 template <typename T>
 class Publisher {
   public:
-    void publish(const T &msg) {
-        Messages<T>::copy(m_msg, msg);
-        m_publisher->template publish<MsgT>(m_msg);
+  template <typename M>
+    void publish(const M &msg) {
+        m_msg = message_cast<T>(msg);
+        m_publisher->publish(m_msg);
     }
 
   private:
-    using MsgT = Messages<T>::type;
-
     friend class Node;
-    Publisher(typename rclcpp::Publisher<MsgT>::SharedPtr inner) : m_publisher(inner) {}
+    Publisher(typename rclcpp::Publisher<T>::SharedPtr inner) : m_publisher(inner) {}
 
-    typename rclcpp::Publisher<MsgT>::SharedPtr m_publisher;
-    MsgT m_msg;
+    typename rclcpp::Publisher<T>::SharedPtr m_publisher;
+    T m_msg;
 };
 } // namespace ros_rclcpp
 

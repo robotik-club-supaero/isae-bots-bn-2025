@@ -6,8 +6,10 @@
 
 using UpdateResultCode = controller::UpdateResultCode;
 
-#define TEMPLATE template <typename ROSImpl, Actuators TActuators, PositionFeedback TFeedback, Clock TClock>
-#define _ROS ROS<ROSImpl, TActuators, TFeedback, TClock>
+#define TEMPLATE template <Actuators TActuators, PositionFeedback TFeedback, Clock TClock>
+#define _ROS ROS<TActuators, TFeedback, TClock>
+
+using namespace ros_impl::messages;
 
 template <typename T>
 constexpr bool hasOdos = requires(const T &t) {
@@ -23,12 +25,11 @@ constexpr bool hasTwoWheels = requires(const T &t) {
 
 TEMPLATE
 _ROS::ROS(TClock clock, duration_t sendPositionInterval, duration_t logInterval)
-    : ROSImpl::node_t("base_roulante"), m_clock(std::move(clock)), m_sendInterval(sendPositionInterval), m_logInterval(logInterval), m_lastSend(0),
-      m_lastLog(0), m_wasActive(false), m_pendingPath(std::make_shared<std::vector<Point2D<Meter>>>()), m_subOrder(), m_subIdle(), m_subGains(),
-      m_subSpeed(), m_pubPositionFeedback(this->template createPublisher<Position2D<Millimeter>>("current_position")),
-      m_pubHN(this->template createPublisher<int16_t>("okPosition")), //
-      m_pubLog(this->template createPublisher<log_entry_t>("logTotaleArray")),
-      m_pubOdosTicks(this->template createPublisher<std::pair<int32_t, int32_t>>("odos_count")) {}
+    : ros_impl::node_t("base_roulante"), m_clock(std::move(clock)), m_sendInterval(sendPositionInterval), m_logInterval(logInterval), m_lastSend(0),
+      m_lastLog(0), m_wasActive(false), m_dispatcher(), m_pubPositionFeedback(this->template createPublisher<position_t>("/br/currentPosition")),
+      m_pubHN(this->template createPublisher<msg_int16_t>("/br/callbacks")), //
+      m_pubLog(this->template createPublisher<log_entry_t>("/br/logTotaleArray")),
+      m_pubOdosTicks(this->template createPublisher<odos_count_t>("/br/odosCount")) {}
 
 TEMPLATE
 void _ROS::attachManager(std::shared_ptr<manager_t> manager) {
@@ -38,49 +39,7 @@ void _ROS::attachManager(std::shared_ptr<manager_t> manager) {
     }
     m_manager = std::move(manager);
 
-    m_subOrder.emplace(createSubOrder());
-    m_subIdle.emplace(createSubIdle());
-    m_subGains.emplace(createSubGain());
-    m_subSpeed.emplace(createSubSpeed());
-}
-
-TEMPLATE
-typename _ROS::subscription_t<typename _ROS::disp_order_t> _ROS::createSubOrder() {
-    return this->template createSubscription<disp_order_t>( //
-        "nextPositionTeensy", [manager_weak = std::weak_ptr(m_manager), path_weak = std::weak_ptr(m_pendingPath)](const disp_order_t &order) {
-            if (auto lock = manager_weak.lock()) {
-                if (auto path = path_weak.lock()) {
-                    order(*lock, *path);
-                }
-            }
-        });
-}
-TEMPLATE
-typename _ROS::subscription_t<bool> _ROS::createSubIdle() {
-    return this->template createSubscription<bool>("br/idle", [manager_weak = std::weak_ptr(m_manager)](const bool &active) {
-        if (auto lock = manager_weak.lock()) {
-            lock->setActive(active);
-        }
-    });
-}
-TEMPLATE
-typename _ROS::subscription_t<typename _ROS::gains_t> _ROS::createSubGain() {
-    return this->template createSubscription<gains_t>("gains", [manager_weak = std::weak_ptr(m_manager)](const gains_t &gains) {
-        if (auto lock = manager_weak.lock()) {
-            converter_t pid = lock->getController().getErrorConverter();
-            lock->getController().setErrorConverter(
-                {gains.kp, gains.ti, gains.td, pid.filter(), pid.saturation(), pid.integralSaturation(), pid.derivativeSaturation()});
-        }
-    });
-}
-TEMPLATE
-typename _ROS::subscription_t<int16_t> _ROS::createSubSpeed() {
-    return this->template createSubscription<int16_t>("teensy/obstacle_seen", [manager_weak = std::weak_ptr(m_manager)](const int16_t &percentage) {
-        if (auto lock = manager_weak.lock()) {
-            Speeds maxSpeeds = lock->getController().getMaxSpeeds();
-            lock->getController().setMaxSpeeds(maxSpeeds * clamp((double_t)percentage, 1., 100.) / 100., /* persist = */ false);
-        }
-    });
+    m_dispatcher.emplace(*this, std::weak_ptr(m_manager));
 }
 
 TEMPLATE
@@ -123,7 +82,7 @@ void _ROS::loop() {
 
         if constexpr (hasOdos<TFeedback>) {
             const TFeedback &feedback = m_manager->getPositionFeedback();
-            m_pubOdosTicks.publish(std::pair<int32_t, int32_t>(feedback.getLeftOdoCount(), feedback.getRightOdoCount()));
+            m_pubOdosTicks.publish(odos_count_t{feedback.getLeftOdoCount(), feedback.getRightOdoCount()});
         }
     }
 
@@ -133,31 +92,12 @@ void _ROS::loop() {
 
         m_log.time = now;
 
-        Position2D<Meter> robotPosition = m_manager->getPositionFeedback().getRobotPosition();
-        m_log.robot_pos_x = robotPosition.x;
-        m_log.robot_pos_y = robotPosition.y;
-        m_log.robot_pos_theta = robotPosition.theta;
-
-        Position2D<Meter> setpoint = m_manager->getController().getSetpoint();
-        m_log.setpoint_pos_x = setpoint.x;
-        m_log.setpoint_pos_y = setpoint.y;
-        m_log.setpoint_pos_theta = setpoint.theta;
-
-        Vector2D<Meter> goalPoint = m_manager->getController().getGoalPoint();
-        m_log.goal_point_pos_x = goalPoint.x;
-        m_log.goal_point_pos_y = goalPoint.y;
-
-        Vector2D<Meter> goalPointSpeed = m_manager->getController().getGoalPointSpeed();
-        m_log.goal_point_speed_x = goalPointSpeed.x;
-        m_log.goal_point_speed_y = goalPointSpeed.y;
-
-        Vector2D<Meter> lastError = m_manager->getController().getErrorConverter().lastError();
-        m_log.asserv_error_x = lastError.x;
-        m_log.asserv_error_y = lastError.y;
-
-        Speeds lastCmd = m_manager->getController().getLastCommand();
-        m_log.command_v = lastCmd.linear;
-        m_log.command_omega = lastCmd.angular;
+        m_log.robot_pos = message_cast<position_t>(m_manager->getPositionFeedback().getRobotPosition());
+        m_log.setpoint_pos = message_cast<position_t>(m_manager->getController().getSetpoint());
+        m_log.goal_point_pos = message_cast<point_t>(m_manager->getController().getGoalPoint());
+        m_log.goal_point_speed = message_cast<point_t>(m_manager->getController().getGoalPointSpeed());
+        m_log.asserv_error = message_cast<point_t>(m_manager->getController().getErrorConverter().lastError());
+        m_log.command = message_cast<command_t>(m_manager->getController().getLastCommand());
 
         if constexpr (hasTwoWheels<TActuators>) {
             m_log.commande_motor_r = m_manager->getActuators().getLastRightSpeed();
@@ -174,11 +114,11 @@ void _ROS::loop() {
 
 TEMPLATE
 void _ROS::sendLog(LogSeverity severity, const string_t &message) {
-    ROSImpl::node_t::sendLog(severity, message);
+    ros_impl::node_t::sendLog(severity, message);
 }
 
 // Explicit instantiation of the ROS node
 // Template classes need either to have all their implementation in the .hpp file or to be explicitly instantiated for the particular types they are
 // used with.
 #include "specializations/ros.hpp"
-template class ROS<ros_impl_t, actuators_t, feedback_t, _clock_t>;
+template class ROS<actuators_t, feedback_t, _clock_t>;

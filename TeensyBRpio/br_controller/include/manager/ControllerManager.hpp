@@ -38,6 +38,11 @@ namespace manager {
 template <Actuators TActuators, CanControl<TActuators> TController, PositionFeedback TFeedback, Clock TClock>
 class ControllerManager : private fsm::StateMachine<ManagerState<TActuators, TController>> {
   public:
+    using controller_t = TController;
+    using actuators_t = TActuators;
+    using feedback_t = TFeedback;
+    using _clock_t = TClock;
+
     /**
      * @param updateInterval The interval (in microseconds) between two updates of the command to send to the motors. Multiple calls to update()
      * within this interval will result in the command being updated only once. In other words, `interval` will always have the same value when
@@ -99,6 +104,7 @@ class ControllerManager : private fsm::StateMachine<ManagerState<TActuators, TCo
      * This bypasses the manager's clock and tick interval and allows the use of an external clock (especially in tests).
      *
      * # Caveat
+     * 
      * This desynchronizes the manager from its internal clock. Calling `update(void)` after `update(double_t)` is a logic error
      * and will lead to inconsistent update rates. To avoid this, you must call `resyncClock()` before calling `update(void)` again.
      *
