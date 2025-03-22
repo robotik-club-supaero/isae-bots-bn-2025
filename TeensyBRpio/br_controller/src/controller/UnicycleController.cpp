@@ -1,9 +1,9 @@
 #include "controller/UnicycleController.hpp"
 #include "controller/states/StateBraking.hpp"
+#include "controller/states/StateFullTrajectory.hpp"
 #include "controller/states/StateManualControl.hpp"
 #include "controller/states/StateRotation.hpp"
 #include "controller/states/StateStandStill.hpp"
-#include "controller/states/StateTrajectoryWithInitialRotation.hpp"
 
 #include "defines/func.hpp"
 #include "defines/math.hpp"
@@ -210,8 +210,7 @@ template <ErrorConverter TConverter>
 void UnicycleController<TConverter>::startTrajectory(DisplacementKind kind, std::unique_ptr<Trajectory> trajectory,
                                                      std::optional<Angle> finalOrientation) {
     softReset({trajectory->getCurrentPosition(), m_setpoint.theta});
-    setCurrentState<StateTrajectoryWithInitialRotation>(kind, std::move(trajectory), m_setpoint.theta, m_maxSpeeds, m_maxAccelerations,
-                                                        finalOrientation);
+    setCurrentState<StateFullTrajectory>(kind, std::move(trajectory), m_setpoint.theta, m_maxSpeeds, m_maxAccelerations, finalOrientation);
 }
 
 template <ErrorConverter TConverter>

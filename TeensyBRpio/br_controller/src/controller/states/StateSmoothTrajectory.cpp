@@ -1,16 +1,16 @@
-#include "controller/states/StateTrajectory.hpp"
+#include "controller/states/StateSmoothTrajectory.hpp"
 #include "defines/func.hpp"
 #include "logging.hpp"
 
 namespace controller {
 
-StateTrajectory::StateTrajectory(DisplacementKind kind, std::shared_ptr<Trajectory> trajectory, Speeds maxSpeeds, double_t maxLinAcceleration)
+StateSmoothTrajectory::StateSmoothTrajectory(DisplacementKind kind, std::shared_ptr<Trajectory> trajectory, Speeds maxSpeeds, double_t maxLinAcceleration)
     : m_kind(kind), m_trajectory(std::move(trajectory)), m_lastDirection(m_trajectory->getCurrentPosition().theta), m_maxSpeeds(maxSpeeds),
       m_ramp(maxSpeeds.linear, maxLinAcceleration) {
     log(INFO, "Entering controller state: Moving");
 }
 
-ControllerStatus StateTrajectory::getStatus() const {
+ControllerStatus StateSmoothTrajectory::getStatus() const {
     if (m_kind == FORWARD) {
         return ControllerStatus::MOVING;
     } else {
@@ -18,12 +18,12 @@ ControllerStatus StateTrajectory::getStatus() const {
     }
 }
 
-StateUpdateResult StateTrajectory::update(double_t interval) {
+StateUpdateResult StateSmoothTrajectory::update(double_t interval) {
     if (m_trajectory) {
         m_ramp.update(interval);
         double_t currentRampSpeed = m_ramp.getCurrentSpeed();
 
-        if (m_trajectory->advance(currentRampSpeed * interval)) {           
+        if (m_trajectory->advanceSmooth(currentRampSpeed * interval)) {           
             m_ramp.setTargetSpeed(m_maxSpeeds.linear);
             std::optional<double_t> remainingDistance = m_trajectory->getRemainingDistance();
             if (remainingDistance) {
@@ -65,7 +65,7 @@ StateUpdateResult StateTrajectory::update(double_t interval) {
     return TrajectoryComplete();
 }
 
-void StateTrajectory::notify(ControllerEvent event) {
+void StateSmoothTrajectory::notify(ControllerEvent event) {
     std::visit(overload{[&](const MaxSpeedsChanged &event) { m_maxSpeeds = event.newSpeeds; }, [](auto) {}}, event);
 }
 

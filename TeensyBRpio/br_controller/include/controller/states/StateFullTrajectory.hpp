@@ -8,11 +8,11 @@
 
 namespace controller {
 
-/// Manages the transition between StateInitialRotation and StateTrajectory
-class StateTrajectoryWithInitialRotation : public ControllerState, private fsm::StateMachine<ControllerState> {
+/// Makes the robot follow a trajectory. This manages the initial rotation and the rotations at points of discontinuity.
+class StateFullTrajectory : public ControllerState, private fsm::StateMachine<ControllerState> {
   public:
     /// @param trajectory must not be null
-    StateTrajectoryWithInitialRotation(DisplacementKind kind, std::unique_ptr<Trajectory> trajectory, Angle initialOrientation, Speeds maxSpeeds,
+    StateFullTrajectory(DisplacementKind kind, std::unique_ptr<Trajectory> trajectory, Angle initialOrientation, Speeds maxSpeeds,
                                        Accelerations maxAccelerations, std::optional<Angle> finalOrientation = std::nullopt);
     ControllerStatus getStatus() const override;
     StateUpdateResult update(double_t interval) override;

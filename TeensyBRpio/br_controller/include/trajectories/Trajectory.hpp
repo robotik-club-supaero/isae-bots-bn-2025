@@ -7,7 +7,8 @@
 #include <optional>
 
 /**
- * A continuous (reasonably smooth, i.e. at least of class C2) 2D-trajectory the robot is expected to follow.
+ * A continuous 2D-trajectory the robot is expected to follow. The direction of the trajectory is allowed to be
+ * discontinuous provided that the points of discontinuity are a discrete set.
  *
  * The trajectory is described by the successive positions of a point that moves along the trajectory.
  * This point can be seen as the target position for the robot.
@@ -15,10 +16,9 @@
  * When the `Trajectory` instance is created, this point must be at the beginning of the trajectory.
  * The implementation is responsible for keeping track of this point internally as it advances.
  *
- * If the trajectory has tight curves, the robot may not be able to follow it in an accurate way. The controller and this
- * class might be extended later to implement automatic braking before curves.
+ * This class must be inherited. Smooth trajectories should inherit class `SmoothTrajectory` instead.
  *
- * This class must be inherited.
+ * @see SmoothTrajectory.
  */
 class Trajectory {
   public:
@@ -29,9 +29,21 @@ class Trajectory {
      * @return true if the position was advanced. false if the position is already at the end of the trajectory. If this method returns false,
      * subsequent calls to advance() must also return false.
      *
+     * If `distance == 0`:
+     * - if the current position is just before a point of discontinuity, this must move it just after the discontinuity and return true,
+     * - otherwise this must be a no-op and return `false` only if the current position is already at the end of the trajectory. 
+     * 
      * If `distance < 0`, the behavior is undefined.
      */
     virtual bool advance(double_t distance) = 0;
+
+    /**
+     * This is the same as `advance` but must stop at points of discontinuity.
+     * - If the direction of the trajectory is continuous for the next `distance` meters, this must be equivalent to calling `advance`.
+     * - Otherwise, this must stop just before the discontinuity. Then subsequent calls to advanceSmooth() must do nothing and return false until
+     * `advance` is called.
+     */
+    virtual bool advanceSmooth(double_t distance) = 0;
 
     /**
      * Returns the current position on the trajectory. The position must be heading forward in the current local direction of the trajectory.
@@ -57,6 +69,7 @@ class Trajectory {
      *
      * - Returning 0 means the trajectory is a straight line and effectively disables turn anticipation.
      *   0 is also a valid default value for trajectories that do not support curvature estimation.
+     * - Returning +Inf means there is a discontinuity in the direction of the trajectory in the next `distance` meters.
      * - Returning a negative value is illegal and unspecified behavior.
      *
      * If `distance < 0`, the behavior is undefined.
@@ -81,6 +94,30 @@ class Trajectory {
 
   protected:
     Trajectory() = default;
+};
+
+/**
+ * A reasonably smooth, i.e. at least of class C2, 2D-trajectory.
+ *
+ * # Contract:
+ *
+ * - The direction of the trajectory must be continuous.
+ * - As a result, `getMaxCurvature` must never return +Inf.
+ *
+ * This class must be inherited.
+ *
+ * @see Trajectory
+ */
+class SmoothTrajectory : public Trajectory {
+  public:
+    /**
+     * If you know the trajectory is smooth, you should call `advance` directly instead.
+     *
+     * @copydoc Trajectory::advanceSmooth */
+    bool advanceSmooth(double_t distance) override final { return advance(distance); }
+
+  protected:
+    SmoothTrajectory() = default;
 };
 
 #endif

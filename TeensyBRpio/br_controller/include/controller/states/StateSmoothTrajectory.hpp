@@ -12,14 +12,20 @@ class Trajectory;
 
 namespace controller {
 
-class StateTrajectory : public ControllerState {
+/**
+ * Makes the robot follow a smooth trajectory. This expects the robot to be heading in the initial direction of the trajectory, and
+ * stops at points of discontinuity.
+ * 
+ * @see Trajectory
+ */
+class StateSmoothTrajectory : public ControllerState {
   public:
     /// @param trajectory must not be null
-    StateTrajectory(DisplacementKind kind, std::shared_ptr<Trajectory> trajectory, Speeds maxSpeeds, double_t maxLinAcceleration);
+    StateSmoothTrajectory(DisplacementKind kind, std::shared_ptr<Trajectory> trajectory, Speeds maxSpeeds, double_t maxLinAcceleration);
     ControllerStatus getStatus() const override;
     StateUpdateResult update(double_t interval) override;
     void notify(ControllerEvent event) override;
-    
+
   private:
     DisplacementKind m_kind;
     std::shared_ptr<Trajectory> m_trajectory;

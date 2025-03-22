@@ -18,7 +18,7 @@ concept Curve = requires(const T &c, double_t t) {
 /// A trajectory that follows a differentiable parametric curve.
 /// @tparam TCurve The type of the trajectory. Must be a complete type.
 template <Curve TCurve>
-class CurveTrajectory : public Trajectory {
+class CurveTrajectory : public SmoothTrajectory {
   public:
     /**
      * @param curve

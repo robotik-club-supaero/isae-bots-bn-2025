@@ -1,12 +1,10 @@
 #ifndef _LINEAR_TRAJECTORY_HPP
 #define _LINEAR_TRAJECTORY_HPP
 
-#include "defines/math.hpp"
-#include "geometry/Vector2D.hpp"
 #include "trajectories/Trajectory.hpp"
 
 /// A straight line between the origin and the destination.
-class LinearTrajectory : public Trajectory {
+class LinearTrajectory : public SmoothTrajectory {
   public:
     LinearTrajectory(Point2D<Meter> origin, Point2D<Meter> destination);
 

@@ -55,7 +55,7 @@ class GeneratorVector {
  * See concept CurveGenerator.
  */
 template <Curve TCurve, CurveGenerator<TCurve> TGenerator = GeneratorVector<TCurve>>
-class MultiCurveTrajectory : public Trajectory {
+class MultiCurveTrajectory : public SmoothTrajectory {
   public:
     using size_type = std::size_t;
 
