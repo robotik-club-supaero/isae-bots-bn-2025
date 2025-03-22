@@ -127,7 +127,7 @@ void _ROS::loop() {
         }
     }
 
-#ifdef _DEBUG
+#ifdef _BR_DEBUG
     if (getDurationMicros(m_lastLog, now) > m_logInterval) {
         m_lastLog = now;
 

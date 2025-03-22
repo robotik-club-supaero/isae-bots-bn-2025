@@ -47,7 +47,7 @@ class ProportionalIntegralDerivative {
     operator TValue() const;
     TValue value() const;
 
-#ifdef _DEBUG
+#ifdef _BR_DEBUG
     TValue lastError() const;
 #endif
 
@@ -68,7 +68,7 @@ class ProportionalIntegralDerivative {
     double_t m_ki;
 
     TValue m_value;
-#ifdef _DEBUG
+#ifdef _BR_DEBUG
     TValue m_lastError = {};
 #endif
 

@@ -20,7 +20,7 @@ MotorsOdrive2::MotorsOdrive2(uint8_t odriveRxPin, uint8_t odriveTxPin, double_t 
 void MotorsOdrive2::sendCommand(Speeds speeds) {
     WheelSpeeds wheelSpeeds = speeds.toWheelSpeeds(m_wheelRadius, m_wheelDistance) * m_conversionFactor;
 
-#ifdef _DEBUG
+#ifdef _BR_DEBUG
     m_lastLeftSpeed = -wheelSpeeds.left;
     m_lastRightSpeed = wheelSpeeds.right;
 #endif
@@ -57,7 +57,7 @@ bool MotorsOdrive2::isIdle() {
     return m_odrive.getCurrentAxisState(BR_LEFT) == AXIS_STATE_IDLE && m_odrive.getCurrentAxisState(BR_RIGHT) == AXIS_STATE_IDLE;
 }
 
-#ifdef _DEBUG
+#ifdef _BR_DEBUG
 double_t MotorsOdrive2::getLastLeftSpeed() const {
     return m_lastLeftSpeed;
 }

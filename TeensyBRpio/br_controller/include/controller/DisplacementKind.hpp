@@ -17,7 +17,7 @@ class DisplacementKind {
     Value m_value;
 };
 
-const DisplacementKind FORWARD = DisplacementKind::FORWARD;
-const DisplacementKind REVERSE = DisplacementKind::REVERSE;
+constexpr DisplacementKind FORWARD = DisplacementKind::FORWARD;
+constexpr DisplacementKind REVERSE = DisplacementKind::REVERSE;
 
 #endif

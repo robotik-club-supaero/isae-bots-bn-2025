@@ -1,9 +1,8 @@
 #ifndef _BEZIER_HPP_
 #define _BEZIER_HPP_
 
-#include "geometry/Position2D.hpp"
+#include "geometry/Vector2D.hpp"
 #include "math/Polynomial.hpp"
-#include "math/Samples.hpp"
 #include <vector>
 
 class BezierCurve {

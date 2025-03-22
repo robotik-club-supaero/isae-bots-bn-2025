@@ -6,7 +6,7 @@
 #include "geometry/Speeds.hpp"
 #include "geometry/Vector2D.hpp"
 
-#ifdef _DEBUG
+#ifdef _BR_DEBUG
 #include "defines/string.h"
 #endif
 
@@ -96,7 +96,7 @@ class Position2D : public Vector2D<Unit> {
 
     TAngle theta;
 
-#ifdef _DEBUG
+#ifdef _BR_DEBUG
     operator std::string() const { return "(" + std::to_string(this->x) + ", " + std::to_string(this->y) + ", " + to_string(theta) + ")"; }
 #endif
 };

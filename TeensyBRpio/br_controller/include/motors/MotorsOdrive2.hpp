@@ -29,7 +29,7 @@ class MotorsOdrive2 {
     bool isIdle();
     void sendCommand(Speeds speeds);
 
-#ifdef _DEBUG
+#ifdef _BR_DEBUG
     double_t getLastLeftSpeed() const;
     double_t getLastRightSpeed() const;
 #endif
@@ -37,7 +37,7 @@ class MotorsOdrive2 {
   private:
     void sendCommand(int motor_number, double_t velCmd);
 
-#ifdef _DEBUG
+#ifdef _BR_DEBUG
     double_t m_lastLeftSpeed;
     double_t m_lastRightSpeed;
 #endif

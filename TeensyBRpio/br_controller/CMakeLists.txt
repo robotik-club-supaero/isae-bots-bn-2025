@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.5)
 project (br_simu)
 
 add_compile_definitions(_SIMULATION)
-add_compile_definitions(_DEBUG)
+add_compile_definitions(_BR_DEBUG)
 
 # Dependencies
 find_package(ament_cmake REQUIRED)

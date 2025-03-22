@@ -3,7 +3,7 @@
 
 #include "defines/math.hpp"
 
-#ifdef _DEBUG
+#ifdef _BR_DEBUG
 #include <string>
 #endif
 
@@ -37,7 +37,7 @@ class Speeds {
     /// (Maybe signed) angular speed or acceleration (rad/s or rad/s²)
     double_t angular;
 
-#ifdef _DEBUG
+#ifdef _BR_DEBUG
     operator std::string() const { return "(" + std::to_string(linear) + ", " + std::to_string(angular) + ")"; }
 #endif
 };

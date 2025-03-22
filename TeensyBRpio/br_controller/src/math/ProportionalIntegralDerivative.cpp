@@ -22,7 +22,7 @@ void ProportionalIntegralDerivative<TValue>::update(TValue error, double_t inter
         m_value = clamp<TValue>(m_value, -*m_saturation, *m_saturation);
     }
 
-#ifdef _DEBUG
+#ifdef _BR_DEBUG
     m_lastError = error;
 #endif
 }
@@ -43,7 +43,7 @@ TValue ProportionalIntegralDerivative<TValue>::value() const {
     return m_value;
 }
 
-#ifdef _DEBUG
+#ifdef _BR_DEBUG
 TEMPLATE
 TValue ProportionalIntegralDerivative<TValue>::lastError() const {
     return m_lastError;

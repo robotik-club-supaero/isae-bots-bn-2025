@@ -5,7 +5,7 @@
 
 #include <vector>
 
-#ifdef _DEBUG
+#ifdef _BR_DEBUG
 #include <string>
 #endif
 
@@ -29,7 +29,7 @@ class Polynomial {
     const std::vector<T> &coeffs() const;
     std::vector<T> &coeffs();
 
-#ifdef _DEBUG
+#ifdef _BR_DEBUG
     operator std::string() const {
         std::string str = "(";
         for (int i = m_coeffs.size() - 1; i >= 0; i--) {
