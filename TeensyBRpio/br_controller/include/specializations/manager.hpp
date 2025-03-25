@@ -16,7 +16,12 @@ inline manager_t createManager(Position2D<Meter> initialPosition = {}) {
     feedback_t feedback;
     feedback.resetPosition(initialPosition);
     actuators_t motors = feedback.createMotorStub();
-    return manager_t(std::move(motors), std::move(feedback));
+    manager_t manager(std::move(motors), std::move(feedback));
+    manager.setActive(true);
+    while (!manager.isActive()) {
+        manager.update(UPDATE_INTERVAL / 1e6);
+    }
+    return manager;
 }
 #endif
 

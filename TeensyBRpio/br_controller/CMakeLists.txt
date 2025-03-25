@@ -29,12 +29,19 @@ file(GLOB_RECURSE base_SRCS
 set(ros_SRCS ${PROJECT_SOURCE_DIR}/src/ros/ROS.cpp ${PROJECT_SOURCE_DIR}/src/ros/Dispatcher.cpp)
 set(test_SRCS ${PROJECT_SOURCE_DIR}/test/test_logging.cpp)
 
+# Main simulation app
 add_executable(simulation_br src/main_simulation.cpp ${base_SRCS} ${ros_SRCS})
 target_link_libraries(simulation_br m)
 ament_target_dependencies(simulation_br rclcpp std_msgs br_messages)
 
+# Python bindings to display trajectories
+set(PYBIND11_CPP_STANDARD -std=c++20)
+find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
+find_package(pybind11 REQUIRED)
+pybind11_add_module(br_trajectories src/main_pybind.cpp ${base_SRCS})
+
 install(TARGETS
-  simulation_br
+  simulation_br br_trajectories
   DESTINATION lib/${PROJECT_NAME}
 )
 

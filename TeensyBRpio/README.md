@@ -15,8 +15,11 @@ Se placer à la racine du projet, dans un environnement où RO2 Jazzy est instal
 ```
 colcon build
 ```
-L'exécutable est à l'emplacement ./install/br_simu/lib/br_simu/simulation_br, mais il faut sourcer "install/setup.bash" ou "install/local_setup.bash" avant de lancer la simulation, ce qui implique
-de distribuer tout le dossier install avec l'exécutable.
+
+Pour communiquer avec la BR (simulation ou non) depuis le HN, il faut copier :
+- ./br_messages/* vers [HN]/dev/lib/br_messages/
+- ./install/br_simu/lib/br_simu/simulation_br vers [HN]/dev/src/sim/sim/br/simulation_br
+- ./install/br_simu/lib/br_simu/br_trajectories.cpython-312-x86_64-linux-gnu.so  vers [HN]/dev/lib/br_trajectories/br_trajectories.cpython-312-x86_64-linux-gnu.so
 
 ### Compiler pour la BR (Arduino Teensy)
 Compiler avec Platform.IO.

@@ -16,11 +16,6 @@ constexpr controller::ControllerStatus Still = controller::ControllerStatus::Sti
 
 manager_t startTrajectorySimulation(std::unique_ptr<Trajectory> trajectory) {
     manager_t manager = createManager(trajectory->getCurrentPosition());
-    manager.setActive(true);
-    while (!manager.isActive()) {
-        manager.update(UPDATE_INTERVAL / 1e6);
-    }
-
     manager.sendOrder(
         [&](controller_t &controller, Position2D<Meter> position) { controller.startTrajectory(FORWARD, std::move(trajectory), std::nullopt); });
     return manager;
