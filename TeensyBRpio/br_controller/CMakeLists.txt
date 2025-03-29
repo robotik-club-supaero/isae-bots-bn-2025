@@ -44,6 +44,10 @@ install(TARGETS
   simulation_br br_trajectories
   DESTINATION lib/${PROJECT_NAME}
 )
+ament_environment_hooks(
+  ${CMAKE_CURRENT_SOURCE_DIR}/hooks/${PROJECT_NAME}.dsv.in
+  ${CMAKE_CURRENT_SOURCE_DIR}/hooks/${PROJECT_NAME}.sh.in
+)
 
 if(BUILD_TESTING)
   add_executable(test_curve test/test_curve.cpp ${base_SRCS} ${test_SRCS})
