@@ -34,8 +34,6 @@ int main(int argc, char **argv) {
     std::shared_ptr<manager_t> manager(std::make_shared<manager_t>(createManager()));
     ros->attachManager(manager);
 
-    manager->setActive(true);
-
     while (!quit.load()) {
         ros->loop();
     }
