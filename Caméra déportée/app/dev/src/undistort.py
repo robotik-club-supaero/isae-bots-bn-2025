@@ -20,21 +20,22 @@ class Undistort:
 
     def computeCameraMatrix(self, image_path):
 
+        print("Computing camera matrix...")
+
         image = loadImage(image_path)
         h,  w = image.shape[:2]
-        newcameramtx, roi = cv2.getOptimalNewCameraMatrix(self._mtx, self._dist, (w,h), 0, (w,h))
-        
-        return newcameramtx, roi
+        newCameraMatrix, roi = cv2.getOptimalNewCameraMatrix(self._mtx, self._dist, (w,h), 0, (w,h))
+        mapx, mapy = cv2.initUndistortRectifyMap(self._mtx, self._dist, None, newCameraMatrix, (w, h), 5)
+        return mapx, mapy, roi
 
         
-    def undistort(self, image_path, cameraMatrix, roi):
+    def undistort(self, image_path, mapx, mapy, roi):
+        
+        print("Undistorting image...")
         
         image = loadImage(image_path)
         
-        if cameraMatrix is None:
-            raise ValueError("Camera matrix cannot be None")
-        
-        dst = cv2.undistort(image, self._mtx, self._dist, None, cameraMatrix)
+        dst = cv2.remap(image, mapx, mapy, cv2.INTER_LINEAR)
         
         x, y, w, h = roi
         dst = dst[y:y+h, x:x+w]
