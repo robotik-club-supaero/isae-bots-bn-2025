@@ -23,7 +23,7 @@ class Machine_etats
     {
         INIT,
         MVT,
-        EMERGENCY, // Etat pour éviter un obstacle de dernière minute
+        AVOID, // Etat pour éviter un obstacle de dernière minute
         STOP,
         END,
 

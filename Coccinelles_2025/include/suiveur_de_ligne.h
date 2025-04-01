@@ -47,12 +47,11 @@ public:
     
     int m_minimum_distance = 1000;
 
-    Asserv *m_p_asserv;
+    Asserv *m_p_asserv ;
+    Serv *m_p_servo ;
+    Irsensor *m_p_ir_sensor ;
 
-    Mesure_pos *m_p_mesure_pos;
-    Irsensor *m_p_ir_sensor;
-
-    Machine_etats_sl(Asserv *p_asserv, Irsensor *p_ir_sensor);
+    Machine_etats_sl(Asserv *p_asserv, Irsensor *p_ir_sensor, Serv *p_servo);
     void setup();
     void loop();
 };

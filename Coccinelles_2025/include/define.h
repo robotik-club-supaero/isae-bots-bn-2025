@@ -9,7 +9,6 @@
 
 /*
 ENCODEURS
-
 */
 #define CLK_L 5 // CLK LEFT  ENCODER
 #define DT_L 18 // DT LEFT Encoder
@@ -31,7 +30,13 @@ MOTEURS
 
 /*
 SENSORS
-
 */
+
+/*
+SERVO
+*/
+#define ANGLE1 20 ; 
+#define ANGLE2 60 ;
+#define TEMPS_BLINK 1 ; //Temps clignotement (secondes).
 
 #endif
