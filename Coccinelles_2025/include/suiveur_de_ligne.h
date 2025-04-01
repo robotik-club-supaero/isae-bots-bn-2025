@@ -23,7 +23,7 @@
 
 
 
-class Machine_etats
+class Machine_etats_sl
 {
     enum Pami_State
     {
@@ -52,7 +52,7 @@ public:
     Mesure_pos *m_p_mesure_pos;
     Irsensor *m_p_ir_sensor;
 
-    Machine_etats(Asserv *p_asserv, Irsensor *p_ir_sensor);
+    Machine_etats_sl(Asserv *p_asserv, Irsensor *p_ir_sensor);
     void setup();
     void loop();
 };

@@ -7,14 +7,14 @@
 #include "Serv.h"
 #include "suiveur_de_ligne.h"
 
-Machine_etats::Machine_etats(Asserv *p_asserv, Irsensor *p_ir_sensor)
+Machine_etats_sl::Machine_etats_sl(Asserv *p_asserv, Irsensor *p_ir_sensor)
 {
     m_p_asserv = p_asserv;
     m_p_ir_sensor = p_ir_sensor;
     
 }
 
-void Machine_etats::setup()
+void Machine_etats_sl::setup()
 {
     pinMode(34, INPUT);
     etat = INIT;
@@ -22,7 +22,7 @@ void Machine_etats::setup()
     m_time_global = millis();
 }
 
-void Machine_etats::loop()
+void Machine_etats_sl::loop()
 {
     if (millis() - m_time >= dt) {
         int INL = 4 ;
