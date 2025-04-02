@@ -1,11 +1,12 @@
 //Machine à état pour robot suiveur de ligne.
 
-#include <Machine_etats.h>
+#include "Machine_etats.h"
 #include <Arduino.h>
 #include <cmath>
 #include "trajectories/PathTrajectory.hpp"
 #include "Serv.h"
 #include "suiveur_de_ligne.h"
+#include "define.h"
 
 Machine_etats_sl::Machine_etats_sl(Asserv *p_asserv, Irsensor *p_ir_sensor, Serv *p_servo)
 {
@@ -17,6 +18,8 @@ Machine_etats_sl::Machine_etats_sl(Asserv *p_asserv, Irsensor *p_ir_sensor, Serv
 void Machine_etats_sl::setup()
 {
     pinMode(34, INPUT);
+    pinMode(INL,INPUT);
+    pinMode(INR,INPUT);
     etat = INIT;
     m_time = millis();
     m_time_global = millis();
@@ -24,9 +27,7 @@ void Machine_etats_sl::setup()
 
 void Machine_etats_sl::loop()
 {
-    int INL = 4 ;
-    int INR = 5 ;
-    if (millis() - m_time >= dt) {
+        if (millis() - m_time >= dt) {
         int lsensor = analogRead(INL); //Valeur capteur gauche.
         int rsensor = analogRead(INR); //Valeur capteur droit.
 
@@ -59,13 +60,14 @@ void Machine_etats_sl::loop()
             if (m_minimum_distance <= DISTANCE_MIN) {
                 etat = STOP ;
             } 
-            else if (lsensor > white_min && rsensor < black_max) {
+            
+            else if (lsensor > WHITE_MIN && rsensor < BLACK_MAX) {
                 etat = TRIGHT ;
             }
-            else if (rsensor > white_min && lsensor < black_max) {
+            else if (rsensor > WHITE_MIN && lsensor < BLACK_MAX) {
                 etat = TLEFT ;
             }
-            else if (rsensor > white_min && lsensor > white_min) {
+            else if (rsensor > WHITE_MIN && lsensor > WHITE_MIN) {
                 etat = END ;
             }
             else {
@@ -78,10 +80,10 @@ void Machine_etats_sl::loop()
             if (m_minimum_distance <= DISTANCE_MIN) {
                 etat = STOP ;
             }
-            else if (rsensor < black_max && lsensor < black_max) {
+            else if (rsensor < BLACK_MAX && lsensor < BLACK_MAX) {
                 etat = STRAIGHT ;
             }
-            else if (rsensor > white_min && lsensor > white_min) {
+            else if (rsensor > WHITE_MIN && lsensor > WHITE_MIN) {
                 etat = END ;
             }
             else {
@@ -90,14 +92,14 @@ void Machine_etats_sl::loop()
             break;
         
         case TRIGHT:
-            m_p_asserv->asservissement(5, 20);
+            m_p_asserv->asservissement(5, 20) ;
             if (m_minimum_distance <= DISTANCE_MIN) {
                 etat = STOP ;
             }
-            else if (rsensor < black_max && lsensor < black_max) {
+            else if (rsensor < BLACK_MAX && lsensor < BLACK_MAX) {
                 etat = STRAIGHT ;
             }
-            else if (rsensor > white_min && lsensor > white_min) {
+            else if (rsensor > WHITE_MIN && lsensor > WHITE_MIN) {
                 etat = END ;
             }
             else {
@@ -115,7 +117,8 @@ void Machine_etats_sl::loop()
 
         case END:
             m_p_asserv->asservissement(0, 0) ;
-            m_p_servo->blink(1,25,25) ;//Wtf jcp.
+            m_p_servo->blink(1, ANGLE1, ANGLE2) ;
+            etat = END ;
             break;
         }
         m_time = millis();

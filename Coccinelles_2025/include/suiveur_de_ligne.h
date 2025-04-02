@@ -9,19 +9,6 @@
 #include <Asserv.h>
 #include <Define_map.h>
 
-#define K 1
-#define dt 10
-#define time_global 10000
-#define time_sensor 8000
-
-#define SPEED 25        // Vitesse en cm/s 25 est la vitesse max des moteurs
-#define DISTANCE_MIN 80 // Distance minimale pour éviter un obstacle en mm
-#define white_min 85 
-#define black_max 25 
-#define yellow_min 45 
-#define yellow_max 80 // Temporary
-
-
 
 class Machine_etats_sl
 {

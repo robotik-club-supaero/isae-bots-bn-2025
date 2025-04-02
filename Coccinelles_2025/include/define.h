@@ -35,8 +35,32 @@ SENSORS
 /*
 SERVO
 */
-#define ANGLE1 20 ; 
-#define ANGLE2 60 ;
-#define TEMPS_BLINK 1 ; //Temps clignotement (secondes).
+#define ANGLE1 20  
+#define ANGLE2 60 
+#define TEMPS_BLINK 1  //Temps clignotement (secondes).
+
+/*
+MACHINE A ETAT
+*/
+#define START_TIME 85  //Les groupies commence dans les 15 dernières minutes.
+#define DMIN 15 // En cm, à modifier.
+
+/*
+SUIVEUR DE LIGNE
+*/
+
+#define dt 10
+#define time_global 10000
+#define time_sensor 8000
+
+#define SPEED 25        // Vitesse en cm/s 25 est la vitesse max des moteurs
+#define DISTANCE_MIN 80 // Distance minimale pour éviter un obstacle en mm
+#define WHITE_MIN 90 
+#define BLACK_MAX 30
+#define YELLOW_MIN 45 
+#define YELLOW_MAX 80 // Temporary
+#define INL 4 
+#define INR 5 
+
 
 #endif

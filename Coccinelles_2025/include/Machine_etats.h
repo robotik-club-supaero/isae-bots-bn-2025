@@ -44,7 +44,7 @@ public:
     float pos_finit_y = ARRIVEE_BLEU_3_Y; // TODO : A MODIFIER en foction de la stratégie
 
     float pos_init_x = DEPART_BLEU_X; // TODO : A MODIFIER en foction de la stratégie
-    float pos_init_y = DEPART_BLEU_Y; // TODO : A MODIFIER en foction de la stratégie
+    float pos_init_y = DEPART_BLEU_Y;// TODO : A MODIFIER en foction de la stratégie
     // Position actualisé du robot
     float pos_x = 0;
     float pos_y = 0;

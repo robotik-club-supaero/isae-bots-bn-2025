@@ -3,6 +3,8 @@
 #include <cmath>
 #include "trajectories/PathTrajectory.hpp"
 #include <Pathfinder.h>
+#include <define.h>
+
 
 Machine_etats::Machine_etats(Asserv *p_asserv, Mesure_pos *p_mesure_pos, Irsensor *p_ir_sensor_right, Irsensor *p_ir_sensor_left)
 {
@@ -31,8 +33,7 @@ void Machine_etats::loop()
         }
         // Lire l'état de la tirette
         tirette = digitalRead(34);
-        Serial.println(tirette);
-
+        
         // Récupère la vision des 2 ir_sensor et les mets dans 1 seul liste (taille 16)
         for (int i = 0; i < 8; i++){ m_vision[i] = m_p_ir_sensor_left->vision[i] ; } 
         for (int i = 0; i < 8; i++){ m_vision[8 + i] = m_p_ir_sensor_right->vision[i] ; }
@@ -46,21 +47,23 @@ void Machine_etats::loop()
         switch (etat)
         {
         case INIT:
-            if (tirette == 0)
-            {
-                m_time_global = millis();
-                etat = STOP;
-            } else
-            {
-                etat = INIT;
+            if ((millis() - m_time_global >= START_TIME) && tirette == 0) {
+                m_time_global = millis() ;
+                etat = MVT ;
+            } 
+            else {
+                etat = INIT ;
             }
             break;
         case MVT:
-            if (m_minimum_distance <= DISTANCE_MIN)
-            {
+            if (m_minimum_distance <= DISTANCE_MIN) {
                 m_p_asserv->asserv_global(0, 0, 0);
-                etat = EMERGENCY;
-            } else {
+                etat = AVOID;
+            } 
+            else if (m_distance_obstacle > DMIN ){
+                etat = STOP ;
+
+            else {
                 pos_x = m_p_mesure_pos->position_x + pos_init_x;
                 pos_y = m_p_mesure_pos->position_y + pos_init_y;
 
@@ -75,13 +78,13 @@ void Machine_etats::loop()
                 // pos = trajectory.getCurrentPosition()
 
                 if (m_minimum_distance < DISTANCE_MIN) {
-                    etat = EMERGENCY;
+                    etat = AVOID;
                 } else {
                     m_p_asserv->asserv_global(SPEED, SPEED, target.argument());
                 }
             }
             break;
-        case EMERGENCY:
+        case AVOID:
             // Faites tourner le robot dans une direction spécifique
             // (par exemple, en ajustant l'angle)
             angle += PI / 4; // Tournez de 45 degrés à droite
