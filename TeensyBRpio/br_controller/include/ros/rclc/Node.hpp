@@ -1,6 +1,7 @@
 #ifndef _ROS_IMPL_NODE_HPP_
 #define _ROS_IMPL_NODE_HPP_
 
+#include "Clock.hpp"
 #include "defines/string.h"
 #include "logging.hpp"
 #include "ros/message_cast.hpp"
@@ -95,6 +96,10 @@ class Node {
         }
 
         rosidl_runtime_c__String__assignn(&m_msgLog.msg, message.c_str(), message.size());
+
+        instant_t stamp = SystemClock().micros();
+        m_msgLog.stamp.sec = static_cast<int32_t>(stamp / 1000000);
+        m_msgLog.stamp.nanosec = static_cast<int32_t>((stamp % 1000000) * 1000);
 
         if (m_logger) {
             m_logger->publish(m_msgLog);
