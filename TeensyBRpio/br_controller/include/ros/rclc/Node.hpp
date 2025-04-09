@@ -12,11 +12,14 @@
 #include <rcl_interfaces/msg/log.h>
 #include <rclc/executor.h>
 #include <rclc/rclc.h>
-#include <rcutils/logging_macros.h>
+#include <rosidl_runtime_c/string_functions.h>
 
 #include <functional>
 #include <memory>
 #include <optional>
+#ifndef ARDUINO
+#include <iostream>
+#endif
 
 namespace ros_rclc {
 
@@ -35,12 +38,25 @@ class Subscription;
 class Node {
 
   public:
-    Node(string_t name) : m_name(std::move(name)), m_msgLog() {
+    Node(string_t name) : m_name(std::move(name)), m_msgLog(), m_logger() {
         RCCHECK_HARD(rclc_support_init(m_support.get(), 0, NULL, m_allocator.get()));
         RCCHECK_HARD(rclc_node_init_default(m_node.get(), m_name.c_str(), "", m_support.get()));
-        RCCHECK_HARD(rclc_executor_init(m_executor.get(), &m_support->context, 8, m_allocator.get()));
+        RCCHECK_HARD(rclc_executor_init(m_executor.get(), &m_support->context, 7, m_allocator.get()));
 
-        m_logger.emplace(createPublisher<rcl_interfaces__msg__Log>("rosout"));
+        rcl_interfaces__msg__Log__init(&m_msgLog);
+        rosidl_runtime_c__String__assignn(&m_msgLog.name, m_name.c_str(), m_name.size());
+
+        m_logger.emplace(createPublisher<rcl_interfaces__msg__Log>("rosout", /* reliability = */ ReliableOnly));
+    }
+    ~Node() {
+        m_logger.reset();
+
+        if (m_executor) {
+            rcl_interfaces__msg__Log__fini(&m_msgLog);
+            RCCHECK_SOFT(rclc_executor_fini(m_executor.get()));
+            RCCHECK_SOFT(rcl_node_fini(m_node.get()));
+            RCCHECK_SOFT(rclc_support_fini(m_support.get()));
+        }
     }
 
     void spin_once() { RCCHECK_HARD(rclc_executor_spin_some(m_executor.get(), 0)); }
@@ -78,17 +94,15 @@ class Node {
                 break;
         }
 
-        m_msgLog.name.data = (char *)m_name.c_str();
-        m_msgLog.name.size = m_name.size();
-        m_msgLog.name.capacity = m_name.capacity();
-
-        m_msgLog.msg.data = (char *)message.c_str();
-        m_msgLog.msg.size = message.size();
-        m_msgLog.msg.capacity = message.capacity();
+        rosidl_runtime_c__String__assignn(&m_msgLog.msg, message.c_str(), message.size());
 
         if (m_logger) {
             m_logger->publish(m_msgLog);
         }
+
+#ifndef ARDUINO
+        std::cout << severityToString(severity) << " " << message << std::endl;
+#endif
     }
 
   private:
@@ -100,6 +114,7 @@ class Node {
 
     string_t m_name;
     rcl_interfaces__msg__Log m_msgLog;
+    // We use our own publisher to /rosout instead of the logging macros because micro_ros does not publish logs automatically
     std::optional<Publisher<rcl_interfaces__msg__Log>> m_logger;
 };
 } // namespace ros_rclc
