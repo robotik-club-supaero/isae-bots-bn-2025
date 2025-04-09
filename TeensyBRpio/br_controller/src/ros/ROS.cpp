@@ -27,7 +27,7 @@ TEMPLATE
 _ROS::ROS(TClock clock, duration_t sendPositionInterval, duration_t logInterval)
     : ros_impl::node_t("base_roulante"), m_clock(std::move(clock)), m_sendInterval(sendPositionInterval), m_logInterval(logInterval), m_lastSend(0),
       m_lastLog(0), m_wasActive(false), m_dispatcher(), m_pubPositionFeedback(this->template createPublisher<position_t>("/br/currentPosition")),
-      m_pubHN(this->template createPublisher<msg_int16_t>("/br/callbacks")), //
+      m_pubHN(this->template createPublisher<msg_int16_t>("/br/callbacks", /* reliability = */ ReliableOnly)), //
       m_pubLog(this->template createPublisher<log_entry_t>("/br/logTotaleArray")),
       m_pubOdosTicks(this->template createPublisher<odos_count_t>("/br/odosCount")) {}
 

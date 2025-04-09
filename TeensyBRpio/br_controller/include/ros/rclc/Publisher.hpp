@@ -2,6 +2,7 @@
 #define _ROS_IMPL_PUBLISHER_HPP_
 
 #include "ros/message_cast.hpp"
+#include "ros/qos/Reliability.hpp"
 #include "ros/rclc/macros.hpp"
 #include "ros/rclc/type_support.hpp"
 
@@ -35,9 +36,13 @@ class Publisher {
   private:
     friend class Node;
 
-    Publisher(std::shared_ptr<rcl_node_t> node, const string_t &topic)
+    Publisher(std::shared_ptr<rcl_node_t> node, const string_t &topic, QosReliability reliability)
         : m_node(std::move(node)), m_publisher(std::make_unique<rcl_publisher_t>()), m_msg() {
-        RCCHECK_HARD(rclc_publisher_init_best_effort(m_publisher.get(), m_node.get(), type_support_t<T>::get(), topic.c_str()));
+        if (reliability == AllowBestEffort) {
+            RCCHECK_HARD(rclc_publisher_init_best_effort(m_publisher.get(), m_node.get(), type_support_t<T>::get(), topic.c_str()));
+        } else {
+            RCCHECK_HARD(rclc_publisher_init_default(m_publisher.get(), m_node.get(), type_support_t<T>::get(), topic.c_str()));
+        }
     }
 
     std::shared_ptr<rcl_node_t> m_node;

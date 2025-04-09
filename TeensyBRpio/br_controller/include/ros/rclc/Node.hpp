@@ -51,8 +51,8 @@ class Node {
     }
 
     template <typename T>
-    Publisher<T> createPublisher(const string_t &topic) {
-        return Publisher<T>(m_node, topic);
+    Publisher<T> createPublisher(const string_t &topic, QosReliability reliability = AllowBestEffort) {
+        return Publisher<T>(m_node, topic, reliability);
     }
 
     void sendLog(LogSeverity severity, const string_t &message) {

@@ -2,9 +2,11 @@
 #define _ROS_IMPL_NODE_HPP_
 
 #include "defines/string.h"
+
+#include "ros/qos/Reliability.hpp"
 #include "ros/rclcpp/Publisher.hpp"
 
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
 
 namespace ros_rclcpp {
 class Node {
@@ -20,7 +22,8 @@ class Node {
     }
 
     template <typename T>
-    Publisher<T> createPublisher(const string_t &topic) {
+    Publisher<T> createPublisher(const string_t &topic, QosReliability reliability = ReliableOnly) {
+        std::ignore = reliability; // Always use a reliable QOS for the simulation
         return Publisher<T>(m_node->template create_publisher<T>(topic, 10));
     }
 
