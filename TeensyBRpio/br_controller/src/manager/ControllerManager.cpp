@@ -29,13 +29,13 @@ ManagerStatus MANAGER::getStatus() const {
 TEMPLATE
 void MANAGER::setActive(bool active) {
     if (active) {
-        if (this->getStatus() == Active) {
+        if (this->getStatus() == Active || this->getStatus() == Activating) {
             log(WARN, "The controller is already active.");
         } else {
             this->template setCurrentState<StateActivating>(m_actuators);
         }
     } else {
-        if (this->getStatus() == Idle) {
+        if (this->getStatus() == Idle || this->getStatus() == Deactivating) {
             log(WARN, "The controller is already inactive.");
         } else {
             m_controller.reset();
