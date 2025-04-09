@@ -38,7 +38,7 @@ class Node {
     Node(string_t name) : m_name(std::move(name)), m_msgLog() {
         RCCHECK_HARD(rclc_support_init(m_support.get(), 0, NULL, m_allocator.get()));
         RCCHECK_HARD(rclc_node_init_default(m_node.get(), m_name.c_str(), "", m_support.get()));
-        RCCHECK_HARD(rclc_executor_init(m_executor.get(), &m_support->context, 5, m_allocator.get()));
+        RCCHECK_HARD(rclc_executor_init(m_executor.get(), &m_support->context, 8, m_allocator.get()));
 
         m_logger.emplace(createPublisher<rcl_interfaces__msg__Log>("rosout"));
     }

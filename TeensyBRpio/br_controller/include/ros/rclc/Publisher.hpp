@@ -26,7 +26,11 @@ class Publisher {
         RCCHECK_HARD(rcl_publish(m_publisher.get(), &m_msg, NULL));
     }
 
-    ~Publisher() { RCCHECK_SOFT(rcl_publisher_fini(m_publisher.get(), m_node.get())); }
+    ~Publisher() {
+        if (m_publisher) {
+            RCCHECK_SOFT(rcl_publisher_fini(m_publisher.get(), m_node.get()));
+        }
+    }
 
   private:
     friend class Node;

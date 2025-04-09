@@ -8,6 +8,8 @@
 #include <rclc/executor.h>
 #include <rclc/rclc.h>
 
+#include <functional>
+
 namespace ros_rclc {
 
 class Node;
@@ -41,7 +43,11 @@ class Subscription {
   public:
     Subscription(Subscription<T> &&subscription)
         : m_node(std::move(subscription.m_node)), m_subscription(std::move(subscription.m_subscription)), m_msg(std::move(subscription.m_msg)) {}
-    ~Subscription() { RCCHECK_SOFT(rcl_subscription_fini(m_subscription.get(), m_node.get())); }
+    ~Subscription() {
+        if (m_subscription) {
+            RCCHECK_SOFT(rcl_subscription_fini(m_subscription.get(), m_node.get()));
+        }
+    }
 
   private:
     using MsgT = MessageWrapper<T>;
