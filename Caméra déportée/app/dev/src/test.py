@@ -14,6 +14,8 @@ from lora import ModemConfig, LoRa
 # File paths
 calibration_image_path = "../platformImages/calibration.jpg"
 
+camera_test_image_path = "../platformImages/test_camera.jpg"
+
 capture_image_path = "../platformImages/capture.jpg"
 reference_image_path = "../platformImages/reference.jpg"
 
@@ -50,34 +52,35 @@ print("Setting up image normalizer...")
 imageNormalizer = ImageNormalizer(reference_image_path, calibration_image_path, npz_file_path)
 imageNormalizer.computeHomographyMatrix(calibration_image_path, draw=False)
 
-# Capture an image of the platform
-#print("Capturing image of the platform...")
-#capture_image(capture_image_path)
+start = time.time()
 
-# Normalize the image using Aruco tags
-normalizedImage = imageNormalizer.normalizeImage(capture_image_path)
+for i in range(2):
 
-print("Writing normalized capture...")
-normalized_output_path = os.path.join(normalized_image_dir, "normalized_" + os.path.basename(capture_image_path))
-cv2.imwrite(normalized_output_path, normalizedImage)
-print(f"Normalized capture saved to {normalized_output_path}")
+    # Capture an image of the platform
+    print("Capturing image of the platform...")
+    capture_image(camera_test_image_path)
+    # Normalize the image using Aruco tags
+    normalizedImage = imageNormalizer.normalizeImage(capture_image_path)
 
-# Detect objects inside Aruco tags and return the coordinates
-rectangles = detect_objects_inside_aruco(
-    reference_image_path,normalized_output_path, aruco_json_path, distances_json_path
-)
-print(rectangles)
-print("\n")
+    print("Writing normalized capture...")
+    normalized_output_path = os.path.join(normalized_image_dir, "normalized_" + os.path.basename(capture_image_path))
+    cv2.imwrite(normalized_output_path, normalizedImage)
+    print(f"Normalized capture saved to {normalized_output_path}")
 
-# Send the coordinates via LoRa
-print("Sending data.\n")
-for rectangle in rectangles:
-    for item in rectangle:
-        item = int(item)
-        lora.send(item, header_to)
+    # Detect objects inside Aruco tags and return the coordinates
+    rectangles = detect_objects_inside_aruco(
+        reference_image_path,normalized_output_path, aruco_json_path, distances_json_path
+    )
+    print(rectangles)
+    print("\n")
 
-# Wait for the next iteration
-print("Sleeping.\n")
-time.sleep(5)  # Adjust this value as needed
+    # Send the coordinates via LoRa
+    print("Sending data.\n")
+    for rectangle in rectangles:
+        for item in rectangle:
+            item = int(item)
+            lora.send(item, header_to)
 
 lora.close()
+
+print(time.time() - start)
