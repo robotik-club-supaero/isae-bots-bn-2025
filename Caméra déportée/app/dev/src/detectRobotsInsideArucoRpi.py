@@ -4,13 +4,12 @@
 import cv2
 import sys
 import json
-from loadImage import loadImage
 from aruco import ArucoDetector, ArucoTags
 
 def detect_objects_inside_aruco(reference_image_path, capture_image_path, aruco_json_path, distances_json_path):
     # Load images
-    image_reference = loadImage(reference_image_path)
-    image_with_objects = loadImage(capture_image_path)
+    image_reference = cv2.imread(reference_image_path)
+    image_with_objects = cv2.imread(capture_image_path)
 
     # Load Aruco tags
     aruco_tags = json.load(open(aruco_json_path))

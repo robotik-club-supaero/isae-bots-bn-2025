@@ -4,7 +4,6 @@
 import cv2
 import os
 import numpy as np
-from loadImage import loadImage
 from undistort import Undistort
 from aruco import ArucoDetector, ArucoTags
 
@@ -22,7 +21,7 @@ class ImageNormalizer:
         self._detector = ArucoDetector()
 
         # Load the reference image for Aruco tags
-        self._reference = self._detector(loadImage(reference_image_path))
+        self._reference = self._detector(cv2.imread(reference_image_path))
         # Shape of the reference image
         self._shape = self._reference._image.shape
         

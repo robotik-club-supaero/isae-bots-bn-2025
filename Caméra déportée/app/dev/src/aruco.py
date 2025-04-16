@@ -2,7 +2,6 @@
 
 import cv2
 import numpy as np
-from loadImage import loadImage
 
 class ArucoDetector:
     _dictionary =  cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)

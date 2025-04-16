@@ -12,6 +12,7 @@ print("Importing files")
 from imageNormalizerRpi import ImageNormalizer
 from detectRobotsInsideArucoRpi import detect_objects_inside_aruco
 from lora import ModemConfig, LoRa
+from picamera2 import Picamera2
 
 # File paths
 calibration_image_path = "../platformImages/calibration.jpg"
@@ -34,7 +35,7 @@ def capture_image(output_path): # add ,q in final version
     # libcamera-jpeg is a custom command to capture images using the Raspberry Pi camera
     # -n no preview
     # -o output file
-    command = f"libcamera-jpeg -n -o {output_path}"
+    command = f"libcamera-jpeg -n --output {output_path} --width 320 --height 240"
     subprocess.run(command, shell=True)
 
     #q.put(output_path)
@@ -73,6 +74,13 @@ def sendData(rectangles, lora, header_to):
 
 if __name__ == "__main__":
 
+    print("Setting up camera...")
+    picam2 = Picamera2()
+    config = picam2.create_still_configuration(main={"size": (320, 240)})
+    picam2.configure(config)
+    picam2.start()
+
+
     print("Setting up  LoRa...")
     lora = LoRa(channel=0, interrupt=17, this_address=2, modem_config=ModemConfig.Bw500Cr45Sf128, tx_power=14, acks=False)
     header_to = 255 # Send to all
@@ -98,17 +106,18 @@ if __name__ == "__main__":
     start = time.time()
 
     #Prise de la première image
-    p0 = multiprocessing.Process(target = capture_image, args = (camera_test_image_path))
+    p0 = multiprocessing.Process(target = capture_image, args = (camera_test_image_path,))
     p0.start()
 
     p0.join()
+
     #capture_image_path = q.get()
     # Processing de la première image
     p1 = multiprocessing.Process(target=processImage, args=(capture_image_path,normalized_image_dir,q))
     p1.start()
 
     # Prise de la deuxième image
-    p0 = multiprocessing.Process(target = capture_image, args = (camera_test_image_path))
+    p0 = multiprocessing.Process(target = capture_image, args = (camera_test_image_path,))
     p0.start()
 
     p1.join()
@@ -145,5 +154,6 @@ if __name__ == "__main__":
     p3.join()
 
     lora.close()
+    picam2.close()
 
     print(time.time() - start)

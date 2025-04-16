@@ -2,7 +2,6 @@
 
 import numpy as np
 import cv2
-from loadImage import loadImage
 
 class Undistort:
 
@@ -22,7 +21,7 @@ class Undistort:
 
         print("Computing camera matrix...")
 
-        image = loadImage(image_path)
+        image = cv2.imread(image_path)
         h,  w = image.shape[:2]
         newCameraMatrix, roi = cv2.getOptimalNewCameraMatrix(self._mtx, self._dist, (w,h), 0, (w,h))
         mapx, mapy = cv2.initUndistortRectifyMap(self._mtx, self._dist, None, newCameraMatrix, (w, h), 5)
@@ -33,7 +32,7 @@ class Undistort:
         
         print("Undistorting image...")
         
-        image = loadImage(image_path)
+        image = cv2.imread(image_path)
         
         dst = cv2.remap(image, mapx, mapy, cv2.INTER_LINEAR)
         
