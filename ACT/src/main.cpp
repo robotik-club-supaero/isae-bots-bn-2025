@@ -1,55 +1,84 @@
-#include <Arduino.h>
-#include "Doors.hpp"
-#include "ClampElevator.hpp"
+#include <ros2arduino.h>
+
+#include <optional>
+
 #include "Clamp.hpp"
-#include "ClampHoriz.hpp"
-#include "a_define.hpp"
-#include "Ultrasonic.hpp"
-#include <ros.h>
+#include "Elevator.hpp"
+#include "logging.hpp"
 
-ros::NodeHandle nh;
+ros2::Node node("ACT");
+ros2::Publisher<std_msgs::String> *logger(node.createPublisher<std_msgs::String>("/act/logging"));
 
-Doors doors = Doors();
-DoorsROS doorsROS = DoorsROS(&doors, &nh);
-
-ClampElevator clampelevator = ClampElevator();
-ClampElevatorROS clampelevatorROS = ClampElevatorROS(&clampelevator, &nh);
-
-Clamp clamp = Clamp();
-ClampROS clampROS = ClampROS(&clamp, &nh);
-
-ClampHoriz clamphoriz = ClampHoriz(); 
-ClampHorizROS clamphorizROS = ClampHorizROS(&clamphoriz, &nh);  
-
-Ultrasonic ultrasonic_l = Ultrasonic(ULTRASONIC_L_TRIG_PIN, ULTRASONIC_L_ECHO_PIN);
-Ultrasonic ultrasonic_r = Ultrasonic(ULTRASONIC_R_TRIG_PIN, ULTRASONIC_R_ECHO_PIN);
-
-UltrasonicROS ultrasonicROS = UltrasonicROS(&ultrasonic_l, &ultrasonic_r, &nh);
-
+std::optional<Elevator1> elevator1;
+std::optional<Elevator2> elevator2;
+std::optional<Clamp1> clamp1;
+std::optional<Clamp2> clamp2;
 
 void setup() {
+    Serial.begin(115200);
+    while (!Serial);
 
-  nh.initNode();
+    ros2::init(&Serial);
 
-  doorsROS.setup();
-  clampelevatorROS.setup();
-  clampROS.setup();
-  clamphorizROS.setup();
-
-  ultrasonicROS.setup();
-
-
+    elevator1.emplace(node);
+    elevator2.emplace(node);
+    clamp1.emplace(node);
+    clamp2.emplace(node);
 }
 
 void loop() {
+    elevator1->loop();
+    elevator2->loop();
+    clamp1->loop();
+    clamp2->loop();
 
-  doorsROS.loop();
-  clampelevatorROS.loop();
-  clampROS.loop();
-  clamphorizROS.loop();
+    ros2::spin(&node);
+}
 
-  ultrasonicROS.loop();
-  
+inline const char *severityToString(LogSeverity severity) {
+    switch (severity) {
+        case DEBUG:
+            return "DEBUG";
+        case INFO:
+            return "INFO";
+        case WARN:
+            return "WARN";
+        case ERROR:
+            return "ERROR";
+        case FATAL:
+            return "FATAL";
+        default:
+            return "INVALID";
+    }
+}
 
-  nh.spinOnce();
+void log(LogSeverity severity, String message) {
+    if (logger) {
+        std_msgs::String msg;
+        constexpr size_t max_len = sizeof(msg.data);
+
+        String severityPrefix = String("[").concat(severityToString(severity)).concat("] ");
+        size_t max_msg_len = max_len - 1 - severityPrefix.length();
+
+        while (message.length() > max_msg_len) {
+            String partialMessage = severityPrefix.concat(message.substring(0, max_msg_len));
+            message = message.substring(max_msg_len);
+
+            memcpy(msg.data, partialMessage.c_str(), partialMessage.length() + 1);
+            logger->publish(&msg);
+        }
+
+        String _message = severityPrefix.concat(message);
+        memcpy(msg.data, _message.c_str(), _message.length() + 1);
+        logger->publish(&msg);
+    }
+}
+
+extern "C" {
+    __attribute__((weak))
+    int _write(int file, char *ptr, int len)
+    {
+        ((class Print *)file)->write((uint8_t *)ptr, len);
+        return len;
+    }
 }

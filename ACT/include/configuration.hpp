@@ -1,0 +1,24 @@
+#ifndef _CONFIGURATION_HPP_
+#define _CONFIGURATION_HPP_
+
+// -- SERVO POSITIONS --
+
+#define CLAMP_OPEN_POS 40 // TODO
+#define CLAMP_CLOSED_POS 6 // TODO
+
+#define ELEVATOR_UP_POS 50 // TODO
+#define ELEVATOR_DOWN_POS 5 // TODO
+
+// -- PINS --
+
+#define ELEVATOR_1_PIN 5 // TODO
+#define ELEVATOR_2_PIN 6 // TODO
+
+#define CLAMP_1_PIN 21 // TODO
+#define CLAMP_2_PIN 22 // TODO
+
+// -- OTHER CONFIG --
+
+#define CALLBACK_INTERVAL 1000 // ms
+
+#endif

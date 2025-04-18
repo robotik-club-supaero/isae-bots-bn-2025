@@ -1,71 +1,12 @@
-
 #include "Clamp.hpp"
 
+#include "configuration.hpp"
 
-Clamp::Clamp() :
-    m_servo(){
+// TODO what should be the initial state?
 
-        m_positions[0] = CLAMP_CLOSED_POS;
-        m_positions[1] = CLAMP_OPEN_POS;
-        
-}
+Clamp::Clamp(int servo_pin, ros2::Node &node, const char *order_topic, const char *callback_topic)
+    : Actuator(servo_pin, node, order_topic, callback_topic, std::array{CLAMP_CLOSED_POS, CLAMP_OPEN_POS}, /* initial_state = */ OPEN) {}
 
-void Clamp::setState(ClampState state){
-    m_state = state;
-    m_servo.write(m_positions[(int)state]);
-}
+Clamp1::Clamp1(ros2::Node &node) : Clamp(CLAMP_1_PIN, node, "/act/order/clamp_1", "/act/callback/clamp_1") {}
 
-void Clamp::setup(){
-
-    m_servo.attach(CLAMP_PIN);   
-
-    m_state = ClampState::OPEN;
-    this->setState(m_state);
-}
-
-void Clamp::loop(){
-    ;
-}
-
-Clamp* ClampROS::m_p_clamp = NULL;
-ros::NodeHandle* ClampROS::m_p_nh = NULL;
-long ClampROS::m_callback_time = 0;
-int ClampROS::m_callback_value = 0;
-
-ClampROS::ClampROS(Clamp* p_clamp, ros::NodeHandle* p_nh) :
-    m_sub("/act/order/clamp", subCallback),
-    m_pub("/act/callback/clamp", &m_msg){
-
-    m_p_clamp = p_clamp;
-    m_p_nh = p_nh;
-    m_callback_value = -1;
-
-}
-
-void ClampROS::subCallback(const std_msgs::Int16& stateVal){
-    m_p_nh->loginfo("[CLAMP] Order");
-    if (stateVal.data == 1) m_p_clamp->setState(ClampState::CLOSED);
-    else               m_p_clamp->setState(ClampState::OPEN);
-    m_callback_value = stateVal.data;
-    m_callback_time = millis();
-}
-
-void ClampROS::setup(){
-    m_p_clamp->setup();
-    m_p_nh->subscribe(m_sub);
-
-    m_p_nh->advertise(m_pub);
-
-    m_p_nh->loginfo("[CLAMP] Setup");
-}
-
-void ClampROS::loop(){
-    m_p_clamp->loop();
-
-    if(m_callback_value != -1 && millis() - m_callback_time > CALLBACK_INTERVAL){
-        m_msg.data = m_callback_value;
-        m_pub.publish(&m_msg);
-        m_callback_value = -1;
-    }
-}
-
+Clamp2::Clamp2(ros2::Node &node) : Clamp(CLAMP_2_PIN, node, "/act/order/clamp_2", "/act/callback/clamp_2") {}
