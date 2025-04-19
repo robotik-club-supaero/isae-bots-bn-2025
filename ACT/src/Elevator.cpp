@@ -29,8 +29,8 @@ void ElevatorStepper::setState(uint16_t state) {
 }
 
 Elevators::Elevators(ros2::Node &node)
-    : m_stepper_1(ELEVATOR_STEP_PER_REV, ELEVATOR_1_STEP_PIN, ELEVATOR_1_DIR_PIN, 1, ELEVATOR_SPEED, ELEVATOR_POS_OFFSET),
-      m_stepper_2(ELEVATOR_STEP_PER_REV, ELEVATOR_2_STEP_PIN, ELEVATOR_2_DIR_PIN, 2, ELEVATOR_SPEED, ELEVATOR_POS_OFFSET),
+    : m_stepper_1(ELEVATOR_1_STEP_PER_REV, ELEVATOR_1_STEP_PIN, ELEVATOR_1_DIR_PIN, 1, ELEVATOR_1_SPEED, ELEVATOR_1_POS_OFFSET),
+      m_stepper_2(ELEVATOR_2_STEP_PER_REV, ELEVATOR_2_STEP_PIN, ELEVATOR_2_DIR_PIN, 2, ELEVATOR_2_SPEED, ELEVATOR_2_POS_OFFSET),
       m_elevator_1(node, "/act/order/elevator_1", "/act/callback/elevator_1"),
       m_elevator_2(node, "/act/order/elevator_2", "/act/callback/elevator_2") {}
 

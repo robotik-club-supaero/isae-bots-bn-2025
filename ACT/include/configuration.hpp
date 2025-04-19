@@ -6,15 +6,23 @@
 #define CLAMP_OPEN_POS 40   // TODO
 #define CLAMP_CLOSED_POS 6  // TODO
 
-#define ELEVATOR_STEP_PER_REV 200 // TODO
-#define ELEVATOR_SPEED 50 // rev per minute // TODO
-#define ELEVATOR_POS_OFFSET 200 // number of steps between states DOWN and UP // TODO
-
 #define BANNER_1_DEPLOYED_POS 50  // TODO
 #define BANNER_1_RETRACTED_POS 5  // TODO
 
 #define BANNER_2_DEPLOYED_POS 50  // TODO
 #define BANNER_2_RETRACTED_POS 5  // TODO
+
+// -- STEPPERS CONFIGURATION (ELEVATORS) --
+
+#define ELEVATOR_1_STEP_PER_REV 200 // TODO
+#define ELEVATOR_2_STEP_PER_REV ELEVATOR_1_STEP_PER_REV // TODO
+
+#define ELEVATOR_1_SPEED 50 // rev per minute // TODO
+#define ELEVATOR_2_SPEED ELEVATOR_1_SPEED // rev per minute // TODO
+
+// number of steps between states DOWN and UP - change sign to invert direction
+#define ELEVATOR_1_POS_OFFSET 200 // TODO
+#define ELEVATOR_2_POS_OFFSET ELEVATOR_1_POS_OFFSET // TODO
 
 // -- PINS --
 
