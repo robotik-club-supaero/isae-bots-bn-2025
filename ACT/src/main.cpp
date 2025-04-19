@@ -1,3 +1,4 @@
+#ifndef TEST_OSCILLATE
 
 #include <optional>
 
@@ -14,8 +15,8 @@ std::optional<ros2::Node> node;
 std::optional<ros2::Publisher<std_msgs::String>> logger;
 
 std::optional<Elevators> elevators;
-std::optional<Clamp1> clamp1;
-std::optional<Clamp2> clamp2;
+std::optional<Clamps1> clamp1;
+std::optional<Clamps2> clamp2;
 std::optional<Banner> banner;
 
 void setup() {
@@ -64,6 +65,10 @@ inline const char *severityToString(LogSeverity severity) {
 }
 
 void log(LogSeverity severity, String message) {
-    std_msgs::String msg(String("[").concat(severityToString(severity)).concat("] ").concat(message));
-    logger->publish(msg);
+    if (logger) {
+        std_msgs::String msg(String("[").concat(severityToString(severity)).concat("] ").concat(message));
+        logger->publish(msg);
+    }
 }
+
+#endif

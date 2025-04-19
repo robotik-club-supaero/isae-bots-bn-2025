@@ -29,7 +29,7 @@ class ActuatorStateManager {
 
    private:
     std::shared_ptr<ActuatorStateHolder> m_state;
-    ros2::Subscriber<std_msgs::Int16>m_sub;
+    ros2::Subscriber<std_msgs::Int16> m_sub;
     ros2::Publisher<std_msgs::Int16> m_pub;
     std_msgs::Int16 m_msg;
 };

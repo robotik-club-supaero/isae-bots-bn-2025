@@ -2,6 +2,7 @@
 #define _ACTUATOR_SERVO_HPP_
 
 #include <Servo.h>
+
 #include <array>
 
 template <uint16_t N>
@@ -11,6 +12,7 @@ class ActuatorServo {
 
     uint16_t getState() const;
     void setState(uint16_t state);
+    void toggle();
 
     bool needsNotify() const;
     unsigned long getLastChangeTime() const;

@@ -7,10 +7,10 @@
 
 ClampServo::ClampServo(int servo_pin) : ActuatorServo(servo_pin, std::array{CLAMP_CLOSED_POS, CLAMP_OPEN_POS}, /* initial_state = */ OPEN) {}
 
-Clamp::Clamp(int servo_pin1, int servo_pin2, ros2::Node &node, int level, const char *order_topic, const char *callback_topic)
+Clamps::Clamps(int servo_pin1, int servo_pin2, ros2::Node &node, int level, const char *order_topic, const char *callback_topic)
     : m_level(level), m_ros(node, order_topic, callback_topic), m_clamp_1(servo_pin1), m_clamp_2(servo_pin2) {}
 
-void Clamp::loop() {
+void Clamps::loop() {
     if (auto state = m_ros.getRequestedState()) {
         if (*state < 2) {
             log(INFO, String("Moving clamps ").concat(m_level).concat(" to position ").concat(*state));
@@ -26,6 +26,6 @@ void Clamp::loop() {
     }
 }
 
-Clamp1::Clamp1(ros2::Node &node) : Clamp(CLAMP_1_1_PIN, CLAMP_1_2_PIN, node, 1, "/act/order/clamp_1", "/act/callback/clamp_1") {}
+Clamps1::Clamps1(ros2::Node &node) : Clamps(CLAMP_1_1_PIN, CLAMP_1_2_PIN, node, 1, "/act/order/clamp_1", "/act/callback/clamp_1") {}
 
-Clamp2::Clamp2(ros2::Node &node) : Clamp(CLAMP_2_1_PIN, CLAMP_2_2_PIN, node, 2, "/act/order/clamp_2", "/act/callback/clamp_2") {}
+Clamps2::Clamps2(ros2::Node &node) : Clamps(CLAMP_2_1_PIN, CLAMP_2_2_PIN, node, 2, "/act/order/clamp_2", "/act/callback/clamp_2") {}

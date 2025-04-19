@@ -13,9 +13,9 @@ class ClampServo : public ActuatorServo<2> {
     ClampServo(int servo_pin);
 };
 
-class Clamp {
+class Clamps {
    public:
-    Clamp(int servo_pin1, int servo_pin2, ros2::Node &node, int level, const char *order_topic, const char *callback_topic);
+    Clamps(int servo_pin1, int servo_pin2, ros2::Node &node, int level, const char *order_topic, const char *callback_topic);
 
     void loop();
 
@@ -26,14 +26,14 @@ class Clamp {
     ClampServo m_clamp_2;
 };
 
-class Clamp1 : public Clamp {
+class Clamps1 : public Clamps {
    public:
-    Clamp1(ros2::Node &node);
+    Clamps1(ros2::Node &node);
 };
 
-class Clamp2 : public Clamp {
+class Clamps2 : public Clamps {
    public:
-    Clamp2(ros2::Node &node);
+    Clamps2(ros2::Node &node);
 };
 
 #endif

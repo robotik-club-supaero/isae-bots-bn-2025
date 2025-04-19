@@ -25,6 +25,11 @@ void ActuatorServo<N>::setState(uint16_t state) {
 }
 
 template <uint16_t N>
+void ActuatorServo<N>::toggle() {
+    setState((getState() + 1) % N);
+}
+
+template <uint16_t N>
 bool ActuatorServo<N>::needsNotify() const {
     return m_need_notify;
 }

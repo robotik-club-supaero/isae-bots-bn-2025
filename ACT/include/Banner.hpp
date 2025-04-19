@@ -13,6 +13,16 @@ class BannerServo : public ActuatorServo<2> {
     BannerServo(int servo_pin, std::array<int, 2> positions);
 };
 
+class BannerServo1 : public BannerServo {
+   public:
+    BannerServo1();
+};
+
+class BannerServo2 : public BannerServo {
+   public:
+    BannerServo2();
+};
+
 class Banner {
    public:
     Banner(ros2::Node &node);
@@ -20,8 +30,8 @@ class Banner {
     void loop();
 
    private:
-    BannerServo m_servo_1;
-    BannerServo m_servo_2;
+    BannerServo1 m_servo_1;
+    BannerServo2 m_servo_2;
     ActuatorStateManager m_ros;
 };
 

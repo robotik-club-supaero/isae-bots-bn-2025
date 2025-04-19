@@ -9,6 +9,13 @@ ElevatorStepper::ElevatorStepper(int number_of_steps, int pin1, int pin2, int le
     m_stepper.setSpeed(speed);
 }
 
+ElevatorStepper1::ElevatorStepper1()
+    : ElevatorStepper(ELEVATOR_1_STEP_PER_REV, ELEVATOR_1_STEP_PIN, ELEVATOR_1_DIR_PIN, 1, ELEVATOR_1_SPEED, ELEVATOR_1_POS_OFFSET) {}
+
+
+    ElevatorStepper2::ElevatorStepper2()
+    : ElevatorStepper(ELEVATOR_2_STEP_PER_REV, ELEVATOR_2_STEP_PIN, ELEVATOR_2_DIR_PIN, 2, ELEVATOR_2_SPEED, ELEVATOR_2_POS_OFFSET) {}
+
 ElevatorCallback ElevatorStepper::getState() const { return m_state; }
 void ElevatorStepper::setState(uint16_t state) {
     switch (state) {
@@ -29,8 +36,8 @@ void ElevatorStepper::setState(uint16_t state) {
 }
 
 Elevators::Elevators(ros2::Node &node)
-    : m_stepper_1(ELEVATOR_1_STEP_PER_REV, ELEVATOR_1_STEP_PIN, ELEVATOR_1_DIR_PIN, 1, ELEVATOR_1_SPEED, ELEVATOR_1_POS_OFFSET),
-      m_stepper_2(ELEVATOR_2_STEP_PER_REV, ELEVATOR_2_STEP_PIN, ELEVATOR_2_DIR_PIN, 2, ELEVATOR_2_SPEED, ELEVATOR_2_POS_OFFSET),
+    : m_stepper_1(),
+      m_stepper_2(),
       m_elevator_1(node, "/act/order/elevator_1", "/act/callback/elevator_1"),
       m_elevator_2(node, "/act/order/elevator_2", "/act/callback/elevator_2") {}
 

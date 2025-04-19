@@ -23,6 +23,16 @@ class ElevatorStepper {
     ElevatorCallback m_state;
 };
 
+class ElevatorStepper1 : public ElevatorStepper {
+   public:
+    ElevatorStepper1();
+};
+
+class ElevatorStepper2 : public ElevatorStepper {
+   public:
+    ElevatorStepper2();
+};
+
 class Elevators {
    public:
     Elevators(ros2::Node &node);
@@ -30,8 +40,8 @@ class Elevators {
     void loop();
 
    private:
-    ElevatorStepper m_stepper_1;
-    ElevatorStepper m_stepper_2;
+    ElevatorStepper1 m_stepper_1;
+    ElevatorStepper2 m_stepper_2;
 
     ActuatorStateManager m_elevator_1;
     ActuatorStateManager m_elevator_2;

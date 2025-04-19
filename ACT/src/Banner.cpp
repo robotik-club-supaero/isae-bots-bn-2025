@@ -5,10 +5,10 @@
 
 BannerServo::BannerServo(int servo_pin, std::array<int, 2> positions) : ActuatorServo<2>(servo_pin, positions, /* initial_state = */ RETRACTED) {}
 
-Banner::Banner(ros2::Node& node)
-    : m_servo_1(BANNER_1_PIN, std::array<int, 2>{BANNER_1_RETRACTED_POS, BANNER_1_DEPLOYED_POS}),
-      m_servo_2(BANNER_2_PIN, std::array<int, 2>{BANNER_2_RETRACTED_POS, BANNER_2_DEPLOYED_POS}),
-      m_ros(node, "/act/order/banderolle", "/act/callback/banderolle") {}
+BannerServo1::BannerServo1() : BannerServo(BANNER_1_PIN, std::array<int, 2>{BANNER_1_RETRACTED_POS, BANNER_1_DEPLOYED_POS}) {}
+BannerServo2::BannerServo2() : BannerServo(BANNER_2_PIN, std::array<int, 2>{BANNER_2_RETRACTED_POS, BANNER_2_DEPLOYED_POS}) {}
+
+Banner::Banner(ros2::Node& node) : m_servo_1(), m_servo_2(), m_ros(node, "/act/order/banderolle", "/act/callback/banderolle") {}
 
 void Banner::loop() {
     if (auto state = m_ros.getRequestedState()) {
