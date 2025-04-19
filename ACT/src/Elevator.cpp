@@ -1,3 +1,4 @@
+#if 0
 #include "Elevator.hpp"
 
 #include "configuration.hpp"
@@ -58,3 +59,4 @@ std::function<void(uint16_t)> Elevators::createCallback(const std::shared_ptr<El
         }
     };
 }
+#endif

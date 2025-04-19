@@ -23,8 +23,10 @@
 #define ELEVATOR_1_PIN 5  // TODO
 #define ELEVATOR_2_PIN 6  // TODO
 
-#define CLAMP_1_PIN 21  // TODO
-#define CLAMP_2_PIN 22  // TODO
+#define CLAMP_1_1_PIN 21  // TODO
+#define CLAMP_1_2_PIN 21  // TODO
+#define CLAMP_2_1_PIN 22  // TODO
+#define CLAMP_2_2_PIN 21  // TODO
 
 #define BANNER_1_PIN 21  // TODO
 #define BANNER_2_PIN 22  // TODO

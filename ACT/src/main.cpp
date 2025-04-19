@@ -4,13 +4,13 @@
 
 #include "Banner.hpp"
 #include "Clamp.hpp"
-#include "Elevator.hpp"
+//#include "Elevator.hpp"
 #include "logging.hpp"
 
 ros2::Node node("ACT");
 ros2::Publisher<std_msgs::String> *logger(node.createPublisher<std_msgs::String>("/act/logging"));
 
-std::optional<Elevators> elevators;
+//std::optional<Elevators> elevators;
 std::optional<Clamp1> clamp1;
 std::optional<Clamp2> clamp2;
 std::optional<Banner> banner;
@@ -21,14 +21,14 @@ void setup() {
 
     ros2::init(&Serial);
 
-    elevators.emplace(node);
+ //   elevators.emplace(node);
     clamp1.emplace(node);
     clamp2.emplace(node);
     banner.emplace(node);
 }
 
 void loop() {
-    elevators->loop();
+   // elevators->loop();
     clamp1->loop();
     clamp2->loop();
     banner->loop();

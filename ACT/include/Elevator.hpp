@@ -1,3 +1,4 @@
+#if 0
 #ifndef _ELEVATOR_HPP_
 #define _ELEVATOR_HPP_
 
@@ -38,4 +39,5 @@ class Elevators {
     ActuatorTopics m_elevator_2;
 };
 
+#endif
 #endif
