@@ -49,8 +49,10 @@ MACHINE A ETAT
 Capteur ultrason
 */
 *
-#define Broche_Echo 7 // Broche Echo du HC-SR04 sur D7 //
-#define Broche_Trigger 8 // Broche Trigger du HC-SR04 sur D8 //
+#define ECHO 7 // Broche Echo du HC-SR04 sur D7 //
+#define TRIGGER 8 // Broche Trigger du HC-SR04 sur D8 //
+#define DIST_MAX = 300; // Distance maxi a mesurer //
+#define DIST_MINs = 3; // Distance mini a mesurer //
 
 
 /*
