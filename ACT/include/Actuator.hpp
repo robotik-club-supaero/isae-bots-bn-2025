@@ -13,8 +13,17 @@ template <uint16_t N>
 class ActuatorHandle {
    public:
     ActuatorHandle(int servo_pin, const char *name, std::array<int, N> positions, uint16_t initial_state);
-    void setState(uint16_t state);
 
+    uint16_t getState() const;
+    bool setState(uint16_t state);
+    unsigned long lastChangeTime() const;
+    bool needsNotify() const;
+    void markNotified();
+
+   protected:
+    void setNeedNotify(bool need_notify);
+
+   private:
     const char *m_name;
     std::array<int, N> m_positions;
 
@@ -25,18 +34,18 @@ class ActuatorHandle {
     Servo m_servo;
 };
 
-template <uint16_t N>
-class Actuator {
+class ActuatorTopics {
    public:
-    Actuator(int servo_pin, ros2::Node &node, const char *order_topic, const char *callback_topic, std::array<int, N> positions,
-             uint16_t initial_state = 0);
-    void loop();
+    ActuatorTopics(ros2::Node &node, const char *order_topic, const char *callback_topic, std::function<void(uint16_t)> callback);
+    ~ActuatorTopics();
+
+    void sendCallback(uint16_t data);
 
    protected:
    private:
     static void orderCallback(void *msg, void *arg);
 
-    std::shared_ptr<ActuatorHandle<N>> m_handle;
+    std::shared_ptr<std::function<void(uint16_t)>> m_callback;
 
     ros2::Subscriber<std_msgs::Int16> *m_sub;
     ros2::Publisher<std_msgs::Int16> *m_pub;

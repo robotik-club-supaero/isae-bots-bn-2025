@@ -3,22 +3,35 @@
 
 // -- SERVO POSITIONS --
 
-#define CLAMP_OPEN_POS 40 // TODO
-#define CLAMP_CLOSED_POS 6 // TODO
+#define CLAMP_OPEN_POS 40   // TODO
+#define CLAMP_CLOSED_POS 6  // TODO
 
-#define ELEVATOR_UP_POS 50 // TODO
-#define ELEVATOR_DOWN_POS 5 // TODO
+#define ELEVATOR_1_UP_POS 50   // TODO
+#define ELEVATOR_1_DOWN_POS 5  // TODO
+
+#define ELEVATOR_2_UP_POS 50   // TODO
+#define ELEVATOR_2_DOWN_POS 5  // TODO
+
+#define BANNER_1_DEPLOYED_POS 50  // TODO
+#define BANNER_1_RETRACTED_POS 5  // TODO
+
+#define BANNER_2_DEPLOYED_POS 50  // TODO
+#define BANNER_2_RETRACTED_POS 5  // TODO
 
 // -- PINS --
 
-#define ELEVATOR_1_PIN 5 // TODO
-#define ELEVATOR_2_PIN 6 // TODO
+#define ELEVATOR_1_PIN 5  // TODO
+#define ELEVATOR_2_PIN 6  // TODO
 
-#define CLAMP_1_PIN 21 // TODO
-#define CLAMP_2_PIN 22 // TODO
+#define CLAMP_1_PIN 21  // TODO
+#define CLAMP_2_PIN 22  // TODO
+
+#define BANNER_1_PIN 21  // TODO
+#define BANNER_2_PIN 22  // TODO
 
 // -- OTHER CONFIG --
 
-#define CALLBACK_INTERVAL 1000 // ms
+#define CALLBACK_INTERVAL 1000  // ms
+#define BANNER_INTERVAL 1000    // ms // TODO
 
 #endif

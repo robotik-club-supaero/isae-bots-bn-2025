@@ -7,9 +7,20 @@ enum ClampOrder : uint16_t { ORDER_OPEN = 0, CLOSE = 1 };
 
 enum ClampCallback : uint16_t { OPEN = 0, CLOSED = 1 };
 
-class Clamp : public Actuator<2> {
+class ClampHandle : public ActuatorHandle<2> {
    public:
-    Clamp(int servo_pin, ros2::Node &node, const char *order_topic, const char *callback_topic);
+    ClampHandle(int servo_pin, const char *name);
+};
+
+class Clamp {
+   public:
+    Clamp(int servo_pin, ros2::Node &node, const char *name, const char *order_topic, const char *callback_topic);
+
+    void loop();
+
+   private:
+    std::shared_ptr<ClampHandle> m_handle;
+    ActuatorTopics m_ros;
 };
 
 class Clamp1 : public Clamp {

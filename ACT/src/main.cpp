@@ -2,6 +2,7 @@
 
 #include <optional>
 
+#include "Banner.hpp"
 #include "Clamp.hpp"
 #include "Elevator.hpp"
 #include "logging.hpp"
@@ -9,10 +10,10 @@
 ros2::Node node("ACT");
 ros2::Publisher<std_msgs::String> *logger(node.createPublisher<std_msgs::String>("/act/logging"));
 
-std::optional<Elevator1> elevator1;
-std::optional<Elevator2> elevator2;
+std::optional<Elevators> elevators;
 std::optional<Clamp1> clamp1;
 std::optional<Clamp2> clamp2;
+std::optional<Banner> banner;
 
 void setup() {
     Serial.begin(115200);
@@ -20,17 +21,17 @@ void setup() {
 
     ros2::init(&Serial);
 
-    elevator1.emplace(node);
-    elevator2.emplace(node);
+    elevators.emplace(node);
     clamp1.emplace(node);
     clamp2.emplace(node);
+    banner.emplace(node);
 }
 
 void loop() {
-    elevator1->loop();
-    elevator2->loop();
+    elevators->loop();
     clamp1->loop();
     clamp2->loop();
+    banner->loop();
 
     ros2::spin(&node);
 }
@@ -75,10 +76,8 @@ void log(LogSeverity severity, String message) {
 }
 
 extern "C" {
-    __attribute__((weak))
-    int _write(int file, char *ptr, int len)
-    {
-        ((class Print *)file)->write((uint8_t *)ptr, len);
-        return len;
-    }
+__attribute__((weak)) int _write(int file, char *ptr, int len) {
+    ((class Print *)file)->write((uint8_t *)ptr, len);
+    return len;
+}
 }
