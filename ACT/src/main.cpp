@@ -1,17 +1,17 @@
-#include <ros2arduino.h>
 
 #include <optional>
 
 #include "Banner.hpp"
 #include "Clamp.hpp"
 #include "Led.hpp"
+#include "ros2/ros2.hpp"
 // #include "Elevator.hpp"
 #include "logging.hpp"
 
 std::optional<BlinkLED> led;
 
-ros2::Node node("ACT");
-ros2::Publisher<std_msgs::String> *logger(node.createPublisher<std_msgs::String>("/act/logging"));
+std::optional<ros2::Node> node("ACT");
+std::optional<ros2::Publisher<std_msgs::String>> logger;
 
 // std::optional<Elevators> elevators;
 std::optional<Clamp1> clamp1;
@@ -24,12 +24,15 @@ void setup() {
 
     led.emplace();
 
-    ros2::init(&Serial);
+    ros2::init(Serial);
+
+    node.emplace("ACT");
+    logger.emplace(node->createPublisher<std_msgs::String>("/act/logging"));
 
     //   elevators.emplace(node);
-    clamp1.emplace(node);
-    clamp2.emplace(node);
-    banner.emplace(node);
+    clamp1.emplace(*node);
+    clamp2.emplace(*node);
+    banner.emplace(*node);
 }
 
 void loop() {
@@ -40,7 +43,7 @@ void loop() {
     clamp2->loop();
     banner->loop();
 
-    ros2::spin(&node);
+    ros2::spin(*node);
 }
 
 inline const char *severityToString(LogSeverity severity) {
@@ -61,30 +64,6 @@ inline const char *severityToString(LogSeverity severity) {
 }
 
 void log(LogSeverity severity, String message) {
-    if (logger) {
-        std_msgs::String msg;
-        constexpr size_t max_len = sizeof(msg.data);
-
-        String severityPrefix = String("[").concat(severityToString(severity)).concat("] ");
-        size_t max_msg_len = max_len - 1 - severityPrefix.length();
-
-        while (message.length() > max_msg_len) {
-            String partialMessage = severityPrefix.concat(message.substring(0, max_msg_len));
-            message = message.substring(max_msg_len);
-
-            memcpy(msg.data, partialMessage.c_str(), partialMessage.length() + 1);
-            logger->publish(&msg);
-        }
-
-        String _message = severityPrefix.concat(message);
-        memcpy(msg.data, _message.c_str(), _message.length() + 1);
-        logger->publish(&msg);
-    }
-}
-
-extern "C" {
-__attribute__((weak)) int _write(int file, char *ptr, int len) {
-    ((class Print *)file)->write((uint8_t *)ptr, len);
-    return len;
-}
+    std_msgs::String msg(String("[").concat(severityToString(severity)).concat("] ").concat(message));
+    logger->publish(msg);
 }

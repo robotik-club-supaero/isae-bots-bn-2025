@@ -1,10 +1,10 @@
 #ifndef _ACTUATOR_STATE_HPP_
 #define _ACTUATOR_STATE_HPP_
 
-#include <ros2arduino.h>
-
 #include <memory>
 #include <optional>
+
+#include "ros2/ros2.hpp"
 
 class ActuatorStateHolder {
    public:
@@ -28,11 +28,9 @@ class ActuatorStateManager {
     void sendCallback(uint16_t data);
 
    private:
-    static void orderCallback(void *msg, void *arg);
-
     std::shared_ptr<ActuatorStateHolder> m_state;
-    ros2::Subscriber<std_msgs::Int16> *m_sub;
-    ros2::Publisher<std_msgs::Int16> *m_pub;
+    ros2::Subscriber<std_msgs::Int16>m_sub;
+    ros2::Publisher<std_msgs::Int16> m_pub;
     std_msgs::Int16 m_msg;
 };
 
