@@ -16,7 +16,7 @@ void Banner::loop() {
             log(INFO, "Deploying banner");
             m_servo_1.setState(DEPLOYED);
         } else {
-            log(WARN, "Invalid order received for banner ");
+            log(WARN, "Invalid order received for banner");
         }
         m_ros.clearRequestedState();
     } else if (m_servo_1.needsNotify() && micros() - m_servo_1.getLastChangeTime() > BANNER_INTERVAL) {

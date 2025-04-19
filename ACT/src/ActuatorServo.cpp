@@ -7,6 +7,7 @@ ActuatorServo<N>::ActuatorServo(int pin, std::array<int, N> positions, uint16_t 
     : m_state(), m_last_change(), m_need_notify(false), m_positions(positions), m_servo() {
     m_servo.attach(pin);
     setState(initial_state);
+    markNotified();
 }
 
 template <uint16_t N>

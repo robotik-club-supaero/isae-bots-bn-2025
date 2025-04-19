@@ -6,11 +6,9 @@
 #define CLAMP_OPEN_POS 40   // TODO
 #define CLAMP_CLOSED_POS 6  // TODO
 
-#define ELEVATOR_1_UP_POS 50   // TODO
-#define ELEVATOR_1_DOWN_POS 5  // TODO
-
-#define ELEVATOR_2_UP_POS 50   // TODO
-#define ELEVATOR_2_DOWN_POS 5  // TODO
+#define ELEVATOR_STEP_PER_REV 200 // TODO
+#define ELEVATOR_SPEED 50 // rev per minute // TODO
+#define ELEVATOR_POS_OFFSET 200 // number of steps between states DOWN and UP // TODO
 
 #define BANNER_1_DEPLOYED_POS 50  // TODO
 #define BANNER_1_RETRACTED_POS 5  // TODO
@@ -20,8 +18,11 @@
 
 // -- PINS --
 
-#define ELEVATOR_1_PIN 5  // TODO
-#define ELEVATOR_2_PIN 6  // TODO
+#define ELEVATOR_1_STEP_PIN 3
+#define ELEVATOR_1_DIR_PIN 4
+
+#define ELEVATOR_2_STEP_PIN 5
+#define ELEVATOR_2_DIR_PIN 6
 
 #define CLAMP_1_1_PIN 20 
 #define CLAMP_1_2_PIN 21
