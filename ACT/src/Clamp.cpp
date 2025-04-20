@@ -20,7 +20,7 @@ void Clamps::loop() {
             log(WARN, String("Invalid order received for clamps ").concat(m_level));
         }
         m_ros.clearRequestedState();
-    } else if (m_clamp_1.needsNotify() && micros() - m_clamp_1.getLastChangeTime() > CALLBACK_INTERVAL) {
+    } else if (m_clamp_1.needsNotify() && millis() - m_clamp_1.getLastChangeTime() > CALLBACK_INTERVAL) {
         m_ros.sendCallback(m_clamp_1.getState());
         m_clamp_1.markNotified();
     }

@@ -19,11 +19,11 @@ void Banner::loop() {
             log(WARN, "Invalid order received for banner");
         }
         m_ros.clearRequestedState();
-    } else if (m_servo_1.needsNotify() && micros() - m_servo_1.getLastChangeTime() > BANNER_INTERVAL) {
+    } else if (m_servo_1.needsNotify() && millis() - m_servo_1.getLastChangeTime() > BANNER_INTERVAL) {
         log(DEBUG, "Deploying banner (phase 2)");
         m_servo_2.setState(DEPLOYED);
         m_servo_1.markNotified();
-    } else if (m_servo_2.needsNotify() && micros() - m_servo_2.getLastChangeTime() > CALLBACK_INTERVAL) {
+    } else if (m_servo_2.needsNotify() && millis() - m_servo_2.getLastChangeTime() > CALLBACK_INTERVAL) {
         m_ros.sendCallback(DEPLOYED);
         m_servo_2.markNotified();
     }

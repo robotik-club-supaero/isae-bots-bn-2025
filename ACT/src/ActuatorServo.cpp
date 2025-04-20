@@ -17,7 +17,7 @@ uint16_t ActuatorServo<N>::getState() const {
 
 template <uint16_t N>
 void ActuatorServo<N>::setState(uint16_t state) {
-    m_last_change = micros();
+    m_last_change = millis();
     m_need_notify = true;
 
     m_state = state;

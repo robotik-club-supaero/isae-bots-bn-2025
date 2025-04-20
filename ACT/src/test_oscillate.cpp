@@ -12,8 +12,8 @@ class TestServo {
     TestServo() : banner1(), banner2(), clamp11(CLAMP_1_1_PIN), clamp12(CLAMP_1_2_PIN), clamp21(CLAMP_2_1_PIN), clamp22(CLAMP_2_2_PIN) {}
 
     void loop() {
-        if (micros() - m_last_change > TEST_OSCILLATE_INTERVAL) {
-            m_last_change = micros();
+        if (millis() - m_last_change > TEST_OSCILLATE_INTERVAL) {
+            m_last_change = millis();
 
             banner1.toggle();
             banner2.toggle();
@@ -42,8 +42,8 @@ class TestElevator {
     TestElevator(ElevatorStepper stepper) : m_stepper(stepper) {}
 
     void loop() {
-        if (micros() - m_last_change > TEST_OSCILLATE_INTERVAL) {
-            m_last_change = micros();
+        if (millis() - m_last_change > TEST_OSCILLATE_INTERVAL) {
+            m_last_change = millis();
 
             m_stepper.setState((m_stepper.getState() + 1) % 2);
         }
