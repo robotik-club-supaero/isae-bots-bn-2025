@@ -47,6 +47,7 @@ class TestElevator {
 
             m_stepper.setState((m_stepper.getState() + 1) % 2);
         }
+        m_stepper.loop();
     }
 
    private:

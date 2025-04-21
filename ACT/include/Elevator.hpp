@@ -16,10 +16,13 @@ class ElevatorStepper {
     ElevatorCallback getState() const;
     void setState(uint16_t state);
 
+    bool loop();
+
    private:
     Stepper m_stepper;
     int m_level;
     int m_steps;
+    int m_remaining_steps;
     ElevatorCallback m_state;
 };
 

@@ -5,34 +5,51 @@
 
 // TODO what should be the initial state?
 ElevatorStepper::ElevatorStepper(int number_of_steps, int pin1, int pin2, int level, long speed, int move_steps)
-    : m_stepper(number_of_steps, pin1, pin2), m_level(level), m_steps(move_steps), m_state(DOWN) {
+    : m_stepper(number_of_steps, pin1, pin2), m_level(level), m_steps(move_steps), m_remaining_steps(), m_state(DOWN) {
     m_stepper.setSpeed(speed);
 }
 
 ElevatorStepper1::ElevatorStepper1()
     : ElevatorStepper(ELEVATOR_1_STEP_PER_REV, ELEVATOR_1_STEP_PIN, ELEVATOR_1_DIR_PIN, 1, ELEVATOR_1_SPEED, ELEVATOR_1_POS_OFFSET) {}
 
-
-    ElevatorStepper2::ElevatorStepper2()
+ElevatorStepper2::ElevatorStepper2()
     : ElevatorStepper(ELEVATOR_2_STEP_PER_REV, ELEVATOR_2_STEP_PIN, ELEVATOR_2_DIR_PIN, 2, ELEVATOR_2_SPEED, ELEVATOR_2_POS_OFFSET) {}
 
 ElevatorCallback ElevatorStepper::getState() const { return m_state; }
 void ElevatorStepper::setState(uint16_t state) {
-    switch (state) {
-        case UP:
-            log(INFO, String("Moving elevator ").concat(m_level).concat(" UP"));
-            m_stepper.step(m_steps);
-            m_state = UP;
-            break;
-        case DOWN:
+    if (state != m_state) {
+        switch (state) {
+            case UP:
+                log(INFO, String("Moving elevator ").concat(m_level).concat(" UP"));
+                m_remaining_steps += m_steps;
+                m_state = UP;
+                break;
+            case DOWN:
 
-            log(INFO, String("Moving elevator ").concat(m_level).concat(" DOWN"));
-            m_stepper.step(-m_steps);
-            m_state = DOWN;
-            break;
-        default:
-            log(WARN, String("Invalid order received for elevator ").concat(m_level));
+                log(INFO, String("Moving elevator ").concat(m_level).concat(" DOWN"));
+                m_remaining_steps -= m_steps;
+                m_state = DOWN;
+                break;
+            default:
+                log(WARN, String("Invalid order received for elevator ").concat(m_level));
+        }
     }
+}
+
+bool ElevatorStepper::loop() {
+    constexpr int MAX_STEPS = 10;
+    if (m_remaining_steps < -MAX_STEPS) {
+        m_stepper.step(-MAX_STEPS);
+        m_remaining_steps += MAX_STEPS;
+    } else if (m_remaining_steps > MAX_STEPS) {
+        m_stepper.step(MAX_STEPS);
+        m_remaining_steps -= MAX_STEPS;
+    } else if (m_remaining_steps != 0) {
+        m_stepper.step(m_remaining_steps);
+        m_remaining_steps = 0;
+        return true;
+    }
+    return false;
 }
 
 Elevators::Elevators(ros2::Node &node)
@@ -45,22 +62,27 @@ void Elevators::loop() {
     if (auto state = m_elevator_1.getRequestedState()) {
         if (state == UP && m_stepper_2.getState() == DOWN) {
             log(WARN, "Refusing to move elevator 1 UP while elevator 2 is DOWN");
+            m_elevator_1.sendCallback(m_stepper_1.getState());
         } else {
             m_stepper_1.setState(*state);
         }
-
-        m_elevator_1.sendCallback(m_stepper_1.getState());
         m_elevator_1.clearRequestedState();
     }
 
     if (auto state = m_elevator_2.getRequestedState()) {
         if (state == DOWN && m_stepper_1.getState() == UP) {
             log(WARN, "Refusing to move elevator 2 DOWN while elevator 1 is UP");
+            m_elevator_2.sendCallback(m_stepper_2.getState());
         } else {
             m_stepper_2.setState(*state);
         }
-
-        m_elevator_2.sendCallback(m_stepper_1.getState());
         m_elevator_2.clearRequestedState();
+    }
+
+    if (m_stepper_1.loop()) {
+        m_elevator_1.sendCallback(m_stepper_1.getState());
+    }
+    if (m_stepper_2.loop()) {
+        m_elevator_2.sendCallback(m_stepper_2.getState());
     }
 }
