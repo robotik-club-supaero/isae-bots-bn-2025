@@ -9,7 +9,7 @@
 
 class TestServo {
    public:
-    TestServo() : banner1(), banner2(), clamp11(CLAMP_1_1_PIN), clamp12(CLAMP_1_2_PIN), clamp21(CLAMP_2_1_PIN), clamp22(CLAMP_2_2_PIN) {}
+    TestServo() : banner1(), banner2(), clamp11(), clamp12(), clamp21(), clamp22() {}
 
     void loop() {
         if (millis() - m_last_change > TEST_OSCILLATE_INTERVAL) {
@@ -31,10 +31,10 @@ class TestServo {
     BannerServo1 banner1;
     BannerServo2 banner2;
 
-    ClampServo clamp11;
-    ClampServo clamp12;
-    ClampServo clamp21;
-    ClampServo clamp22;
+    ClampServo1_1 clamp11;
+    ClampServo1_2 clamp12;
+    ClampServo2_1 clamp21;
+    ClampServo2_2 clamp22;
 };
 
 class TestElevator {

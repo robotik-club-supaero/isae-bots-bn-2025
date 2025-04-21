@@ -3,8 +3,17 @@
 
 // -- SERVO POSITIONS --
 
-#define CLAMP_OPEN_POS 40   // TODO
-#define CLAMP_CLOSED_POS 10  // TODO
+#define CLAMP_1_1_OPEN_POS 40   // TODO
+#define CLAMP_1_1_CLOSED_POS 10  // TODO
+
+#define CLAMP_1_2_OPEN_POS 40   // TODO
+#define CLAMP_1_2_CLOSED_POS 10  // TODO
+
+#define CLAMP_2_1_OPEN_POS 40   // TODO
+#define CLAMP_2_1_CLOSED_POS 10  // TODO
+
+#define CLAMP_2_2_OPEN_POS 40   // TODO
+#define CLAMP_2_2_CLOSED_POS 10  // TODO
 
 #define BANNER_1_DEPLOYED_POS 50  // TODO
 #define BANNER_1_RETRACTED_POS 5  // TODO
