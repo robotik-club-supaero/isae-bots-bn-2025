@@ -20,7 +20,7 @@ class ModemConfig(Enum):
 
 
 class LoRa(object):
-    def __init__(self, channel, interrupt, this_address, reset_pin=None, freq=915, tx_power=14,
+    def __init__(self, channel, interrupt, this_address, reset_pin=None, freq=868, tx_power=14,
                  modem_config=ModemConfig.Bw125Cr45Sf128, receive_all=False,
                  acks=False, crypto=None):
         """

@@ -2,7 +2,6 @@
 
 import numpy as np
 import cv2
-from loadImage import loadImage
 
 class Undistort:
 
@@ -17,17 +16,27 @@ class Undistort:
             self._mtx, self._dist = data["mtx"], data["dist"]
         else:
             self._mtx, self._dist = mtx, dist
-        
-    def undistort(self, image):
-        image = loadImage(image)
 
+    def computeCameraMatrix(self, image_path):
+
+        print("Computing camera matrix...")
+
+        image = cv2.imread(image_path)
         h,  w = image.shape[:2]
-        newcameramtx, roi = cv2.getOptimalNewCameraMatrix(self._mtx, self._dist, (w,h), 0, (w,h))
-        dst = cv2.undistort(image, self._mtx, self._dist, None, newcameramtx)
+        newCameraMatrix, roi = cv2.getOptimalNewCameraMatrix(self._mtx, self._dist, (w,h), 0, (w,h))
+        mapx, mapy = cv2.initUndistortRectifyMap(self._mtx, self._dist, None, newCameraMatrix, (w, h), 5)
+        dstMap1, dstMap2 = cv2.convertMaps(mapx, mapy, cv2.CV_16SC2)
+        return dstMap1, dstMap2, roi
+
+        
+    def undistort(self, image_path, dstMap1, dstMap2, roi):
+        
+        print("Undistorting image...")
+        
+        image = cv2.imread(image_path)
+        
+        dst = cv2.remap(image, dstMap1, dstMap2, cv2.INTER_LINEAR)
         
         x, y, w, h = roi
         dst = dst[y:y+h, x:x+w]
         return dst
-    
-    def __call__(self, image):
-        return self.undistort(image)

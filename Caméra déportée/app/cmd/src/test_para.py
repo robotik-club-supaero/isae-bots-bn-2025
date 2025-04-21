@@ -9,8 +9,8 @@ import multiprocessing
 import json
 import struct
 print("Importing files")
-from imageNormalizer import ImageNormalizer
-from detectRobotsInsideAruco import detect_objects_inside_aruco
+from imageNormalizerRpi import ImageNormalizer
+from detectRobotsInsideArucoRpi import detect_objects_inside_aruco
 from lora import ModemConfig, LoRa
 from picamera2 import Picamera2
 
