@@ -6,11 +6,14 @@
 
 #include "ros2/ros2.hpp"
 
+/// Shared state holder. It is updated in ROS subscription callback, and read by the actuator.
+/// It allows to transmit the orders without putting the actuators' logic directly in the callback.
 class ActuatorStateHolder {
    public:
     ActuatorStateHolder();
 
     void requestState(uint16_t state);
+    /// Is empty if no order has been received or if the last order was already processed.
     std::optional<uint16_t> getRequestedState() const;
     void clearRequestedState();
 
@@ -18,6 +21,8 @@ class ActuatorStateHolder {
     std::optional<uint16_t> m_state;
 };
 
+// TODO: the name of this class could be improved
+/// Creates and manages the publisher and subscriber for a specific actuator.
 class ActuatorStateManager {
    public:
     ActuatorStateManager(ros2::Node &node, const char *order_topic, const char *callback_topic);

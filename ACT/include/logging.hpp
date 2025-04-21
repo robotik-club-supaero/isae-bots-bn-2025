@@ -11,6 +11,8 @@ enum LogSeverity {
     FATAL,
 };
 
+// NB: Defined in `main.cpp`.
+/// Sends a log message to ROS. This currently publishes to /act/logging instead of /rosout, but this could be changed in the future.
 void log(LogSeverity severity, String message);
 
 #endif

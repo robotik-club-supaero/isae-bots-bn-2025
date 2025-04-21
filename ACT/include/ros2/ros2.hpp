@@ -7,6 +7,8 @@
 #include "ros2/std_msgs/String.hpp"
 #include "ros2/Node.hpp"
 
+/// Basic C++ interface over micro_ros and RCLC.
+/// Only the stuff needed by this project is implemented.
 namespace ros2 {
 
 inline void init(Stream &comm_instance) { set_microros_serial_transports(comm_instance); }

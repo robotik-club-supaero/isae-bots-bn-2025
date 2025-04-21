@@ -5,6 +5,8 @@
 
 #include <array>
 
+/// Converts between states (CLOSED/OPEN, etc.) and Servo positions.
+/// `N` is the number of states (it is always 2 currently).
 template <uint16_t N>
 class ActuatorServo {
    public:

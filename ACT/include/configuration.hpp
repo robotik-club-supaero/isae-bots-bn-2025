@@ -3,21 +3,27 @@
 
 // -- SERVO POSITIONS --
 
+// Clamp 1 of level 1
 #define CLAMP_1_1_OPEN_POS 40   // TODO
 #define CLAMP_1_1_CLOSED_POS 10  // TODO
 
+// Clamp 2 of level 1
 #define CLAMP_1_2_OPEN_POS 40   // TODO
 #define CLAMP_1_2_CLOSED_POS 10  // TODO
 
+// Clamp 1 of level 2
 #define CLAMP_2_1_OPEN_POS 40   // TODO
 #define CLAMP_2_1_CLOSED_POS 10  // TODO
 
+// Clamp 2 of level 2
 #define CLAMP_2_2_OPEN_POS 40   // TODO
 #define CLAMP_2_2_CLOSED_POS 10  // TODO
 
+// The servo that opens first when deploying the banner
 #define BANNER_1_DEPLOYED_POS 50  // TODO
 #define BANNER_1_RETRACTED_POS 5  // TODO
 
+// The other servo of the banner
 #define BANNER_2_DEPLOYED_POS 50  // TODO
 #define BANNER_2_RETRACTED_POS 5  // TODO
 
@@ -54,7 +60,7 @@
 #define CALLBACK_INTERVAL 10  // ms
 #define BANNER_INTERVAL 1000    // ms // TODO
 
-// If moving the elevator takes more time than the timeout, `ElevatorStepper::loop` returns anyway after roughly the timeout, so ROS orders can
+// If moving the elevator takes more time than the timeout, `ElevatorStepper::loop` returns anyway after (roughly) the timeout, so ROS orders can
 // still be processed and other actuators' state can be updated.
 // The displacement continues the next time `ElevatorStepper::loop` is called.
 #define STEPPER_YIELD_TIMEOUT 50 // ms
