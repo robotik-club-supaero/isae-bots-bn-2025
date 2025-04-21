@@ -15,7 +15,7 @@ class ImageNormalizer:
         self._preprocess = Undistort(path=npz_file_path) if npz_file_path is not None else None
         
         # Compute the camera matrix for the preprocess
-        self._mapx, self._mapy, self._roi = self._preprocess.computeCameraMatrix(calibration_image_path) if self._preprocess else (None, None)
+        self._dstMap1, self._dstMap2, self._roi = self._preprocess.computeCameraMatrix(calibration_image_path) if self._preprocess else (None, None)
         
         # Detector for Aruco tags
         self._detector = ArucoDetector()
@@ -34,7 +34,7 @@ class ImageNormalizer:
         
         print("Begin computeHomographyMatrix...")
 
-        calibrator = self._preprocess.undistort(calibration_image_path, self._mapx, self._mapy, self._roi)
+        calibrator = self._preprocess.undistort(calibration_image_path, self._dstMap1, self._dstMap2, self._roi)
 
         print("Applying detector on calibration image...")
         calibrator = self._detector(calibrator)
@@ -71,7 +71,7 @@ class ImageNormalizer:
 
         output = np.uint8(255 * np.ones((size[0], size[1], 3))) # white image     
         
-        image = self._preprocess.undistort(image_path, self._mapx, self._mapy, self._roi)
+        image = self._preprocess.undistort(image_path, self._dstMap1, self._dstMap2, self._roi)
         
         print("Warping...")
         output = cv2.warpPerspective(image, self._H, size, output, flags=cv2.INTER_LINEAR+cv2.WARP_INVERSE_MAP, borderMode=cv2.BORDER_TRANSPARENT)

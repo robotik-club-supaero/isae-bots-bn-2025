@@ -28,17 +28,6 @@ npz_file_path="../npz/calibration.npz"
 aruco_json_path = "../json/aruco.json"
 distances_json_path = "../json/distances.json"
 
-"""
-# Function to capture an image using the camera
-def capture_image(output_path):
-    # Command to capture an image using the camera
-    # libcamera-jpeg is a custom command to capture images using the Raspberry Pi camera
-    # -n no preview
-    # -o output file
-    command = f"libcamera-jpeg -n --output {output_path} --width 320 --height 240"
-    subprocess.run(command, shell=True)
-"""
-
 print("Setting up camera...")
 picam2 = Picamera2()
 config = picam2.create_still_configuration(main={"size": (320, 240)})
@@ -64,15 +53,9 @@ imageNormalizer.computeHomographyMatrix(calibration_image_path, draw=False)
 
 start = time.time()
 
-#for i in range(2):
-
 # Capture an image of the platform
 print("Capturing image of the platform...")
 picam2.capture_file(camera_test_image_path)
-
-print(time.time() - start)
-
-start = time.time()
 
 # Normalize the image using Aruco tags
 normalizedImage = imageNormalizer.normalizeImage(capture_image_path)
@@ -82,20 +65,12 @@ normalized_output_path = os.path.join(normalized_image_dir, "normalized_" + os.p
 cv2.imwrite(normalized_output_path, normalizedImage)
 print(f"Normalized capture saved to {normalized_output_path}")
 
-print(time.time() - start)
-
-start = time.time()
-
 # Detect objects inside Aruco tags and return the coordinates
 rectangles = detect_objects_inside_aruco(
     reference_image_path,normalized_output_path, aruco_json_path, distances_json_path
 )
 print(rectangles)
 print("\n")
-
-print(time.time() - start)
-
-start = time.time()
 
 # Send the coordinates via LoRa
 flatlist = [coord for rectangle in rectangles for coord in rectangle]
@@ -105,7 +80,9 @@ payload = struct.pack(f'i{len_flatlist}i', nb_rectangles,*flatlist)
 print("Sending data.\n")
 lora.send(payload, header_to)
 
+print(time.time() - start)
+
 lora.close()
 picam2.close()
 
-print(time.time() - start)
+

@@ -25,16 +25,17 @@ class Undistort:
         h,  w = image.shape[:2]
         newCameraMatrix, roi = cv2.getOptimalNewCameraMatrix(self._mtx, self._dist, (w,h), 0, (w,h))
         mapx, mapy = cv2.initUndistortRectifyMap(self._mtx, self._dist, None, newCameraMatrix, (w, h), 5)
-        return mapx, mapy, roi
+        dstMap1, dstMap2 = cv2.convertMaps(mapx, mapy, cv2.CV_16SC2)
+        return dstMap1, dstMap2, roi
 
         
-    def undistort(self, image_path, mapx, mapy, roi):
+    def undistort(self, image_path, dstMap1, dstMap2, roi):
         
         print("Undistorting image...")
         
         image = cv2.imread(image_path)
         
-        dst = cv2.remap(image, mapx, mapy, cv2.INTER_LINEAR)
+        dst = cv2.remap(image, dstMap1, dstMap2, cv2.INTER_LINEAR)
         
         x, y, w, h = roi
         dst = dst[y:y+h, x:x+w]
