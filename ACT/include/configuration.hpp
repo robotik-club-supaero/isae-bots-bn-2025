@@ -51,7 +51,12 @@
 
 // -- OTHER CONFIG --
 
-#define CALLBACK_INTERVAL 1000  // ms
+#define CALLBACK_INTERVAL 10  // ms
 #define BANNER_INTERVAL 1000    // ms // TODO
+
+// If moving the elevator takes more time than the timeout, `ElevatorStepper::loop` returns anyway after roughly the timeout, so ROS orders can
+// still be processed and other actuators' state can be updated.
+// The displacement continues the next time `ElevatorStepper::loop` is called.
+#define STEPPER_YIELD_TIMEOUT 50 // ms
 
 #endif

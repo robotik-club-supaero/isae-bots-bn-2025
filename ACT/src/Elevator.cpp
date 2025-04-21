@@ -5,7 +5,12 @@
 
 // TODO what should be the initial state?
 ElevatorStepper::ElevatorStepper(int number_of_steps, int pin1, int pin2, int level, long speed, int move_steps)
-    : m_stepper(number_of_steps, pin1, pin2), m_level(level), m_steps(move_steps), m_remaining_steps(), m_state(DOWN) {
+    : m_stepper(number_of_steps, pin1, pin2),
+      m_level(level),
+      m_steps(move_steps),
+      m_remaining_steps(),
+      m_max_steps(max(1, STEPPER_YIELD_TIMEOUT * speed * number_of_steps / 60 / 1000)),
+      m_state(DOWN) {
     m_stepper.setSpeed(speed);
 }
 
@@ -37,13 +42,12 @@ void ElevatorStepper::setState(uint16_t state) {
 }
 
 bool ElevatorStepper::loop() {
-    constexpr int MAX_STEPS = 10;
-    if (m_remaining_steps < -MAX_STEPS) {
-        m_stepper.step(-MAX_STEPS);
-        m_remaining_steps += MAX_STEPS;
-    } else if (m_remaining_steps > MAX_STEPS) {
-        m_stepper.step(MAX_STEPS);
-        m_remaining_steps -= MAX_STEPS;
+    if (m_remaining_steps < -m_max_steps) {
+        m_stepper.step(-m_max_steps);
+        m_remaining_steps += m_max_steps;
+    } else if (m_remaining_steps > m_max_steps) {
+        m_stepper.step(m_max_steps);
+        m_remaining_steps -= m_max_steps;
     } else if (m_remaining_steps != 0) {
         m_stepper.step(m_remaining_steps);
         m_remaining_steps = 0;

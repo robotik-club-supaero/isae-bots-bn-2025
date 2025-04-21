@@ -23,6 +23,7 @@ class ElevatorStepper {
     int m_level;
     int m_steps;
     int m_remaining_steps;
+    int m_max_steps;
     ElevatorCallback m_state;
 };
 
