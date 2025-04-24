@@ -18,6 +18,13 @@ void Mesure_pos::setup()
     mesure_l = m_p_encoder_L->mesure();
     m_time = millis();
 }
+
+void Mesure_pos::reinitialise() {
+    position_theta = 0;
+    position_x = 0;
+    position_y = 0;
+}
+
 void Mesure_pos::loop()
 {
     if (millis() - m_time >= dt)

@@ -14,7 +14,6 @@
 #include <Asserv.h>
 #include <Irsensor.h>
 #include <Machine_etats.h>
-#include <suiveur_de_ligne.h>
 
 #define IR_PIN 4 //  ne sert à rien pour le moment , sert pour l'interruption
 
@@ -27,7 +26,7 @@ Encodeur encoder_L = Encodeur(CLK_L, DT_L);
 Mesure_pos mesure_pos = Mesure_pos(&encoder_R, &encoder_L);
 Asserv asserv = Asserv(&moteur_d, &moteur_g, &mesure_pos);
 
-Machine_etats_sl machine_etats_sl = Machine_etats_sl(&asserv, &irsensor);
+Machine_etats machine_etats = Machine_etats(&asserv, &mesure_pos, &irsensor);
 
 void setup()
 {
@@ -50,7 +49,7 @@ void setup()
   moteur_d.set_speed(255);
   */
   asserv.setup();
-  machine_etats_sl.setup();
+  machine_etats.setup();
 }
 
 void loop()
@@ -66,5 +65,5 @@ void loop()
   mesure_pos.loop();
   // #DEBUG Si on veut tester les asservissements , on decommente la lige suivante et on commente machine_etats.loop()
   // asserv.loop();
-  machine_etats_sl.loop();
+  machine_etats.loop();
 }

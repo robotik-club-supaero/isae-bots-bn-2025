@@ -9,6 +9,7 @@
 #include <Asserv.h>
 #include <Define_map.h>
 #include "Serv.h"
+#include "define.h"
 
 #define K 1
 #define dt 10
@@ -23,8 +24,7 @@ class Machine_etats
     enum Pami_State
     {
         INIT,
-        STRAIGHT,
-        TURN,
+        MOVE,
         STOP,
         END,
 
@@ -38,17 +38,25 @@ private:
 
 public:
     int tirette = 1; // TODO Etat par défaut de la tirette , CHANGER SI NECESSAIRE
-
+    
+    float pos_init_x = DEPART_SUPERSTAR_X; // TODO : A MODIFIER en foction de la stratégie
+    float pos_init_y = DEPART_SUPERSTAR_Y;// TODO : A MODIFIER en foction de la stratégie
+    
+    float pos_finit_x = TOURNE_SUPERSTAR_X; // Premier point clef
+    float pos_finit_y = TOURNE_SUPERSTAR_Y;// Premier point clef
+    
+    float pos_x = 0;
+    float pos_y = 0;
+    float angle = 0;
     int m_minimum_distance = 1000; //Pk mille?
 
     Asserv *m_p_asserv;
     Serv *m_p_servo ;
 
     Mesure_pos *m_p_mesure_pos;
-    Irsensor *m_p_ir_sensor_right;
-    Irsensor *m_p_ir_sensor_left;
+    Irsensor *m_p_ir_sensor;
 
-    Machine_etats(Asserv *p_asserv, Mesure_pos *p_mesure_pos, Irsensor *p_ir_sensor_right,  Irsensor *p_ir_sensor_left);
+    Machine_etats(Asserv *p_asserv, Mesure_pos *p_mesure_pos, Irsensor *p_ir_sensor);
     void setup();
     void loop();
 };

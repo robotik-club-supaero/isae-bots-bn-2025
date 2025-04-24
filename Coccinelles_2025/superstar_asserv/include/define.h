@@ -46,6 +46,8 @@ MACHINE A ETAT
 #define DMIN 15 // En cm, à modifier.
 #define TOURNE_SUPERSTAR_X 0    
 #define TOURNE_SUPERSTAR_Y 0 //Position ou la superstar va tourner
+#define DEPART_SUPERSTAR_X 0
+#define DEPART_SUPERSTAR_Y 0
 #define FIN_SUPERSTAR_X 0
 #define FIN_SUPERSTAR_Y 0 //position finale superstar
 #define EPSP 1 //Incertitude position, cm

@@ -33,6 +33,7 @@ private:
 public:
     void setup();
     void loop();
+    void reinitialise();
     Mesure_pos(Encodeur *p_encodeur_r, Encodeur *p_encodeur_l);
     /**
      * Mesure right & left encoder
