@@ -2,16 +2,14 @@
 #include <Arduino.h>
 #include <cmath>
 #include "trajectories/PathTrajectory.hpp"
-#include <Pathfinder.h>
+
 #include <define.h>
 
 
-Machine_etats::Machine_etats(Asserv *p_asserv, Mesure_pos *p_mesure_pos, Irsensor *p_ir_sensor_right, Irsensor *p_ir_sensor_left)
+Machine_etats::Machine_etats(Asserv *p_asserv, Mesure_pos *p_mesure_pos, Irsensor *p_ir_sensor_right,  Irsensor *p_ir_sensor_left)
 {
     m_p_asserv = p_asserv;
     m_p_mesure_pos = p_mesure_pos;
-    m_p_ir_sensor_right = p_ir_sensor_right;
-    m_p_ir_sensor_left = p_ir_sensor_left;
 }
 
 void Machine_etats::setup()
@@ -34,9 +32,6 @@ void Machine_etats::loop()
         // Lire l'état de la tirette
         tirette = digitalRead(34);
         
-        // Récupère la vision des 2 ir_sensor et les mets dans 1 seul liste (taille 16)
-        for (int i = 0; i < 8; i++){ m_vision[i] = m_p_ir_sensor_left->vision[i] ; } 
-        for (int i = 0; i < 8; i++){ m_vision[8 + i] = m_p_ir_sensor_right->vision[i] ; }
         // Récupère la distance au danger le plus proche
         if (m_p_ir_sensor_left->ir_minimum_distance < m_p_ir_sensor_right->ir_minimum_distance){
             m_minimum_distance = m_p_ir_sensor_left->ir_minimum_distance ;
@@ -49,64 +44,68 @@ void Machine_etats::loop()
         case INIT:
             if ((millis() - m_time_global >= START_TIME) && tirette == 0) {
                 m_time_global = millis() ;
-                etat = MVT ;
+                etat = STRAIGHT ;
             } 
             else {
                 etat = INIT ;
             }
             break;
-        case MVT:
+        case STRAIGHT:
+            m_p_asserv->asserv_global(SPEED, SPEED, 0);
             if (m_minimum_distance <= DISTANCE_MIN) {
-                m_p_asserv->asserv_global(0, 0, 0);
-                etat = AVOID;
-            } 
-            else if (m_distance_obstacle > DMIN ){
-                etat = STOP ;
+                etat = STOP;
+            }
 
             else {
-                pos_x = m_p_mesure_pos->position_x + pos_init_x;
-                pos_y = m_p_mesure_pos->position_y + pos_init_y;
+                bool condx_turn = (m_p_mesure_pos->position_x <= TOURNE_SUPERSTAR_X + EPSP) && (m_p_mesure_pos->position_x >= TOURNE_SUPERSTAR_X - EPSP) ;
+                bool condy_turn = (m_p_mesure_pos->position_y <= TOURNE_SUPERSTAR_Y + EPSP) && (m_p_mesure_pos->position_y >= TOURNE_SUPERSTAR_Y - EPSP) ;
+                if ( condx_turn && condy_turn) {
+                    etat = TURN ;
+                }
 
-                point pos = {.x = pos_x, .y = pos_y};
-                point target = {.x = pos_finit_x, .y = pos_finit_y};
-
-                list_points path = pathfinding_Astar(NULL, pos, target, m_vision);
-                point sub_target = path.first;
-
-                // trajectory = PathTrajectory(angle, path)
-                // target_reached = trajectory.advance(SPEED * dt)
-                // pos = trajectory.getCurrentPosition()
-
-                if (m_minimum_distance < DISTANCE_MIN) {
-                    etat = AVOID;
-                } else {
-                    m_p_asserv->asserv_global(SPEED, SPEED, target.argument());
+                bool condx_arret = (m_p_mesure_pos->position_x <= FIN_SUPERSTAR_X + EPSP) && (m_p_mesure_pos->position_x >= FIN_SUPERSTAR_X - EPSP) ;
+                bool condy_arret = (m_p_mesure_pos->position_y <= FIN_SUPERSTAR_Y + EPSP) && (m_p_mesure_pos->position_y >= FIN_SUPERSTAR_Y - EPSP) ;
+                if (condx_arret && condy_arret) {
+                    etat = END ;
+                }
+                else {
+                    etat = STRAIGHT ;
                 }
             }
             break;
-        case AVOID:
-            // Faites tourner le robot dans une direction spécifique
-            // (par exemple, en ajustant l'angle)
-            angle += PI / 4; // Tournez de 45 degrés à droite
-            m_p_asserv->asserv_global(-SPEED, -SPEED, angle);
 
-            // Si l'obstacle n'est plus détecté, revenez à l'état MVT
-            if (m_minimum_distance > DISTANCE_MIN)
-            {
-                etat = MVT;
+        case TURN:
+            // Tournez de 45 degrés à droite
+            m_p_asserv->asservissement(-SPEED, SPEED);
+            if (m_minimum_distance <= DISTANCE_MIN) {
+                etat = STOP;
+            }
+            
+            else {
+                bool condtheta = (m_p_mesure_pos->position_theta <= PI/2 + EPSA) && (m_p_mesure_pos->position_theta >= PI/4 - EPSA) ; //A tourner de 90 degrés.
+                if (!condtheta) {
+                    etat = TURN ;
+                }
+                else {
+                    etat = STRAIGHT;
+                }
             }
             break;
 
         case STOP:
-            m_p_asserv->asserv_global(0, 0, angle);
+            m_p_asserv->asserv_global(0, 0, 0);
             if (m_minimum_distance > DISTANCE_MIN)
             {
-                etat = MVT;
+                etat = STRAIGHT;
+            }
+            else {
+                etat = STOP ;
             }
             break;
 
         case END:
-            m_p_asserv->asserv_global(0, 0, angle);
+            m_p_asserv->asserv_global(0, 0, 0);
+            m_p_servo->blink(1, ANGLE1, ANGLE2) ;
             break;
 
         }

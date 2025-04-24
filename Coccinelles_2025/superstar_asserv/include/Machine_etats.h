@@ -8,6 +8,7 @@
 #include <Irsensor.h>
 #include <Asserv.h>
 #include <Define_map.h>
+#include "Serv.h"
 
 #define K 1
 #define dt 10
@@ -22,8 +23,8 @@ class Machine_etats
     enum Pami_State
     {
         INIT,
-        MVT,
-        AVOID, // Etat pour éviter un obstacle de dernière minute
+        STRAIGHT,
+        TURN,
         STOP,
         END,
 
@@ -37,23 +38,11 @@ private:
 
 public:
     int tirette = 1; // TODO Etat par défaut de la tirette , CHANGER SI NECESSAIRE
-    /**
-     * Stratégie de déplacement  , Position de départ et d'arrivée
-     */
-    float pos_finit_x = ARRIVEE_BLEU_3_X; // TODO : A MODIFIER en foction de la stratégie
-    float pos_finit_y = ARRIVEE_BLEU_3_Y; // TODO : A MODIFIER en foction de la stratégie
 
-    float pos_init_x = DEPART_BLEU_X; // TODO : A MODIFIER en foction de la stratégie
-    float pos_init_y = DEPART_BLEU_Y;// TODO : A MODIFIER en foction de la stratégie
-    // Position actualisé du robot
-    float pos_x = 0;
-    float pos_y = 0;
-    float angle = 0;
-
-    int m_vision[16];
-    int m_minimum_distance = 1000;
+    int m_minimum_distance = 1000; //Pk mille?
 
     Asserv *m_p_asserv;
+    Serv *m_p_servo ;
 
     Mesure_pos *m_p_mesure_pos;
     Irsensor *m_p_ir_sensor_right;
