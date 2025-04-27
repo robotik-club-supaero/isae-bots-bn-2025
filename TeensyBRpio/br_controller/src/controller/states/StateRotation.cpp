@@ -14,9 +14,9 @@ ControllerStatus StateRotation::getStatus() const {
 
 StateUpdateResult StateRotation::update(double_t interval) {
     if (m_profile) {
-        m_ramp.setTargetSpeed(m_maxSpeed);
         m_ramp.update(interval);
         if (m_profile->advance(m_ramp.getCurrentSpeed() * interval)) {
+            m_ramp.setTargetSpeed(m_maxSpeed);
             std::optional<double_t> remainingAngle = m_profile->getRemainingAngle();
             if (remainingAngle) {
                 m_ramp.ensureCanBrake(*remainingAngle);
@@ -38,7 +38,7 @@ void StateRotation::notify(ControllerEvent event) {
 
 bool StateRotation::resumeState(Position2D<Meter> robotPosition) {
     if (m_profile->recompute(robotPosition.theta)) {
-        log(INFO, "Rotation file recomputed.");
+        log(INFO, "Rotation profile recomputed.");
 
         m_ramp.overwriteCurrentSpeed(0.);
         return true;
