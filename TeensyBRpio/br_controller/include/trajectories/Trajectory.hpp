@@ -81,7 +81,7 @@ class Trajectory {
      * - The new start position is `newStartPosition`. The initial direction of the trajectory is not required to match the robot's orientation.
      * - The current position is reset to the beginning of the trajectory.
      * - The recomputed trajectory eventually catches up with the remaining part of the initial trajectory (what this exactly means depends on the
-     * trajectory). If the initially trajectory is finite, this usually means the recomputed trajectory is finite as well and has the same final
+     * trajectory). If the initial trajectory is finite, this usually means the recomputed trajectory is finite as well and has the same final
      * position.
      *
      * @returns true if the trajectory was successfully recomputed, false otherwise. If this returns false, the state of this object must not have

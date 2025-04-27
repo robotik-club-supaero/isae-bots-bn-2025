@@ -17,6 +17,7 @@ class StateRotation : public ControllerState {
     ControllerStatus getStatus() const override;
     StateUpdateResult update(double_t interval) override;
     void notify(ControllerEvent event) override;
+    bool resumeState(Position2D<Meter> robotPosition) override;
 
   private:
     std::unique_ptr<OrientationProfile> m_profile;

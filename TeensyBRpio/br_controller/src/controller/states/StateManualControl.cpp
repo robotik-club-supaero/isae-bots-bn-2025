@@ -40,4 +40,11 @@ void StateManualControl::notify(ControllerEvent event) {
                event);
 }
 
+bool StateManualControl::resumeState(Position2D<Meter> robotPosition) {
+    m_linearRamp.overwriteCurrentSpeed(0.);
+    m_angularRamp.overwriteCurrentSpeed(0.);
+
+    return true;
+}
+
 } // namespace controller

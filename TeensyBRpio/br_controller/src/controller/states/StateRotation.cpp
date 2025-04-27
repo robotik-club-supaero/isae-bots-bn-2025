@@ -1,5 +1,6 @@
 #include "controller/states/StateRotation.hpp"
 #include "defines/func.hpp"
+#include "logging.hpp"
 #include "rotations/OrientationProfile.hpp"
 
 namespace controller {
@@ -13,9 +14,9 @@ ControllerStatus StateRotation::getStatus() const {
 
 StateUpdateResult StateRotation::update(double_t interval) {
     if (m_profile) {
+        m_ramp.setTargetSpeed(m_maxSpeed);
         m_ramp.update(interval);
         if (m_profile->advance(m_ramp.getCurrentSpeed() * interval)) {
-            m_ramp.setTargetSpeed(m_maxSpeed);
             std::optional<double_t> remainingAngle = m_profile->getRemainingAngle();
             if (remainingAngle) {
                 m_ramp.ensureCanBrake(*remainingAngle);
@@ -33,6 +34,18 @@ StateUpdateResult StateRotation::update(double_t interval) {
 
 void StateRotation::notify(ControllerEvent event) {
     std::visit(overload{[&](const MaxSpeedsChanged &event) { m_maxSpeed = event.newSpeeds.angular; }, [](auto) {}}, event);
+}
+
+bool StateRotation::resumeState(Position2D<Meter> robotPosition) {
+    if (m_profile->recompute(robotPosition.theta)) {
+        log(INFO, "Rotation file recomputed.");
+
+        m_ramp.overwriteCurrentSpeed(0.);
+        return true;
+    } else {
+        log(WARN, "Failed to recompute the rotation profile. Aborting rotation...");
+        return false;
+    }
 }
 
 } // namespace controller

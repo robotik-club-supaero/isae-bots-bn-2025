@@ -25,6 +25,11 @@ class SetHeadingProfile : public OrientationProfile {
      */
     std::optional<double_t> getRemainingAngle() const override;
 
+    /**
+     * @copydoc OrientationProfile::recompute
+     */
+    bool recompute(Angle newStartOrientation) override;
+
   private:
     Angle m_currentHeading;
     Angle m_targetHeading;
