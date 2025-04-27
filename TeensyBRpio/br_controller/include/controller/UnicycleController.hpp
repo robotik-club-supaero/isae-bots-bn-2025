@@ -188,7 +188,7 @@ class UnicycleController : private fsm::StateMachine<ControllerState> {
 
     template <Derived<ControllerState> TNewState, typename... Args>
     void startDisplacement(Args &&...args) {
-        if (isMoving()) {
+        if (getStatus() != ControllerStatus::Still) {
             brakeToStop();
             m_suspendedState = std::make_unique<TNewState>(std::forward<Args>(args)...);
         } else {

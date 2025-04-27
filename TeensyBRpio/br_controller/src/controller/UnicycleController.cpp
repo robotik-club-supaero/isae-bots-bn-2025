@@ -82,7 +82,8 @@ setpoint_t UnicycleController<TConverter>::computeSetpoint(double_t interval, Po
                     bool was_reverse = (getStatus() & REVERSE) != 0;
                     if (r.finalOrientation) {
                         m_event = UpdateResultCode::TRAJECTORY_COMPLETE;
-                        startRotation<SetHeadingProfile>(currentSetpoint.theta, *r.finalOrientation);
+                        log(INFO, "Entering controller state: Final rotation");
+                        setCurrentState<SetHeadingProfile>(currentSetpoint.theta, *r.finalOrientation);
                     } else {
                         m_event = UpdateResultCode::ARRIVED_FORWARD;
                         setCurrentState<StateStandStill>(currentSetpoint);
@@ -220,7 +221,7 @@ void UnicycleController<TConverter>::startTrajectory(DisplacementKind kind, std:
 
 template <ErrorConverter TConverter>
 void UnicycleController<TConverter>::startRotation(std::unique_ptr<OrientationProfile> rotation) {
-    log(INFO, "Entering controller state: Final rotation");
+    log(INFO, "Entering controller state: Rotation");
     softReset({m_setpoint, rotation->getCurrentOrientation()});
     startDisplacement<StateRotation>(std::move(rotation), m_maxSpeeds.angular, m_maxAccelerations.angular);
 }
