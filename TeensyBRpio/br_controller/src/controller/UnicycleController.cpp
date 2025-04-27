@@ -183,18 +183,23 @@ void UnicycleController<TConverter>::setSetpoint(Position2D<Meter> setpoint) {
 template <ErrorConverter TConverter>
 void UnicycleController<TConverter>::setSetpointSpeed(Speeds speeds, bool enforceMaxSpeeds, bool enforceMaxAccelerations) {
     if (getStatus() != ControllerStatus::ManualControl) {
-        setCurrentState<StateManualControl>(m_maxAccelerations);
+        startDisplacement<StateManualControl>(m_maxAccelerations);
     }
     if (enforceMaxSpeeds) {
         speeds.linear = clamp(speeds.linear, -m_maxSpeeds.linear, m_maxSpeeds.linear);
         speeds.angular = clamp(speeds.angular, -m_maxSpeeds.angular, m_maxSpeeds.angular);
     }
 
-    getCurrentState().notify(ManualSpeedCommand(speeds, enforceMaxAccelerations));
+    if (m_suspendedState) {
+        m_suspendedState->notify(ManualSpeedCommand(speeds, enforceMaxAccelerations));
+    } else {
+        getCurrentState().notify(ManualSpeedCommand(speeds, enforceMaxAccelerations));
+    }
 }
 
 template <ErrorConverter TConverter>
 void UnicycleController<TConverter>::brakeToStop() {
+    m_suspendedState.reset();
     if ((getStatus() & (ControllerStatus::ROTATING | ControllerStatus::MOVING | ControllerStatus::TRAJECTORY)) != 0) {
         // TODO should we use getEstimatedRelativeRobotSpeed() or m_lastCommand as the initial speed to give to StateBraking?
         setCurrentState<StateBraking>(getEstimatedRelativeRobotSpeed(), m_brakeAccelerations);
@@ -210,14 +215,14 @@ template <ErrorConverter TConverter>
 void UnicycleController<TConverter>::startTrajectory(DisplacementKind kind, std::unique_ptr<Trajectory> trajectory,
                                                      std::optional<Angle> finalOrientation) {
     softReset({trajectory->getCurrentPosition(), m_setpoint.theta});
-    setCurrentState<StateFullTrajectory>(kind, std::move(trajectory), m_setpoint.theta, m_maxSpeeds, m_maxAccelerations, finalOrientation);
+    startDisplacement<StateFullTrajectory>(kind, std::move(trajectory), m_setpoint.theta, m_maxSpeeds, m_maxAccelerations, finalOrientation);
 }
 
 template <ErrorConverter TConverter>
 void UnicycleController<TConverter>::startRotation(std::unique_ptr<OrientationProfile> rotation) {
     log(INFO, "Entering controller state: Final rotation");
     softReset({m_setpoint, rotation->getCurrentOrientation()});
-    setCurrentState<StateRotation>(std::move(rotation), m_maxSpeeds.angular, m_maxAccelerations.angular);
+    startDisplacement<StateRotation>(std::move(rotation), m_maxSpeeds.angular, m_maxAccelerations.angular);
 }
 
 template <ErrorConverter TConverter>

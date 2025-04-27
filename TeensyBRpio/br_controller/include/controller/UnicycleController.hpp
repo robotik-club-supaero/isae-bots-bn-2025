@@ -186,6 +186,16 @@ class UnicycleController : private fsm::StateMachine<ControllerState> {
         m_suspendedState.reset();
     }
 
+    template <Derived<ControllerState> TNewState, typename... Args>
+    void startDisplacement(Args &&...args) {
+        if (isMoving()) {
+            brakeToStop();
+            m_suspendedState = std::make_unique<TNewState>(std::forward<Args>(args)...);
+        } else {
+            setCurrentState<TNewState>(std::forward<Args>(args)...);
+        }
+    }
+
     Speeds getEstimatedRelativeRobotSpeed() const;
 
     Vector2D<Meter> applyOffset(Position2D<Meter> position) const;
