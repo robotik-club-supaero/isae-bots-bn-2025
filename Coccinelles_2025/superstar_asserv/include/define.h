@@ -44,12 +44,12 @@ MACHINE A ETAT
 */
 #define START_TIME 85  //Les groupies commence dans les 15 dernières minutes.
 #define DMIN 15 // En cm, à modifier.
-#define TOURNE_SUPERSTAR_X 0    
-#define TOURNE_SUPERSTAR_Y 0 //Position ou la superstar va tourner
-#define DEPART_SUPERSTAR_X 0
-#define DEPART_SUPERSTAR_Y 0
-#define FIN_SUPERSTAR_X 0
-#define FIN_SUPERSTAR_Y 0 //position finale superstar
+#define TOURNE_SUPERSTAR_X 1100    
+#define TOURNE_SUPERSTAR_Y 1850 //Position ou la superstar va tourner
+#define DEPART_SUPERSTAR_X 100
+#define DEPART_SUPERSTAR_Y 1850
+#define FIN_SUPERSTAR_X 1100
+#define FIN_SUPERSTAR_Y 1600 //position finale superstar
 #define EPSP 1 //Incertitude position, cm
 #define EPSA 0,1 //Incertitude position, radian
 

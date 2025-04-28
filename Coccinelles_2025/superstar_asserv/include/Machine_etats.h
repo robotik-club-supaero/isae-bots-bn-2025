@@ -8,6 +8,7 @@
 #include <Irsensor.h>
 #include <Asserv.h>
 #include <Define_map.h>
+#include "Ultrason.hpp"
 #include "Serv.h"
 #include "define.h"
 
@@ -35,6 +36,10 @@ private:
     long m_time;
     long m_time_global;
     long m_time_sensor;
+    bool condx_turn ;
+    bool condy_turn ;
+    bool condx_arret ;
+    bool condy_arret ;
 
 public:
     int tirette = 1; // TODO Etat par défaut de la tirette , CHANGER SI NECESSAIRE
@@ -54,9 +59,9 @@ public:
     Serv *m_p_servo ;
 
     Mesure_pos *m_p_mesure_pos;
-    Irsensor *m_p_ir_sensor;
+    Ultrason *m_p_ultrason;
 
-    Machine_etats(Asserv *p_asserv, Mesure_pos *p_mesure_pos, Irsensor *p_ir_sensor);
+    Machine_etats(Asserv *p_asserv, Mesure_pos *p_mesure_pos, Ultrason *p_ultrason);
     void setup();
     void loop();
 };

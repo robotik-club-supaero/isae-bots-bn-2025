@@ -11,16 +11,17 @@
 #include <Arduino.h>
 #include <ESP32Servo.h>
 
-class ultrason
+class Ultrason
 {
 private:
-    int echo_PIN;     // Broche Echo du HC-SR04
-    int trigger_PIN;  // Broche Trigger du HC-SR04
-    long duration; // Durée de l'echo
-    long dt = 10; // Délai entre les lectures (10ms)
+    int m_echo_PIN;     // Broche Echo du HC-SR04
+    int m_trigger_PIN;  // Broche Trigger du HC-SR04
+    long m_duration; // Durée de l'echo
+    long m_dt = 10; // Délai entre les lectures (10ms)
 public:
-    long distance; // Distance mesurée
-    Ultrason(int echo_PIN, int trigger_PIN); // Constructeur
+    long m_distance; // Distance mesurée
+    long m_time;
+    Ultrason(int m_echo_PIN, int m_trigger_PIN); // Constructeur
     /**
      * @brief Fonction d'initialisation du capteur ultrason
      */

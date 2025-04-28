@@ -1,12 +1,12 @@
 #include <Machine_etats.h>
 #include <Arduino.h>
 #include <cmath>
-#include "trajectories/PathTrajectory.hpp"
+
 
 #include <define.h>
 
 
-Machine_etats::Machine_etats(Asserv *p_asserv, Mesure_pos *p_mesure_pos, Irsensor *p_ir_sensor)
+Machine_etats::Machine_etats(Asserv *p_asserv, Mesure_pos *p_mesure_pos, Ultrason *p_ultrason)
 {
     m_p_asserv = p_asserv;
     m_p_mesure_pos = p_mesure_pos;
@@ -14,7 +14,7 @@ Machine_etats::Machine_etats(Asserv *p_asserv, Mesure_pos *p_mesure_pos, Irsenso
 
 void Machine_etats::setup()
 {
-    pinMode(34, INPUT);
+    pinMode(4, INPUT);
     etat = INIT;
     m_time = millis();
     m_time_global = millis();
@@ -30,14 +30,15 @@ void Machine_etats::loop()
             etat = END;
         }
         // Lire l'état de la tirette
-        tirette = digitalRead(34);
+        tirette = digitalRead(4);
         
         // Récupère la distance au danger le plus proche
-        m_minimum_distance = m_p_ir_sensor->ir_minimum_distance ;
+        m_minimum_distance = m_p_ultrason->m_distance ;
         
         switch (etat)
         {
-        case INIT:
+            case INIT:
+            Serial.println(tirette) ;
             if ((millis() - m_time_global >= START_TIME) && tirette == 0) {
                 m_time_global = millis() ;
                 etat = MOVE ;
@@ -57,8 +58,8 @@ void Machine_etats::loop()
             
             m_p_asserv->asserv_global(SPEED, SPEED, angle); //corrige l'angle. 
             
-            bool condx_turn = (pos_x <= TOURNE_SUPERSTAR_X + EPSP) && (pos_x >= TOURNE_SUPERSTAR_X - EPSP) ;
-            bool condy_turn = (pos_y <= TOURNE_SUPERSTAR_Y + EPSP) && (pos_y >= TOURNE_SUPERSTAR_Y - EPSP) ;
+            condx_turn = (pos_x <= TOURNE_SUPERSTAR_X + EPSP) && (pos_x >= TOURNE_SUPERSTAR_X - EPSP) ;
+            condy_turn = (pos_y <= TOURNE_SUPERSTAR_Y + EPSP) && (pos_y >= TOURNE_SUPERSTAR_Y - EPSP) ;
             if ( condx_turn && condy_turn) {
                 pos_finit_x = FIN_SUPERSTAR_X;
                 pos_finit_y = FIN_SUPERSTAR_Y;
@@ -68,8 +69,8 @@ void Machine_etats::loop()
                 etat = MOVE ;
             }
 
-            bool condx_arret = (pos_x <= FIN_SUPERSTAR_X + EPSP) && (pos_x >= FIN_SUPERSTAR_X - EPSP) ;
-            bool condy_arret = (pos_y <= FIN_SUPERSTAR_Y + EPSP) && (pos_y >= FIN_SUPERSTAR_Y - EPSP) ;
+            condx_arret = (pos_x <= FIN_SUPERSTAR_X + EPSP) && (pos_x >= FIN_SUPERSTAR_X - EPSP) ;
+            condy_arret = (pos_y <= FIN_SUPERSTAR_Y + EPSP) && (pos_y >= FIN_SUPERSTAR_Y - EPSP) ;
             if (condx_arret && condy_arret) {
                 etat = END ;
             }
@@ -95,6 +96,6 @@ void Machine_etats::loop()
             break;
 
         }
-        m_time = millis();
+       m_time = millis();
     }
 }

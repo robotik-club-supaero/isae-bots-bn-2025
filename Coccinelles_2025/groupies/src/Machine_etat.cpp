@@ -34,7 +34,7 @@ void Machine_etats::loop()
         // Lire l'état de la tirette
         tirette = digitalRead(34);
         
-        // Récupère la vision des 2 ir_sensor et les mets dans 1 seul liste (taille 16)
+        // Récupère la vision des 2 ir_sensor et les mets dans 1 seul matrice (taille 16*8)
         for (int i = 0; i < 8; i++){ m_vision[i] = m_p_ir_sensor_left->vision[i] ; } 
         for (int i = 0; i < 8; i++){ m_vision[8 + i] = m_p_ir_sensor_right->vision[i] ; }
         // Récupère la distance au danger le plus proche
