@@ -3,21 +3,21 @@
 
 // -- SERVO POSITIONS --
 
-// Clamp 1 of level 1
-#define CLAMP_1_1_OPEN_POS 40   // TODO
-#define CLAMP_1_1_CLOSED_POS 10  // TODO
+// Clamp 1
+#define CLAMP_1_1_OPEN_POS 10   // TODO
+#define CLAMP_1_1_CLOSED_POS 160  // TODO
 
-// Clamp 2 of level 1
-#define CLAMP_1_2_OPEN_POS 40   // TODO
+// Clamp 2
+#define CLAMP_1_2_OPEN_POS 160   // TODO
 #define CLAMP_1_2_CLOSED_POS 10  // TODO
 
-// Clamp 1 of level 2
-#define CLAMP_2_1_OPEN_POS 40   // TODO
-#define CLAMP_2_1_CLOSED_POS 10  // TODO
+// Clamp bas  
+#define CLAMP_2_1_OPEN_POS 170   // TODO
+#define CLAMP_2_1_CLOSED_POS 5  // TODO
 
-// Clamp 2 of level 2
-#define CLAMP_2_2_OPEN_POS 40   // TODO
-#define CLAMP_2_2_CLOSED_POS 10  // TODO
+// Clamp en trop  
+#define CLAMP_2_2_OPEN_POS 0   // TODO
+#define CLAMP_2_2_CLOSED_POS 0  // TODO
 
 // The servo that opens first when deploying the banner
 #define BANNER_1_DEPLOYED_POS 50  // TODO
