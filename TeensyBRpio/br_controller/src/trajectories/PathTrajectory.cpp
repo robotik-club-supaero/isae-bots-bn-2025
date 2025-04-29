@@ -20,7 +20,7 @@ BezierCurve generateBezier(Point2D<Meter> start, Point2D<Meter> end, Vector2D<Me
     double_t ctrlPtDistance = distance / 3;
 
     Point2D<Meter> controlPt1 = start + initialDirection.normalize() * ctrlPtDistance;
-    Point2D<Meter> controlPt2 = end + finalDirection.value_or(controlPt1 - end).normalize() * ctrlPtDistance;
+    Point2D<Meter> controlPt2 = end - finalDirection.value_or(end - controlPt1).normalize() * ctrlPtDistance;
 
     return {start, controlPt1, controlPt2, end};
 }
@@ -59,7 +59,7 @@ BezierCurve BezierCurvesGenerator::next() {
 
     if (index + 2 < m_points.size()) {
         const Point2D<Meter> &next = m_points[index + 2];
-        finalDirection = angleBisector(start - end, end - next);
+        finalDirection = angleBisector(end - start, next - end);
     } else if (m_finalDirection && abs(*m_finalDirection - (end - start).argument()) < Angle::Pi / 2) {
         finalDirection = m_finalDirection->toHeadingVector();
     }
