@@ -13,8 +13,12 @@ namespace py = pybind11;
 constexpr controller::ControllerStatus Still = controller::ControllerStatus::Still;
 
 PYBIND11_MODULE(br_trajectories, m) {
-    m.doc() = "Python bindings to display and simulator trajectories. This does NOT allow to communicate with the program that runs the BR, you need "
+    m.doc() = "Python bindings to display and simulate trajectories. This does NOT allow to communicate with the program that runs the BR, you need "
               "to use ROS for that.";
+
+    py::class_<Angle>(m, "Angle")
+        .def(py::init<double_t>())
+        .def_property_readonly("value", &Angle::value);
 
     py::class_<Point2D<Meter>>(m, "Point2D")
         .def(py::init<>())
@@ -47,14 +51,16 @@ PYBIND11_MODULE(br_trajectories, m) {
         .def_property_readonly_static("FORWARD", []() { return FORWARD; })
         .def_property_readonly_static("REVERSE", []() { return REVERSE; });
 
-    m.def("getTrajectoryCurves", [](Position2D<Meter> robotPosition, std::vector<Point2D<Meter>> path) {
+    py::implicitly_convertible<double_t, Angle>();
+
+    m.def("getTrajectoryCurves", [](Position2D<Meter> robotPosition, std::optional<Angle> finalOrientation, std::vector<Point2D<Meter>> path) {
         std::vector<BezierCurve> curves;
         curves.reserve(path.size());
 
         path.insert(path.begin(), robotPosition);
         // We use BezierCurvesGenerator instead of PathTrajectory, because we just want the Bézier curves and don't need
         // all the length and curvature sampling
-        BezierCurvesGenerator trajectory(robotPosition.theta, std::move(path));
+        BezierCurvesGenerator trajectory(robotPosition.theta, finalOrientation, std::move(path));
         while (trajectory.hasNext()) {
             curves.push_back(trajectory.next());
         }
@@ -68,7 +74,7 @@ PYBIND11_MODULE(br_trajectories, m) {
 
             std::unique_ptr<Trajectory> trajectory;
             if (allowCurve) {
-                trajectory = std::make_unique<PathTrajectory>(robotPosition.theta, std::move(path));
+                trajectory = std::make_unique<PathTrajectory>(robotPosition.theta, finalOrientation, std::move(path));
             } else {
                 trajectory = std::make_unique<PolygonalTrajectory>(std::move(path));
             }

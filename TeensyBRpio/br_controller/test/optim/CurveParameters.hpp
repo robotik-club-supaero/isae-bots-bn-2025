@@ -25,7 +25,7 @@ class CurveParameters {
   public:
     CurveParameters(std::vector<Point2D<Meter>> path) : m_path(std::move(path)), m_ctrlPoints() {
         /// Initial guess = current implementation of `PathTrajectory`
-        PathTrajectory trajectory(std::nullopt, m_path);
+        PathTrajectory trajectory(std::nullopt, std::nullopt, m_path);
         trajectory.forceGenerate();
 
         for (std::size_t i = 0; i < trajectory.numOfGeneratedCurves(); i++) {

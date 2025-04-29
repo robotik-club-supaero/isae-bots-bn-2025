@@ -79,7 +79,7 @@ int main() {
                         }
                     }
                     if (points.size() > 1) {
-                        PathTrajectory trajectory(std::nullopt, points);
+                        PathTrajectory trajectory(std::nullopt, std::nullopt, points);
                         trajectoryDrawable.emplace(BezierTrajectoryDrawable(window, trajectory, STEP));
                     } else {
                         trajectoryDrawable.reset();
@@ -91,7 +91,7 @@ int main() {
                     if (event.key.code == sf::Keyboard::Key::R && points.size() > 1) {
                         // -- SIMULATE TRAJECTORY --
                         paused = false;
-                        manager.emplace(startTrajectorySimulation(std::make_unique<PathTrajectory>(std::nullopt, points)));
+                        manager.emplace(startTrajectorySimulation(std::make_unique<PathTrajectory>(std::nullopt, std::nullopt, points)));
                         manager2.reset();
                     } else if (event.key.code == sf::Keyboard::Key::O && points.size() > 1) {
                         // -- OPTIMIZE TRAJECTORY --
@@ -109,7 +109,7 @@ int main() {
                             BezierTrajectoryDrawable(window, trajectory, STEP, sf::Color(150, 200, 50), sf::Color(50, 200, 0)));
 
                         paused = false;
-                        manager.emplace(startTrajectorySimulation(std::make_unique<PathTrajectory>(std::nullopt, points)));
+                        manager.emplace(startTrajectorySimulation(std::make_unique<PathTrajectory>(std::nullopt, std::nullopt, points)));
                         manager2.emplace(startTrajectorySimulation(std::make_unique<MultiCurveTrajectory<BezierCurve>>(params.generateTrajectory())));
                     } else if (event.key.code == sf::Keyboard::Key::P) {
                         paused = !paused;
