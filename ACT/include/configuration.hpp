@@ -41,8 +41,8 @@
 
 // -- PINS --
 
-#define ELEVATOR_1_STEP_PIN 5
-#define ELEVATOR_1_DIR_PIN 6
+#define ELEVATOR_1_STEP_PIN 3
+#define ELEVATOR_1_DIR_PIN 4
 
 #define ELEVATOR_2_STEP_PIN 5
 #define ELEVATOR_2_DIR_PIN 6
