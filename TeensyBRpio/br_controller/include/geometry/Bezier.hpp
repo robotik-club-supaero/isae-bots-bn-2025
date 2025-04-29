@@ -7,7 +7,11 @@
 
 class BezierCurve {
   public:
-    /// @param points There must be at least two points.
+
+    /// Constructs an empty Bézier curve, starting and ending at (0, 0).
+    BezierCurve() = default;
+
+    /// @param points The control points
     /// @{
     BezierCurve(std::vector<Point2D<Meter>> points);
     BezierCurve(std::initializer_list<Point2D<Meter>> points);

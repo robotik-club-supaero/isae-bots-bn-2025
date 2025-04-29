@@ -49,7 +49,7 @@ struct BinomialIterator {
  */
 Polynomial<Point2D<Meter>> bezierToPolynomial(const std::vector<Point2D<Meter>> &points) {
     if (points.size() < 2) {
-        abort("A Bézier curve must have at least two points");
+        return points;
     }
     std::vector<Point2D<Meter>> coeffs;
 

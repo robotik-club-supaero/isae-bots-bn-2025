@@ -20,6 +20,9 @@ class Angle {
     /// @return this + PI
     Angle reverse() const;
 
+    /// Returns the heading vector of which this angle is the argument.
+    Vector2D<Meter> toHeadingVector() const;
+
     Angle operator-() const;
 
     void operator+=(Angle other);

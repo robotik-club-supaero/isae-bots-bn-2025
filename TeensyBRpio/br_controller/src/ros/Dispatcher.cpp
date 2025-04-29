@@ -45,7 +45,7 @@ inline void handleGoTo(TManager &manager, const displacement_order_t &order) {
         Angle initialDirection = robotPosition.theta + kind.getAlignmentOffset();
         std::unique_ptr<Trajectory> trajectory;
         if (allowCurve) {
-            trajectory = std::make_unique<PathTrajectory>(initialDirection, std::move(path));
+            trajectory = std::make_unique<PathTrajectory>(initialDirection, finalOrientation, std::move(path));
         } else {
             trajectory = std::make_unique<PolygonalTrajectory>(std::move(path));
         }

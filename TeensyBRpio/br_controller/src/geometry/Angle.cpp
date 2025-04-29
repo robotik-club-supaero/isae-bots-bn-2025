@@ -1,4 +1,6 @@
 #include "geometry/Angle.hpp"
+#include "geometry/Vector2D.hpp"
+
 #include <cmath>
 #include <numbers>
 
@@ -26,6 +28,10 @@ double_t Angle::value() const {
 
 Angle Angle::reverse() const {
     return *this + Angle(Pi);
+}
+
+Vector2D<Meter> Angle::toHeadingVector() const {
+    return {std::cos(*this), std::sin(*this)};
 }
 
 Angle Angle::operator-() const {

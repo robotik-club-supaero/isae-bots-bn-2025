@@ -16,6 +16,9 @@ template <Add T>
 class Polynomial {
 
   public:
+    /// Constructs the polynomial P(X) = 0.
+    Polynomial() = default;
+
     /// @param coeffs coeffs[i] is the coefficient of degree i.
     Polynomial(std::vector<T> coeffs);
     /// @param coeffs The i-th element is the coefficient of degree i (where i is zero-based)
