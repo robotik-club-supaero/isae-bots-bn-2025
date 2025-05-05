@@ -7,27 +7,42 @@ Le fichier br_controller/include/configuration.hpp contient la plupart des param
 
 ## Compilation 
 
-Attention : la racine du projet Platform.IO est dans le dossier br_controller, et il y a un lien symbolique vers br_messages dans br_controller/extra_packages.
+Attention : la racine du projet ROS est ici, mais la racine du projet Platform.IO est dans le dossier br_controller, et il y a un lien symbolique vers br_messages dans br_controller/extra_packages.
 Cela était nécessaire pour que le code soit compatible à la fois avec colcon et Platform.IO.
 
 ### Compiler la simulation
-Se placer à la racine du projet, dans un environnement où RO2 Jazzy est installé (par exemple le Docker du HN), puis lancer:
+En pratique, la BR est intégrée au HN en tant que sous-module Git et est compilée en même temps que le reste du code du HN.
+
+Conseils pour faciliter le développement :
+- Ajoutez le dépôt local en tant que source pour le sous-module :
 ```
-colcon build
+cd [HN]/dev/lib/br
+git remote add local [BR]
 ```
 
-Pour communiquer avec la BR (simulation ou non) depuis le HN, il faut copier :
-- ./br_messages/* vers [HN]/dev/lib/br_messages/
-- ./install/br_simu/lib/br_simu/simulation_br vers [HN]/dev/src/sim/sim/br/simulation_br
-- ./install/br_simu/lib/br_simu/br_trajectories.cpython-312-x86_64-linux-gnu.so  vers [HN]/dev/lib/br_trajectories/br_trajectories.cpython-312-x86_64-linux-gnu.so
+- Ainsi, vous pouvez compiler les modifications apportées à la BR sans être obligé de "push" (vous devez quand même faire un commit) :
+```
+cd [HN]/dev/lib/br
+git fetch local
+git checkout <id du commit local>
+```
+
+Consultez la documentation du HN pour plus d'informations.
+
+La simulation peut aussi être compilée en exécutant la commande `colcon build` à la racine du projet (nécessite ROS2, SFML et pybind11).
 
 ### Compiler pour la BR (Arduino Teensy)
 Compiler avec Platform.IO.
 Attention la convention de code est en c++20 et ne compilera pas en Arduino pur, qui est en c++9x de base (en plus des Décodeurs HW)
 
 ## Utilisation (sur le robot)
-TODO
-rosserial a été remplacé par micro_ros, mais on n'a pas encore eu l'occasion de tester sur le robot.
+
+Compilez et téléversez le code sur la Teensy BR avec Platform.IO.
+
+Pour communiquer avec la BR depuis le HN, il faut démarrer micro_ros_agent dans le Docker sur le Raspberry :
+`ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/ttyXXX`
+
+Consultez la section sur les erreurs fréquentes ci-dessous et la documentation du HN pour plus d'informations.
 
 ## Les entrees sur l'asserv
 
@@ -40,8 +55,8 @@ Ce topic reçoit les ordres de déplacement. L'ordre est constitué de :
     * REVERSE (1) : Provoque le déplacement en marche arrière plutôt qu'en marche avant
     * FINAL_ORIENTATION (2) : Provoque la rotation finale du robot à la fin du déplacement.
     * ALLOW_CURVE (4) : Autorise l'utilisation des trajectoires courbes. Si ce flag n'est pas utilisé, une trajectoire
-    en ligne brisée (avec arrêt et rotation à chaque point) sera utilisée.
-- path: Une liste de points par lesquels le robot doit passer. La position initial du robot ne doit PAS être incluse.
+      en ligne brisée (avec arrêt et rotation à chaque point) sera utilisée.
+- path: Une liste de points par lesquels le robot doit passer. La position initiale du robot ne doit PAS être incluse.
 - theta: L'orientation finale du robot attendue à la fin du déplacement (en radians). `theta` est ignoré si le flag `FINAL_ORIENTATION` n'est pas utilisé.
 
 Si `path` est vide, le robot ne se déplacera pas et les flags `REVERSE` et `ALLOW_CURVE` n'ont pas d'effet. Si le flag `FINAL_ORIENTATION` est utilisé, le robot effectue une rotation sur place, sinon l'ordre de déplacement n'a aucun effet.
@@ -74,6 +89,8 @@ Ce topic reçoit les ordres de freinage d'urgence.
 
 Activation ou désactivation de l'asservissement. Les ordres ci-dessus n'ont aucun effet quand l'asservissement n'est pas activé.
 L'asservissement est automatiquement activé avec la simulation, mais pas avec le vrai robot.
+
+Assurez-vous d'allumer la puissance avant d'activer l'asservissement.
 
 ### Le topic /br/resetPosition
 
@@ -124,17 +141,17 @@ NB: L'asserv publie sur ce topic uniquement si la constante `_BR_DEBUG` est déf
 Ce topic effectue un log global des variables internes de l'asserv. Pour l'exploiter :
 ```
 ros2 topic echo -p /br/logTotaleArray > fichierdelog.log
-python GraphPos.py fichierdelog.log
-
-Si la teensy est connectée a la pi, un scp pi@ip:fichierdelog.log . permet de le recuperer
-@Yoann a concu un affichage a la volée de ces log
+python GraphPos.py fichierdelog.log # TODO: script obsolete [où est-il ?]
 ```
+
+Si la teensy est connectée a la pi, un `scp pi@ip:fichierdelog.log` . permet de le recuperer
+@Yoann a concu un affichage a la volée de ces log
 
 ### Le topic /br/odosCount
 
 Publie le nombre de "ticks" comptés sur les roues encodeuses de position (utile pour la calibration).
 
-## Possible erreurs à detecter **Avant** la coupe 
+## Possibles erreurs à detecter **Avant** la coupe 
 
 - Tester asserv en idle : --> Topic /br/idle 
 - Tester asserv en vitesse --> Topic /br/command
@@ -155,6 +172,13 @@ source /app/install/setup.bash
 ros2 run uix interface_node
 ```
 (Penser à faire `xhost +` si besoin avant d'aller dans le Docker)
+
+### DEL clignotante
+
+La Teensy doit clignoter en permanence à partir du moment où `micro_ros_agent` est lancé.
+
+- Si la Teensy se met à clignoter très lentement lorsque vous activez l'asservissement avec /br/idle, vérifiez que la puissance est bien allumée et que les moteurs et la carte ODrive sont bien connectés.
+- Si la Teensy arrête de clignoter totalement, cela signifie que le programme a planté. Cela peut être dû soit à une perte de connexion avec micro_ros_agent, soit à un problème plus grave dans le programme (erreur de segmentation ou autre).
 
 ## [TOUT CE QUI SUIT EST POTENTIELLEMENT OBSOLETE, TODO à vérifier]
 ## Les scripts 

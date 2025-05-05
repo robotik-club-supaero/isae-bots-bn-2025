@@ -1,138 +1,128 @@
 #! /usr/bin/python
 # -*- coding: utf-8 -*-
 
+import sys
+from threading import Thread
 
-import rospy
-from std_msgs.msg import Int32MultiArray
-from geometry_msgs.msg import Quaternion
+import rclpy
+from rclpy.node import Node
+from rclpy.qos import QoSProfile, ReliabilityPolicy
+from br_messages.msg import OdosCount, DisplacementOrder
 
 from numpy import mean
 
-log = None
+class CalibrationNode(Node):
+    def __init__(self):
+        super().__init__("odos_calib")
 
-rospy.init_node("node_odos")
-position_pub = rospy.Publisher("nextPositionTeensy", Quaternion, queue_size=10)
-
-
-def sendOrder(x,y,z,w):
-    msg = Quaternion()
-    msg.x = float(x)
-    msg.y = float(y)
-    msg.z = float(z)
-    msg.w = float(w)
-    position_pub.publish(msg)
-
-def logCallback(data):
-    global log
-    log = data.data
-
-log_subcriber = rospy.Subscriber("odos_count", Int32MultiArray, logCallback)
-
-def odosLigneDroite():
-    
-    global log
-
-    fileLigneDroite = open("logLigneDroite.log", "a")
-
-    LR = []
-    Units = [] 
-
-    continueInput = 'y'
-    keepInput = 'y'
-
-    while continueInput != 'n':
-
-        input("Press enter to start ")
-        Li = log[0]
-        Ri = log[1]
+        self.odos_count = OdosCount()
         
-        input("Press enter to stop ")
-        Lf = log[0]
-        Rf = log[1]
+        qos_profile = QoSProfile(reliability=ReliabilityPolicy.BEST_EFFORT, depth=10)    
+        self.odos_sub = self.create_subscription(OdosCount, "/br/odosCount", self.odos_callback, qos_profile)
 
-        dL = Lf - Li
-        dR = Rf - Ri + 1
+    def odos_callback(self, msg):
+        self.odos_count = msg
 
-        d = float(input("Enter distance (mm) : "))
-
-        keepInput = input("Keep this try ? [y/n] ")
-        if(keepInput != 'n'):
-            LR.append(dL/dR)
-            Units.append(dL/d)
-            fileLigneDroite.write(str((d,Li,Ri,Lf,Rf)) + "\n")
-
-        print("LR : " + str(LR) + ", avg = " + str(mean(LR)))
-        print("Units : " + str(Units) + ", avg = " + str(mean(Units)))
+    def odosLigneDroite(self):
         
-        continueInput = input("Continue ? [y/n]")
+        fileLigneDroite = open("logLigneDroite.log", "a")
 
-    return(mean(LR), mean(Units))
+        LR = []
+        Units = [] 
 
-def odosRotation(LR = 1.):
+        continueInput = 'y'
+        keepInput = 'y'
 
-    global log
+        print("Calibrating LR")
 
-    fileRotation = open("logRotation.log", "a")
+        while continueInput != 'n':
 
-    Ecarts = []
+            input("Press enter to start ")
+            Li = self.odos_count.left
+            Ri = self.odos_count.right
+            
+            input("Press enter to stop ")
+            Lf = self.odos_count.left
+            Rf = self.odos_count.right
 
-    continueInput = 'y'
-    keepInput = 'y'
+            dL = Lf - Li
+            dR = Rf - Ri + 1
 
-    while continueInput != 'n':
+            d = float(input("Enter distance (mm) : "))
 
-        input("Press enter to start ")
-        Li = log[0]
-        Ri = log[1]
+            keepInput = input("Keep this try ? [y/n] ")
+            if(keepInput != 'n'):
+                LR.append(dL/dR)
+                Units.append(dL/d)
+                fileLigneDroite.write(str((d,Li,Ri,Lf,Rf)) + "\n")
 
-        #rotSpeed = input("Rotation speed ? ")
+            print("LR : " + str(LR) + ", avg = " + str(mean(LR)))
+            print("Units : " + str(Units) + ", avg = " + str(mean(Units)))
+            
+            continueInput = input("Continue ? [y/n]")
 
-        #input("Press enter to rotate ")
-        #sendOrder(rotSpeed,-rotSpeed,0,4)
-        
-        #input("Press enter to stop the rotation ")
-        #sendOrder(0,0,0,4)
+        return mean(LR), mean(Units) 
 
-        input("Press enter to stop the measure ")
-        Lf = log[0]
-        Rf = log[1]
+    def odosRotation(self, LR = 1.):
 
-        dL = Lf - Li
-        dR = (Rf - Ri)*LR + 1
+        fileRotation = open("logRotation.log", "a")
 
-        d = float(input("Enter distance (rad) : "))
+        Ecarts = []
 
-        keepInput = input("Keep this try ? [y/n] ")
-        if(keepInput != 'n'):
-            Ecarts.append((dL-dR)/d)
-            fileRotation.write(str((d,Li,Ri,Lf,Rf)) + "\n")
+        continueInput = 'y'
+        keepInput = 'y'
 
-        print("Ecarts : " + str(Ecarts) + ", avg = " + str(mean(Ecarts)))
-        
-        continueInput = input("Continue ? [y/n] ")
-        
-    return(mean(Ecarts))
+        print("Calibrating rotation")
 
+        while continueInput != 'n':
 
-(LR,E) = odosLigneDroite()
-Ecarts = odosRotation(LR)
-print(LR)
-print(E)
-print(Ecarts)
+            input("Press enter to start ")
+            Li = self.odos_count.left
+            Ri = self.odos_count.right
 
+            input("Press enter to stop the measure ")
+            Lf = self.odos_count.left
+            Rf = self.odos_count.right
 
+            dL = Lf - Li
+            dR = (Rf - Ri)*LR + 1
 
-        
-        
+            d = float(input("Enter distance (rad) : "))
 
+            keepInput = input("Keep this try ? [y/n] ")
+            if(keepInput != 'n'):
+                Ecarts.append((dL-dR)/d)
+                fileRotation.write(str((d,Li,Ri,Lf,Rf)) + "\n")
 
-        
+            print("Ecarts : " + str(Ecarts) + ", avg = " + str(mean(Ecarts)))
+            
+            continueInput = input("Continue ? [y/n] ")
+            
+        return mean(Ecarts)
 
+#################################################################
+#                                                               #
+#                             Main                              #
+#                                                               #
+#################################################################
 
+def main():
+    rclpy.init(args=sys.argv)
 
+    node = CalibrationNode()
+    try:
+        th = Thread(target = lambda: rclpy.spin(node))
+        th.start()
 
+        (LR,E) = node.odosLigneDroite()
+        Ecarts = node.odosRotation(LR)
+        print(LR)
+        print(E)
+        print(Ecarts)
 
+    finally:
+        node.destroy_node()
+        rclpy.try_shutdown()
 
-
-
-    
+if __name__ == '__main__':
+    main()
