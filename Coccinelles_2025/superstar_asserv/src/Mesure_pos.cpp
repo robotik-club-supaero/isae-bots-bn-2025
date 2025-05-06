@@ -50,8 +50,8 @@ void Mesure_pos::loop()
          * NE PAS OUBLIER DE COMMENTER DANS LE CODE FINAL SINON LE TERMINAL SERIE INTERFERE AVEC L'ASSERVISSEMENT ET CA FAIT NIMP
         */
        
-        // Serial.println("Position_x = " + String(position_x));
-        // Serial.println("Position_y = " + String(position_y));
+        Serial.println("Position_x = " + String(position_x));
+        Serial.println("Position_y = " + String(position_y));
         Serial.println("Position_theta = " + String(position_theta));
         // Serial.println("Vitesse_x = " + String(Vitesse_x));
         // Serial.println("Vitesse_y = " + String(Vitesse_y));

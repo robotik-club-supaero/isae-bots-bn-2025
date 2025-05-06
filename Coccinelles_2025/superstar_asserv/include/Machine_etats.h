@@ -53,7 +53,7 @@ public:
     float pos_x = 0;
     float pos_y = 0;
     float angle = 0;
-    int m_minimum_distance = 1000; //Pk mille?
+    int m_minimum_distance = 1000; 
 
     Asserv *m_p_asserv;
     Serv *m_p_servo ;
