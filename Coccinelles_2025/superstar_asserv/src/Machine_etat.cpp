@@ -42,12 +42,14 @@ void Machine_etats::loop()
             if ((millis() - m_time_global >= START_TIME) && tirette == 0) {
                 m_time_global = millis() ;
                 etat = MOVE ;
+                Serial.println('herein1');
             } 
             else {
                 etat = INIT ;
             }
             break;
         case MOVE:
+            Serial.println('herein2');
             if (m_minimum_distance <= DISTANCE_MIN) {
                 etat = STOP;
             }
