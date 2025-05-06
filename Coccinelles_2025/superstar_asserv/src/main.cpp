@@ -25,7 +25,6 @@ Encodeur encoder_R = Encodeur(CLK_R, DT_R);
 Encodeur encoder_L = Encodeur(CLK_L, DT_L);
 Mesure_pos mesure_pos = Mesure_pos(&encoder_R, &encoder_L);
 Asserv asserv = Asserv(&moteur_d, &moteur_g, &mesure_pos);
-
 Machine_etats machine_etats = Machine_etats(&asserv, &mesure_pos, &ultrason);
 
 void setup()
@@ -43,16 +42,16 @@ void setup()
   Serial.begin(115200); // Initialisation de la communication série
   moteur_g.setup();     // Initialisation des moteurs
   moteur_d.setup();
-  Serial.println('here');
+  Serial.println("here");
   // Test moteur
   /*
   moteur_g.set_speed(255); //TODO : regler la vitesse pour tester la vitesse max
   moteur_d.set_speed(255);
   */
   asserv.setup();
-  Serial.println('here2');
+  Serial.println("here2");
   machine_etats.setup();
-  Serial.println('here3');
+  Serial.println("here3");
 }
 
 void loop()
@@ -66,9 +65,10 @@ void loop()
   
   ultrason.loop();
   mesure_pos.loop();
-  Serial.println('here4');
+  Serial.println("here4");
   // #DEBUG Si on veut tester les asservissements , on decommente la lige suivante et on commente machine_etats.loop()
-  // asserv.loop();
+  asserv.loop();
   machine_etats.loop();
-  Serial.println('here5');
+  Serial.println("here5");
+  delay(100); // Delay de 100ms entre chaque boucle
 }

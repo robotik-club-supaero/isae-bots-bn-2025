@@ -21,13 +21,17 @@ void Ultrason::loop()
     {
         // Envoi d'une impulsion de 10 microsecondes sur la broche Trigger
         // à voir si on doit le faire en asynchrone ou pas (10 micro secondes c'est pas long)
-        digitalWrite(m_trigger_PIN, HIGH);
-        delayMicroseconds(10);
-        digitalWrite(m_trigger_PIN, LOW);
 
+        digitalWrite(m_trigger_PIN, LOW); 
+        delayMicroseconds(5); 
+        digitalWrite(m_trigger_PIN, HIGH); 
+        delayMicroseconds(10); 
+        digitalWrite(m_trigger_PIN, LOW); 
+        
         // Lecture de la durée de l'echo
         m_duration = pulseIn(m_echo_PIN, HIGH);
-
+        Serial.print("Duration: ");
+        Serial.println(m_duration);
         // Calcul de la distance en cm
         m_distance = m_duration * 0.034 / 2;
         

@@ -17,15 +17,24 @@ void Machine_etats::setup()
     pinMode(4, INPUT);
     etat = INIT;
     m_time = millis();
+    Serial.println(m_time);
     m_time_global = millis();
+    Serial.println("setup fin");
 }
 
 void Machine_etats::loop()
 {
+    Serial.println("herein") ;
+    Serial.print("m_time =");
+    Serial.println(m_time);
+
     if (millis() - m_time >= dt)
-    {
+    {   Serial.println("m_time_global = ") ;
+        Serial.println(m_time_global) ;
+        Serial.println(millis()-m_time_global) ;
         if (millis() - m_time_global >= time_global)
         {
+            Serial.println("starth") ;
             m_p_asserv->asserv_global(0, 0, 0);
             etat = END;
         }
@@ -42,14 +51,14 @@ void Machine_etats::loop()
             if ((millis() - m_time_global >= START_TIME) && tirette == 0) {
                 m_time_global = millis() ;
                 etat = MOVE ;
-                Serial.println('herein1');
+                Serial.println("herein1");
             } 
             else {
                 etat = INIT ;
             }
             break;
         case MOVE:
-            Serial.println('herein2');
+            Serial.println("heremoven2");
             if (m_minimum_distance <= DISTANCE_MIN) {
                 etat = STOP;
             }
@@ -82,6 +91,7 @@ void Machine_etats::loop()
             break;
 
         case STOP:
+            Serial.println("herestopn3");
             m_p_asserv->asserv_global(0, 0, 0);
             if (m_minimum_distance > DISTANCE_MIN)
             {
