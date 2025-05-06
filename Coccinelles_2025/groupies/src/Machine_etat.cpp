@@ -4,6 +4,7 @@
 #include "trajectories/PathTrajectory.hpp"
 #include <Pathfinder.h>
 #include <define.h>
+#include <vector>
 
 
 Machine_etats::Machine_etats(Asserv *p_asserv, Mesure_pos *p_mesure_pos, Irsensor *p_ir_sensor_right, Irsensor *p_ir_sensor_left)
@@ -20,6 +21,14 @@ void Machine_etats::setup()
     etat = INIT;
     m_time = millis();
     m_time_global = millis();
+    
+    GridLocation start ;
+    start.x = STARTX ;
+    start.y = STARTY ;
+    GridLocation goal ;
+    goal.x = FINX ;
+    goal.y = FINY ;
+    m_trajectoire = pathfinding_Astar(START_GRID, start, goal) 
 }
 
 void Machine_etats::loop()
@@ -56,35 +65,46 @@ void Machine_etats::loop()
             }
             break;
         case MVT:
-            if (m_minimum_distance <= DISTANCE_MIN) {
+            if (m_minimum_distance < DMIN ){
+                m_p_asserv->asserv_global(0, 0, 0);
+                etat = STOP ;
+            }
+            if (m_minimum_distance <= DMAX && m_minimum_distance >= DMIN) {
                 m_p_asserv->asserv_global(0, 0, 0);
                 etat = AVOID;
             } 
-            else if (m_distance_obstacle > DMIN ){
-                etat = STOP ;
+            
 
             else {
                 pos_x = m_p_mesure_pos->position_x + pos_init_x;
                 pos_y = m_p_mesure_pos->position_y + pos_init_y;
 
-                point pos = {.x = pos_x, .y = pos_y};
-                point target = {.x = pos_finit_x, .y = pos_finit_y};
+                GridLocation pos;
+                pos.x = pos_x;
+                pos.y = pos_y;
+                GridLocation target;
+                target.x = pos_finit_x;
+                target.y = pos_finit_y;
 
-                list_points path = pathfinding_Astar(NULL, pos, target, m_vision);
-                point sub_target = path.first;
+                GridLocation sub_target = m_trajectoire[m_traj_index];
+                m_traj_index++ ;
 
-                // trajectory = PathTrajectory(angle, path)
-                // target_reached = trajectory.advance(SPEED * dt)
-                // pos = trajectory.getCurrentPosition()
+                suppr_obstacle(pos_x, pos_y, angle, m_vision, &grid) ; 
+
+                //trajectory = PathTrajectory(angle, path);
+                //target_reached = trajectory.advance(SPEED * dt);
+                pos = trajectory.getCurrentPosition();
 
                 if (m_minimum_distance < DISTANCE_MIN) {
                     etat = AVOID;
                 } else {
                     m_p_asserv->asserv_global(SPEED, SPEED, target.argument());
+                    etat = MVT ;
                 }
             }
             break;
-        case AVOID:
+        case STOP:
+            m_p_asserv->asserv_global(0, 0, angle);
             // Faites tourner le robot dans une direction spécifique
             // (par exemple, en ajustant l'angle)
             angle += PI / 4; // Tournez de 45 degrés à droite
@@ -93,15 +113,44 @@ void Machine_etats::loop()
             // Si l'obstacle n'est plus détecté, revenez à l'état MVT
             if (m_minimum_distance > DISTANCE_MIN)
             {
-                etat = MVT;
+                etat = AVOID;
             }
             break;
 
-        case STOP:
-            m_p_asserv->asserv_global(0, 0, angle);
-            if (m_minimum_distance > DISTANCE_MIN)
-            {
-                etat = MVT;
+        case AVOID:
+            
+            if (m_minimum_distance < DMIN) {
+                etat = STOP;
+            } 
+            else if (m_minimum_distance <= DMAX && m_minimum_distance >= DMIN) {
+                pos_x = m_p_mesure_pos->position_x + pos_init_x;
+                pos_y = m_p_mesure_pos->position_y + pos_init_y;
+
+                GridLocation pos;
+                pos.x = pos_x;
+                pos.y = pos_y;
+                GridLocation target;
+                target.x = pos_finit_x;
+                target.y = pos_finit_y;
+
+                add_obstacle(pos_x, pos_y, angle, m_vision, &grid) ;
+                std::vector<GridLocation> path = pathfinding_Astar(&grid, pos, target);
+            
+                m_traj_index = 1 ;
+                GridLocation sub_target = path[m_traj_index];
+                m_traj_index++ ;
+                
+                suppr_obstacle(pos_x, pos_y, angle, m_vision, &grid) ; 
+
+                //trajectory = PathTrajectory(angle, path);
+                //target_reached = trajectory.advance(SPEED * dt);
+                //pos = trajectory.getCurrentPosition();
+            }
+            
+
+            else {
+                m_p_asserv->asserv_global(SPEED, SPEED, target.argument());
+                etat = MVT ;
             }
             break;
 

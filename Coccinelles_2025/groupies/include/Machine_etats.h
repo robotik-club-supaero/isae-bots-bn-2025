@@ -8,6 +8,8 @@
 #include <Irsensor.h>
 #include <Asserv.h>
 #include <Define_map.h>
+#include <vector>
+#include <Pathfinder.h>
 
 #define K 1
 #define dt 10
@@ -52,6 +54,11 @@ public:
 
     int m_vision[16];
     int m_minimum_distance = 1000;
+    
+
+    std::vector<GridLocation> m_trajectoire; //Définir dans define.
+    int m_traj_index = 1;
+
 
     Asserv *m_p_asserv;
 
