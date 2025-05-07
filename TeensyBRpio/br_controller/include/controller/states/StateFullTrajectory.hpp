@@ -13,7 +13,7 @@ class StateFullTrajectory : public ControllerState, private fsm::StateMachine<Co
   public:
     /// @param trajectory must not be null
     StateFullTrajectory(DisplacementKind kind, std::unique_ptr<Trajectory> trajectory, Angle initialOrientation, Speeds maxSpeeds,
-                                       Accelerations maxAccelerations, std::optional<Angle> finalOrientation = std::nullopt);
+                        Accelerations maxAccelerations, std::optional<Angle> finalOrientation = std::nullopt);
     ControllerStatus getStatus() const override;
     StateUpdateResult update(double_t interval) override;
     void notify(ControllerEvent event) override;

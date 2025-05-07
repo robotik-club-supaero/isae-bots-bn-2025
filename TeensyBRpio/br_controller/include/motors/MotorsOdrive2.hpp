@@ -18,7 +18,13 @@ class MotorsOdrive2 {
     MotorsOdrive2(uint8_t odriveRxPin, uint8_t odriveTxPin, double_t transmissionRatio, double_t wheelDiameter, double_t wheelDistance,
                   double_t maxMotorSpeed);
 
+    /// Initializes the motors with the default values from the configuration file.
     MotorsOdrive2() : MotorsOdrive2(ODRIVE_RX_PIN, ODRIVE_TX_PIN, TRANSMISSION_RATIO, WHEEL_DIAMETER, WHEEL_DISTANCE, MAX_MOTOR_SPEED) {}
+
+    /// This exists to provide a common constructor with `MotorStub` (where the motor stub needs to be connected to a simulator), but here the
+    /// argument is just ignored.
+    template <typename T>
+    MotorsOdrive2([[maybe_unused]] const T &feedback) : MotorsOdrive2() {}
 
     // See Actuators.hpp
 

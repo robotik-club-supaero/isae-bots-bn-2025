@@ -75,7 +75,11 @@
 
 /* SIMULATION - Not used on the Teensy */
 
+#ifndef ARDUINO
 #define NOISE_STD_DEV 0.1
+#else
+#define NOISE_STD_DEV 0 // random number generator not working on the Teensy
+#endif
 #define SIM_MIN_WHEEL_SPEED 0.2  // rad/s (simulates static friction) // TODO measure actual value
 #define SIM_MAX_WHEEL_SPEED 50 // rad/s (simulates saturation, roughly corresponds to MAX_MOTOR_SPEED)
 #define SIM_MAX_WHEEL_ACCEL 100 // rad/s² (simulates damping + robot inertia) // TODO measure actual value

@@ -1,3 +1,5 @@
+#ifdef _SIMULATION
+
 #include "feedback/TwoWheelSimulator.hpp"
 #include "Clock.hpp"
 #include "geometry/WheelSpeeds.hpp"
@@ -61,3 +63,5 @@ Position2D<Meter> TwoWheelSimulator::getRobotPosition() const {
 MotorStub TwoWheelSimulator::createMotorStub() const {
     return MotorStub(m_requestedSpeeds);
 }
+
+#endif

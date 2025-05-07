@@ -13,9 +13,15 @@
  */
 class MotorStub {
   public:
-  /// Use TwoWheelSimulator::createMotorStub() to create a motor stub connected to the simulator.
+    MotorStub() = delete;
+
+    /// Use TwoWheelSimulator::createMotorStub() or template constructor below to create a motor stub connected to the simulator.
     /// @param speedsPtr must not be null.
     MotorStub(std::shared_ptr<Speeds> speedsPtr);
+
+    /// Creates a motor stub connected to the provided simulator.
+    template <typename Simulator>
+    MotorStub(const Simulator &simulator) : MotorStub(simulator.createMotorStub()) {}
 
     // See Actuators.hpp
 

@@ -1,3 +1,5 @@
+#ifdef _SIMULATION
+
 #include "feedback/UnicycleStateSimulator.hpp"
 
 #include "Clock.hpp"
@@ -44,3 +46,5 @@ double_t UnicycleStateSimulator::Noise::operator()() {
         return 0;
     }
 }
+
+#endif

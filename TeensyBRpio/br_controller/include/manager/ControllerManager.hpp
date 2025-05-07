@@ -55,14 +55,24 @@ class ControllerManager : private fsm::StateMachine<ManagerState<TActuators, TCo
 
     /// Initializes the manager with the default values from the configuration file.
     ControllerManager()
-        requires Default<TClock> && Default<TController> && Default<TActuators> && Default<TFeedback>
-        : ControllerManager(UPDATE_INTERVAL, TClock(), TController(), TActuators(), TFeedback()) {}
+        requires Default<TClock> && Default<TController> && Default<TFeedback> && std::is_constructible_v<TActuators, const TFeedback &>
+        : ControllerManager(create()) {}
 
+  private:
     /// Initializes the manager with the default values from the configuration file.
     ControllerManager(TActuators actuators, TFeedback feedback)
         requires Default<TClock> && Default<TController>
         : ControllerManager(UPDATE_INTERVAL, TClock(), TController(), std::move(actuators), std::move(feedback)) {}
 
+    static ControllerManager create()
+        requires Default<TClock> && Default<TController> && Default<TFeedback> && std::is_constructible_v<TActuators, const TFeedback &>
+    {
+        TFeedback feedback;
+        TActuators actuators(feedback);
+        return ControllerManager(std::move(actuators), std::move(feedback));
+    }
+
+  public:
     ManagerStatus getStatus() const;
     bool isActive() const { return getStatus() == Active; }
     void setActive(bool active);
@@ -104,7 +114,7 @@ class ControllerManager : private fsm::StateMachine<ManagerState<TActuators, TCo
      * This bypasses the manager's clock and tick interval and allows the use of an external clock (especially in tests).
      *
      * # Caveat
-     * 
+     *
      * This desynchronizes the manager from its internal clock. Calling `update(void)` after `update(double_t)` is a logic error
      * and will lead to inconsistent update rates. To avoid this, you must call `resyncClock()` before calling `update(void)` again.
      *
