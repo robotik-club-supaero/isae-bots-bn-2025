@@ -11,7 +11,6 @@ class StateManualControl final : public ControllerState {
     StateManualControl(Speeds speedRequest, Accelerations maxAcceleration);
     ControllerStatus getStatus() const override;
     StateUpdateResult update(double_t interval) override;
-    bool resumeState(Position2D<Meter> robotPosition) override;
 
     void setSpeed(Speeds speeds, bool enforceMaxAccelerations = true);
 

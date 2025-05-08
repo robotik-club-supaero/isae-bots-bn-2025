@@ -94,11 +94,12 @@ setpoint_t UnicycleController<TConverter>::computeSetpoint(double_t interval, Po
                 return currentSetpoint;
             },
             [&](BrakingComplete &r) {
+                softReset(robotPosition);
                 if (!isMoving()) {
                     if (std::holds_alternative<no_order>(m_currentOrder)) {
                         transitToStandStill(robotPosition);
                     } else {
-                        startOrder(/* checkMoving = */ false);
+                        startOrder(/* resume = */ true, /* checkMoving = */ false);
                     }
                     return setpoint_t(robotPosition);
                 } else {
@@ -187,7 +188,7 @@ void UnicycleController<TConverter>::setSetpointSpeed(Speeds speeds, bool enforc
     if (auto *state = getStateOrNull<StateManualControl>()) {
         state->setSpeed(speeds, enforceMaxAccelerations);
     } else {
-        startOrder();
+        startOrder(/* resume = */ false);
     }
 }
 
@@ -217,32 +218,50 @@ void UnicycleController<TConverter>::startTrajectory(DisplacementKind kind, std:
                                                      std::optional<Angle> finalOrientation) {
     softReset({trajectory->getCurrentPosition(), m_setpoint.theta});
     m_currentOrder.emplace<trajectory_request_t>(kind, std::move(trajectory), finalOrientation);
-    startOrder();
+    startOrder(/* resume = */ false);
 }
 
 template <ErrorConverter TConverter>
 void UnicycleController<TConverter>::startRotation(std::unique_ptr<OrientationProfile> rotation) {
     softReset({m_setpoint, rotation->getCurrentOrientation()});
     m_currentOrder.emplace<rotation_request_t>(std::move(rotation));
-    startOrder();
+    startOrder(/* resume = */ false);
 }
 
 template <ErrorConverter TConverter>
-void UnicycleController<TConverter>::startOrder(bool checkMoving) {
+void UnicycleController<TConverter>::startOrder(bool resume, bool checkMoving) {
     if (checkMoving && getStatus() != ControllerStatus::Still && isMoving()) {
         brakeToStop(/* cancelOrder = */ false);
     } else {
         std::visit( //
-            overload{[&](const trajectory_request_t &request) {
-                         const auto &kind = std::get<DisplacementKind>(request);
-                         const auto &trajectory = std::get<std::shared_ptr<Trajectory>>(request);
+            overload{[&](trajectory_request_t &request) {
+                         auto &kind = std::get<DisplacementKind>(request);
+                         auto &trajectory = std::get<std::shared_ptr<Trajectory>>(request);
+                         if (resume) {
+                             if (trajectory->recompute({m_setpoint, m_setpoint.theta + kind.getAlignmentOffset()})) {
+                                 log(INFO, "Trajectory recomputed.");
+                             } else {
+                                 log(WARN, "Failed to recompute the trajectory. Aborting trajectory...");
+                                 cancelOrder();
+                                 return;
+                             }
+                         }
                          setCurrentState<StateFullTrajectory>(kind, trajectory, m_setpoint.theta, m_maxSpeeds, m_maxAccelerations);
                      },
-                     [&](const rotation_request_t &request) {
+                     [&](rotation_request_t &request) {
+                         if (resume) {
+                             if (request->recompute(m_setpoint.theta)) {
+                                 log(INFO, "Rotation profile recomputed.");
+                             } else {
+                                 log(WARN, "Failed to recompute the rotation profile. Aborting rotation...");
+                                 cancelOrder();
+                                 return;
+                             }
+                         }
                          setCurrentState<StateFinalRotation>(request, m_maxSpeeds.angular, m_maxAccelerations.angular);
                      },
-                     [&](const Speeds &request) { setCurrentState<StateManualControl>(m_maxAccelerations, request); }, //
-                     [](const no_order &request) {}},
+                     [&](Speeds &request) { setCurrentState<StateManualControl>(m_maxAccelerations, request); }, //
+                     [](no_order &request) {}},
             m_currentOrder);
     }
 }

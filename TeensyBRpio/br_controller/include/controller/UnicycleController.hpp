@@ -191,7 +191,7 @@ class UnicycleController : private fsm::StateMachine<StateStandStill, StateBraki
 
   private:
     void brakeToStop(bool cancelOrder);
-    void startOrder(bool checkMoving = true);
+    void startOrder(bool resume, bool checkMoving = true);
     void cancelOrder();
     void transitToStandStill(Position2D<Meter> restPosition);
 

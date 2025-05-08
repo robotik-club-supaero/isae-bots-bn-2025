@@ -46,16 +46,4 @@ void StateRotation::setMaxSpeed(double_t maxAngSpeed) {
     m_maxSpeed = maxAngSpeed;
 }
 
-bool StateRotation::resumeState(Position2D<Meter> robotPosition) {
-    if (m_profile->recompute(robotPosition.theta)) {
-        log(INFO, "Rotation profile recomputed.");
-
-        m_ramp.overwriteCurrentSpeed(0.);
-        return true;
-    } else {
-        log(WARN, "Failed to recompute the rotation profile. Aborting rotation...");
-        return false;
-    }
-}
-
 } // namespace controller

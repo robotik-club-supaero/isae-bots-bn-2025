@@ -66,16 +66,6 @@ class ControllerState {
      * @return The updated setpoint, or a transition code. See `StateUpdateResult`.
      */
     virtual StateUpdateResult update(double_t interval) = 0;
-    /**
-     * Notifies the state it was interrupted and needs to be resumed.
-     * This often involves recomputing the state based on the new position of the robot.
-     *
-     * @returns true if the state can be resumed, false otherwise. Returning false will lead to the
-     * state being canceled.
-     *
-     * The default implementation does nothing and returns false.
-     */
-    virtual bool resumeState(Position2D<Meter> robotPosition) { return false; }
 
   protected:
     ControllerState() = default;

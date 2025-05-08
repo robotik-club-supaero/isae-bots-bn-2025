@@ -19,7 +19,6 @@ class StateFullTrajectory final : public ControllerState,
                         Accelerations maxAccelerations);
     ControllerStatus getStatus() const override;
     StateUpdateResult update(double_t interval) override;
-    bool resumeState(Position2D<Meter> robotPosition) override;
     void setMaxSpeeds(Speeds maxSpeeds);
 
   private:

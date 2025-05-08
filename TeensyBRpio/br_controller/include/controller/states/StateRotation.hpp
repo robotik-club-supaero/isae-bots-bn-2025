@@ -14,7 +14,6 @@ class StateRotation : public ControllerState {
   public:
     ControllerStatus getStatus() const override;
     StateUpdateResult update(double_t interval) override;
-    bool resumeState(Position2D<Meter> robotPosition) override;
     void setMaxSpeed(double_t maxAngSpeed);
 
   protected:

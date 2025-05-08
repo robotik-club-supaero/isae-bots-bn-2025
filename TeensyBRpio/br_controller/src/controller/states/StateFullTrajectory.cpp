@@ -45,15 +45,4 @@ void StateFullTrajectory::setMaxSpeeds(Speeds maxSpeeds) {
                                      [&](StateSmoothTrajectory &state) { state.setMaxSpeeds(maxSpeeds); }, [](auto &state) {}});
 }
 
-bool StateFullTrajectory::resumeState(Position2D<Meter> robotPosition) {
-    if (m_trajectory->recompute(robotPosition)) {
-        log(INFO, "Trajectory recomputed.");
-        startInitialRotation(robotPosition.theta);
-        return true;
-    } else {
-        log(WARN, "Failed to recompute the trajectory. Aborting trajectory...");
-        return false;
-    }
-}
-
 } // namespace controller
