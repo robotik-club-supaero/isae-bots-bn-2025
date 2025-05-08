@@ -193,7 +193,14 @@ void UnicycleController<TConverter>::setSetpointSpeed(Speeds speeds, bool enforc
 
 template <ErrorConverter TConverter>
 void UnicycleController<TConverter>::brakeToStop() {
-    cancelOrder();
+    brakeToStop(/* cancelOrder = */ true);
+}
+
+template <ErrorConverter TConverter>
+void UnicycleController<TConverter>::brakeToStop(bool cancelOrder) {
+    if (cancelOrder) {
+        this->cancelOrder();
+    }
     if ((getStatus() & (ControllerStatus::ROTATING | ControllerStatus::MOVING | ControllerStatus::TRAJECTORY)) != 0) {
         // TODO should we use getEstimatedRelativeRobotSpeed() or m_lastCommand as the initial speed to give to StateBraking?
         setCurrentState<StateBraking>(getEstimatedRelativeRobotSpeed(), m_brakeAccelerations);
@@ -223,7 +230,7 @@ void UnicycleController<TConverter>::startRotation(std::unique_ptr<OrientationPr
 template <ErrorConverter TConverter>
 void UnicycleController<TConverter>::startOrder(bool checkMoving) {
     if (checkMoving && getStatus() != ControllerStatus::Still && isMoving()) {
-        brakeToStop();
+        brakeToStop(/* cancelOrder = */ false);
     } else {
         std::visit( //
             overload{[&](const trajectory_request_t &request) {

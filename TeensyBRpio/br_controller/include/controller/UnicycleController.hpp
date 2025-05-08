@@ -190,6 +190,7 @@ class UnicycleController : private fsm::StateMachine<StateStandStill, StateBraki
     Speeds getLastCommand() const;
 
   private:
+    void brakeToStop(bool cancelOrder);
     void startOrder(bool checkMoving = true);
     void cancelOrder();
     void transitToStandStill(Position2D<Meter> restPosition);
