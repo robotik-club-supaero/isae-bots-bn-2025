@@ -36,7 +36,8 @@ namespace manager {
  * Using virtual types as any of the type parameters is undefined behaviour.
  */
 template <Actuators TActuators, CanControl<TActuators> TController, PositionFeedback TFeedback, Clock TClock>
-class ControllerManager : private fsm::StateMachine<ManagerState<TActuators, TController>> {
+class ControllerManager
+    : private fsm::StateMachine<StateIdle<TActuators>, StateDeactivating<TActuators>, StateActivating<TActuators>, StateActive<TActuators>> {
   public:
     using controller_t = TController;
     using actuators_t = TActuators;
@@ -154,10 +155,10 @@ class ControllerManager : private fsm::StateMachine<ManagerState<TActuators, TCo
 
   private:
     using Self = ControllerManager<TActuators, TController, TFeedback, TClock>;
-    using StateIdle = manager::StateIdle<TActuators, TController>;
-    using StateDeactivating = manager::StateDeactivating<TActuators, TController>;
-    using StateActivating = manager::StateActivating<TActuators, TController>;
-    using StateActive = manager::StateActive<TActuators, TController>;
+    using StateIdle = manager::StateIdle<TActuators>;
+    using StateDeactivating = manager::StateDeactivating<TActuators>;
+    using StateActivating = manager::StateActivating<TActuators>;
+    using StateActive = manager::StateActive<TActuators>;
 
     TClock m_clock;
     duration_t m_minUpdateInterval; // µS

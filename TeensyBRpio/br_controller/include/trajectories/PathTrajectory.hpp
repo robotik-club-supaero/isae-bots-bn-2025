@@ -17,7 +17,7 @@ class BezierCurvesGenerator {
 
     BezierCurvesGenerator(std::optional<Angle> initialDirection, std::optional<Angle> finalDirection, std::vector<Point2D<Meter>> points);
 
-    BezierCurve next();
+    BezierCurve<4> next();
     bool hasNext() const;
 
     const std::vector<Point2D<Meter>> &getPoints() const;
@@ -37,7 +37,7 @@ class BezierCurvesGenerator {
  * The trajectory follows a Bézier curve instead of a straight line between two successive crosspoints in order to enforce
  * the continuity of the direction.
  */
-class PathTrajectory : public MultiCurveTrajectory<BezierCurve, BezierCurvesGenerator> {
+class PathTrajectory : public MultiCurveTrajectory<BezierCurve<4>, BezierCurvesGenerator> {
 
   public:
     using size_type = BezierCurvesGenerator::size_type;

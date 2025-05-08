@@ -3,10 +3,8 @@
 
 namespace controller {
 
-StateStandStill::StateStandStill(Position2D<Meter> restPosition, bool advertize) : m_restPosition(restPosition) {
-    if (advertize) {
-        log(INFO, "Entering controller state: Ready (standing still)");
-    }
+StateStandStill::StateStandStill(Position2D<Meter> restPosition) : m_restPosition(restPosition) {
+    log(INFO, "Entering controller state: Ready (standing still)");
 }
 
 ControllerStatus StateStandStill::getStatus() const {

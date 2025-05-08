@@ -1,73 +1,83 @@
 #ifndef _FSM_STATE_MACHINE_HPP_
 #define _FSM_STATE_MACHINE_HPP_
 
-#include "defines/constraint.hpp"
+#include "defines/func.hpp"
 #include "logging.hpp"
 
-#include <memory>
+#include <variant>
 
 namespace fsm {
+
+struct StateUninit {
+    template <typename R>
+    R getStatus() const {
+        abort("Cannot get status of StateUninit.");
+    }
+    template <typename R>
+    R update() const {
+        abort("Cannot update StateUninit.");
+    }
+};
 
 /**
  * A state machine.
  *
  * The machine is created in an undefined state. It is undefined behaviour to call getCurrentState() before setCurrentState().
  * @tparam TState The base type of the machine's states. This can be a virtual type.
+ * @tparam StateTypes The list of the possible states. Those must be concrete types.
  */
-template <typename TState>
+template <typename... StateTypes>
 class StateMachine {
-  public:
-    /**
-     * Set the state of the machine. This destructs the current state and immediately invalidates any reference to it.
-     * In particular, calling this method in a method of the current state is undefined behaviour.
-     *
-     * @tparam TNewState The type of the new state.
-     * @param args The parameters to pass to the constructor of the new state.
-     */
-    template <Derived<TState> TNewState, typename... Args>
-    void setCurrentState(Args &&...args) {
-        m_currentState.reset();
-        m_currentState = std::make_unique<TNewState>(std::forward<Args>(args)...);
-    }
-
-    /**
-     * Sets the state of the machine and returns the previous state.
-     */
-    std::unique_ptr<TState> replaceCurrentState(std::unique_ptr<TState> state) {
-        state.swap(m_currentState);
-        return state;
-    }
-    /**
-     * Sets the state of the machine and returns the previous state.
-     *
-     * @tparam TNewState The type of the new state.
-     * @param args The parameters to pass to the constructor of the new state.
-     */
-    template <Derived<TState> TNewState, typename... Args>
-    std::unique_ptr<TState> replaceCurrentState(Args &&...args) {
-        return replaceCurrentState(std::make_unique<TNewState>(std::forward<Args>(args)...));
-    }
-
-    /// Make sure to call setCurrentState() first!
-    const TState &getCurrentState() const {
-        checkHasState();
-        return *m_currentState;
-    }
-    /// Make sure to call setCurrentState() first!
-    TState &getCurrentState() {
-        checkHasState();
-        return *m_currentState;
-    }
-
   private:
-    std::unique_ptr<TState> m_currentState;
+    using StateVariant = std::variant<StateTypes...>;
+    StateVariant m_currentState;
 
-    void checkHasState() const {
-        if (!m_currentState) {
-            abort("StateMachine has null state! You are missing a call to setCurrentState(). Aborting...");
-        }
+  public:
+    StateMachine() : m_currentState() {}
+
+    template <typename TNewState, typename... Args>
+    void setCurrentState(Args &&...args) {
+        m_currentState.template emplace<TNewState>(std::forward<Args>(args)...);
+    }
+
+    template <class R, class Visitor>
+    R visitCurrentState(Visitor &&visitor) const {
+        return std::visit<R, Visitor>(std::forward<Visitor>(visitor), m_currentState);
+    }
+    template <class R, class Visitor>
+    R visitCurrentState(Visitor &&visitor) {
+        return std::visit<R, Visitor>(std::forward<Visitor>(visitor), m_currentState);
+    }
+
+    template <typename R>
+    R getStateStatus() const {
+        return visitCurrentState<R>(                                                //
+            overload{[](const StateUninit &state) { return state.getStatus<R>(); }, //
+                     [](const auto &state) { return state.getStatus(); }});
+    } // namespace fsm
+
+    template <typename R, typename... Args>
+    R updateState(Args &&...args) {
+        return visitCurrentState<R>( //
+            overload{[](StateUninit &state) { return state.update<R>(); },
+                     [&args...](auto &state) { return state.update(std::forward<Args>(args)...); }});
+    }
+
+    template <typename State>
+    bool holdsState() const {
+        return std::holds_alternative<State>(m_currentState);
+    }
+
+    template <typename State>
+    const State *getStateOrNull() const {
+        return std::get_if<State>(&m_currentState);
+    }
+    template <typename State>
+    State *getStateOrNull() {
+        return std::get_if<State>(&m_currentState);
     }
 };
+
 } // namespace fsm
 
 #endif

@@ -6,8 +6,8 @@
 namespace manager {
 
 /// Idle -> Closed loop
-template <Actuators TActuators, typename TController>
-class StateActivating : public ManagerState<TActuators, TController> {
+template <Actuators TActuators>
+class StateActivating final : public ManagerState<TActuators> {
   public:
     /// @param actuators the reference must not escape the function
     StateActivating(TActuators &actuators);

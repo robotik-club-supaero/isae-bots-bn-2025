@@ -24,7 +24,7 @@ template <typename TManager>
 inline void handleGoTo(TManager &manager, const displacement_order_t &order) {
     DisplacementKind kind = ((order.kind & FLAG_REVERSE) == 0) ? FORWARD : REVERSE;
     std::optional<Angle> finalOrientation = ((order.kind & FLAG_FINAL_ORIENTATION) != 0) ? std::make_optional(order.theta) : std::nullopt;
-    bool allowCurve = (order.kind & FLAG_ALLOW_CURVE) != 0;
+    bool allowCurve = false&&(order.kind & FLAG_ALLOW_CURVE) != 0;
 
     auto pathRaw = message_cast<std::span<const point_t>>(order.path);
     if (pathRaw.empty()) {

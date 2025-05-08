@@ -3,34 +3,43 @@
 
 #include "defines/math.hpp"
 
-#include <vector>
+#include <array>
 
 #ifdef _BR_DEBUG
 #include <string>
 #endif
 
+template <std::size_t N>
+struct DerivativeDegree {
+    static constexpr std::size_t value = N - 1;
+};
+template <>
+struct DerivativeDegree<0> {
+    static constexpr std::size_t value = 0;
+};
+
 /// A dense univariate polynomial.
 ///
 /// @tparam T The type of the coefficients. Must be a complete type that implements addition with itself and multiplication with double.
-template <Add T>
+template <Add T, std::size_t N>
 class Polynomial {
 
   public:
+    using Derivative = Polynomial<T, DerivativeDegree<N>::value>;
+
     /// Constructs the polynomial P(X) = 0.
     Polynomial() = default;
 
     /// @param coeffs coeffs[i] is the coefficient of degree i.
-    Polynomial(std::vector<T> coeffs);
-    /// @param coeffs The i-th element is the coefficient of degree i (where i is zero-based)
-    Polynomial(std::initializer_list<T> coeffs);
+    Polynomial(std::array<T, N> coeffs);
 
     /// Evaluates the polynomial at `value` using Horner's method.
     T operator()(double_t value) const;
 
-    Polynomial<T> derivative() const;
+    Derivative derivative() const;
 
-    const std::vector<T> &coeffs() const;
-    std::vector<T> &coeffs();
+    const std::array<T, N> &coeffs() const;
+    std::array<T, N> &coeffs();
 
 #ifdef _BR_DEBUG
     operator std::string() const {
@@ -47,7 +56,7 @@ class Polynomial {
 #endif
 
   private:
-    std::vector<T> m_coeffs;
+    std::array<T, N> m_coeffs;
 };
 
 #endif

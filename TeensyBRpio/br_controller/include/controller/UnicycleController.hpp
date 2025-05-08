@@ -3,12 +3,19 @@
 
 #include "configuration.hpp"
 
-#include "controller/ControllerState.hpp"
+#include "controller/states/StateBraking.hpp"
+#include "controller/states/StateFullTrajectory.hpp"
+#include "controller/states/StateManualControl.hpp"
+#include "controller/states/StateRotation.hpp"
+#include "controller/states/StateStandStill.hpp"
+
 #include "controller/DisplacementKind.hpp"
 #include "defines/constraint.hpp"
 #include "fsm/StateMachine.hpp"
 #include "math/Derivative.hpp"
 #include "trajectories/Trajectory.hpp"
+
+#include <memory> //FIXME
 
 template <typename T>
 concept ErrorConverter = requires(T a, Vector2D<Meter> error, double_t interval) {
@@ -22,6 +29,10 @@ class OrientationProfile;
 namespace controller {
 
 using setpoint_t = std::variant<Position2D<Meter>, Speeds>;
+struct no_order {};
+using trajectory_request_t = std::tuple<DisplacementKind, std::shared_ptr<Trajectory>, std::optional<Angle>>;
+using rotation_request_t = std::shared_ptr<OrientationProfile>;
+using disp_order_t = std::variant<no_order, trajectory_request_t, rotation_request_t, Speeds>;
 
 /**
  * A controller for a unicycle, nonholonomic robot. A robot is said to be unicycle if its displacement can be described only by its linear and angular
@@ -35,7 +46,7 @@ using setpoint_t = std::variant<Position2D<Meter>, Speeds>;
  * constructor parameter "converter". This must be a complete type.
  */
 template <ErrorConverter TConverter>
-class UnicycleController : private fsm::StateMachine<ControllerState> {
+class UnicycleController : private fsm::StateMachine<StateStandStill, StateBraking, StateFullTrajectory, StateFinalRotation, StateManualControl> {
   public:
     using converter_t = TConverter;
 
@@ -179,22 +190,9 @@ class UnicycleController : private fsm::StateMachine<ControllerState> {
     Speeds getLastCommand() const;
 
   private:
-    /// Convenience function to avoid writing "this->template setCurrentState" every time.
-    template <Derived<ControllerState> TNewState, typename... Args>
-    void setCurrentState(Args &&...args) {
-        fsm::StateMachine<ControllerState>::template setCurrentState<TNewState>(std::forward<Args>(args)...);
-        m_suspendedState.reset();
-    }
-
-    template <Derived<ControllerState> TNewState, typename... Args>
-    void startDisplacement(Args &&...args) {
-        if (getStatus() != ControllerStatus::Still && isMoving()) {
-            brakeToStop();
-            m_suspendedState = std::make_unique<TNewState>(std::forward<Args>(args)...);
-        } else {
-            setCurrentState<TNewState>(std::forward<Args>(args)...);
-        }
-    }
+    void startOrder(bool checkMoving = true);
+    void cancelOrder();
+    void transitToStandStill(Position2D<Meter> restPosition);
 
     Speeds getEstimatedRelativeRobotSpeed() const;
 
@@ -222,7 +220,7 @@ class UnicycleController : private fsm::StateMachine<ControllerState> {
 
     TConverter m_converter;
     UpdateResultCode m_event;
-    std::unique_ptr<ControllerState> m_suspendedState;
+    disp_order_t m_currentOrder;
 
     Speeds m_lastCommand;
 };

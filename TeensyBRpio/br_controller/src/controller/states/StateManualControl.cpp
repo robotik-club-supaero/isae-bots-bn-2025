@@ -6,8 +6,8 @@ constexpr bool FORCE_POSITION_CONTROL = false;
 
 namespace controller {
 
-StateManualControl::StateManualControl(Accelerations maxAcceleration)
-    : m_linearRamp(0, maxAcceleration.linear), m_angularRamp(0, maxAcceleration.angular) {
+StateManualControl::StateManualControl(Speeds speedRequest, Accelerations maxAcceleration)
+    : m_linearRamp(speedRequest.linear, maxAcceleration.linear), m_angularRamp(speedRequest.angular, maxAcceleration.angular) {
     log(INFO, "Entering controller state: Manual control");
 }
 
@@ -27,17 +27,13 @@ StateUpdateResult StateManualControl::update(double_t interval) {
     }
 }
 
-void StateManualControl::notify(ControllerEvent event) {
-    std::visit(overload{[&](const ManualSpeedCommand &event) {
-                            m_linearRamp.setTargetSpeed(event.speeds.linear);
-                            m_angularRamp.setTargetSpeed(event.speeds.angular);
-                            if (!event.enforceMaxAcceleration) {
-                                m_linearRamp.overwriteCurrentSpeed(event.speeds.linear);
-                                m_angularRamp.overwriteCurrentSpeed(event.speeds.angular);
-                            }
-                        },
-                        [](auto) {}},
-               event);
+void StateManualControl::setSpeed(Speeds speeds, bool enforceMaxAcceleration) {
+    m_linearRamp.setTargetSpeed(speeds.linear);
+    m_angularRamp.setTargetSpeed(speeds.angular);
+    if (!enforceMaxAcceleration) {
+        m_linearRamp.overwriteCurrentSpeed(speeds.linear);
+        m_angularRamp.overwriteCurrentSpeed(speeds.angular);
+    }
 }
 
 bool StateManualControl::resumeState(Position2D<Meter> robotPosition) {

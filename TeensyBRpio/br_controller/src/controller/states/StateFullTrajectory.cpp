@@ -6,37 +6,28 @@
 #include "trajectories/LinearTrajectory.hpp"
 
 namespace controller {
-StateFullTrajectory::StateFullTrajectory(DisplacementKind kind, std::unique_ptr<Trajectory> trajectory, Angle initialOrientation, Speeds maxSpeeds,
-                                         Accelerations maxAccelerations, std::optional<Angle> finalOrientation)
-    : m_kind(kind), m_trajectory(std::move(trajectory)), m_finalOrientation(finalOrientation), m_suspendedTrajectory(), m_maxSpeeds(maxSpeeds),
-      m_maxAccelerations(maxAccelerations) {
+StateFullTrajectory::StateFullTrajectory(DisplacementKind kind, std::shared_ptr<Trajectory> trajectory, Angle initialOrientation, Speeds maxSpeeds,
+                                         Accelerations maxAccelerations)
+    : m_kind(kind), m_trajectory(std::move(trajectory)), m_maxSpeeds(maxSpeeds), m_maxAccelerations(maxAccelerations) {
     startInitialRotation(initialOrientation);
 }
 
 ControllerStatus StateFullTrajectory::getStatus() const {
-    return getCurrentState().getStatus() | ControllerStatus::TRAJECTORY;
+    return getStateStatus<ControllerStatus>() | ControllerStatus::TRAJECTORY;
 }
 
 StateUpdateResult StateFullTrajectory::update(double_t interval) {
-    StateUpdateResult result = this->getCurrentState().update(interval);
+    StateUpdateResult result = updateState<StateUpdateResult>(interval);
     if (std::holds_alternative<RotationComplete>(result)) {
         setCurrentState<StateSmoothTrajectory>(m_kind, m_trajectory, m_maxSpeeds, m_maxAccelerations.linear);
         return PositionControl();
     } else if (std::holds_alternative<TrajectoryComplete>(result)) {
-        if (m_suspendedTrajectory) {
-            log(INFO, "Resuming interrupted trajectory.");
-            Angle initialRobotOrientation = m_trajectory->getCurrentPosition().theta + m_kind.getAlignmentOffset();
-            m_trajectory = std::move(m_suspendedTrajectory);
-            startInitialRotation(initialRobotOrientation);
+        Angle currentOrientation = m_trajectory->getCurrentPosition().theta;
+        if (m_trajectory->advance(0)) {
+            startInitialRotation(currentOrientation);
             return PositionControl();
         } else {
-            Angle currentOrientation = m_trajectory->getCurrentPosition().theta;
-            if (m_trajectory->advance(0)) {
-                startInitialRotation(currentOrientation);
-                return PositionControl();
-            } else {
-                return TrajectoryComplete(m_finalOrientation);
-            }
+            return TrajectoryComplete();
         }
     } else {
         return result;
@@ -44,27 +35,25 @@ StateUpdateResult StateFullTrajectory::update(double_t interval) {
 }
 
 void StateFullTrajectory::startInitialRotation(Angle initialRobotOrientation) {
-    log(INFO, "Entering controller state: Initial rotation");
-    setCurrentState<StateRotation>(
-        std::make_unique<SetHeadingProfile>(initialRobotOrientation, m_trajectory->getCurrentPosition().theta + m_kind.getAlignmentOffset()),
-        m_maxSpeeds.angular, m_maxAccelerations.angular);
+    std::shared_ptr<OrientationProfile> profile =
+        std::make_shared<SetHeadingProfile>(initialRobotOrientation, m_trajectory->getCurrentPosition().theta + m_kind.getAlignmentOffset());
+    setCurrentState<StateInitialRotation>(std::move(profile), m_maxSpeeds.angular, m_maxAccelerations.angular);
 }
-
-void StateFullTrajectory::notify(ControllerEvent event) {
-    std::visit(overload{[&](const MaxSpeedsChanged &event) { m_maxSpeeds = event.newSpeeds; }, [](auto) {}}, event);
-    getCurrentState().notify(event);
+void StateFullTrajectory::setMaxSpeeds(Speeds maxSpeeds) {
+    m_maxSpeeds = maxSpeeds;
+    visitCurrentState<void>(overload{[&](StateInitialRotation &state) { state.setMaxSpeed(maxSpeeds.angular); },
+                                     [&](StateSmoothTrajectory &state) { state.setMaxSpeeds(maxSpeeds); }, [](auto &state) {}});
 }
 
 bool StateFullTrajectory::resumeState(Position2D<Meter> robotPosition) {
     if (m_trajectory->recompute(robotPosition)) {
         log(INFO, "Trajectory recomputed.");
+        startInitialRotation(robotPosition.theta);
+        return true;
     } else {
-        log(WARN, "Failed to recompute the trajectory. Catching up using a straight line instead.");
-        m_suspendedTrajectory = std::move(m_trajectory);
-        m_trajectory = std::make_shared<LinearTrajectory>(robotPosition, m_suspendedTrajectory->getCurrentPosition());
+        log(WARN, "Failed to recompute the trajectory. Aborting trajectory...");
+        return false;
     }
-    startInitialRotation(robotPosition.theta);
-    return true;
 }
 
 } // namespace controller

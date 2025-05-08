@@ -23,7 +23,7 @@ MANAGER::ControllerManager(duration_t minUpdateInterval, duration_t maxUpdateInt
 
 TEMPLATE
 ManagerStatus MANAGER::getStatus() const {
-    return this->getCurrentState().getStatus();
+    return this->template getStateStatus<ManagerStatus>();
 }
 
 TEMPLATE
@@ -65,7 +65,7 @@ bool MANAGER::update() {
 
 TEMPLATE
 void MANAGER::update(double_t interval) {
-    ManagerStatus status = this->getCurrentState().update(m_actuators);
+    ManagerStatus status = updateState<ManagerStatus, TActuators&>(m_actuators);
     if (status != this->getStatus()) {
         switch (status) {
             case Idle:

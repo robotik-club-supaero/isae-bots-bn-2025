@@ -1,12 +1,10 @@
 #include "math/Polynomial.hpp"
 
-template <Add T>
-Polynomial<T>::Polynomial(std::vector<T> coeffs) : m_coeffs(std::move(coeffs)) {}
-template <Add T>
-Polynomial<T>::Polynomial(std::initializer_list<T> coeffs) : Polynomial(std::vector<T>(coeffs)) {}
+template <Add T, std::size_t N>
+Polynomial<T, N>::Polynomial(std::array<T, N> coeffs) : m_coeffs(std::move(coeffs)) {}
 
-template <Add T>
-T Polynomial<T>::operator()(double_t value) const {
+template <Add T, std::size_t N>
+T Polynomial<T, N>::operator()(double_t value) const {
     T r;
     for (auto coeff = m_coeffs.rbegin(); coeff != m_coeffs.rend(); coeff++) {
         r = r * value + *coeff;
@@ -14,23 +12,28 @@ T Polynomial<T>::operator()(double_t value) const {
     return r;
 }
 
-template <Add T>
-Polynomial<T> Polynomial<T>::derivative() const {
-    std::vector<T> coeffs;
-    for (unsigned int i = 1; i < m_coeffs.size(); i++) {
-        coeffs.push_back(i * m_coeffs[i]);
+template <Add T, std::size_t N>
+Polynomial<T, N>::Derivative Polynomial<T, N>::derivative() const {
+    std::array<T, DerivativeDegree<N>::value> coeffs;
+    for (unsigned int i = 1; i < N; i++) {
+        coeffs[i-1] = i * m_coeffs[i];
     }
-    return Polynomial(std::move(coeffs));
+    return coeffs;
 }
 
-template <Add T>
-const std::vector<T> &Polynomial<T>::coeffs() const {
+template <Add T, std::size_t N>
+const std::array<T, N> &Polynomial<T, N>::coeffs() const {
     return m_coeffs;
 }
 
-template <Add T>
-std::vector<T> &Polynomial<T>::coeffs() {
+template <Add T, std::size_t N>
+std::array<T, N> &Polynomial<T, N>::coeffs() {
     return m_coeffs;
 }
+
 #include "geometry/Vector2D.hpp"
-template class Polynomial<Point2D<Meter>>;
+template class Polynomial<Point2D<Meter>, 4>;
+template class Polynomial<Point2D<Meter>, 3>;
+template class Polynomial<Point2D<Meter>, 2>;
+template class Polynomial<Point2D<Meter>, 1>;
+template class Polynomial<Point2D<Meter>, 0>;

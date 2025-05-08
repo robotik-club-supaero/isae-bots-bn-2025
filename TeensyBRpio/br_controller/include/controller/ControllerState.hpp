@@ -1,7 +1,6 @@
 #ifndef _CONTROLLER_STATE_HPP_
 #define _CONTROLLER_STATE_HPP_
 
-#include "controller/ControllerEvent.hpp"
 #include "controller/StateResult.hpp"
 #include "geometry/Position2D.hpp"
 
@@ -67,13 +66,6 @@ class ControllerState {
      * @return The updated setpoint, or a transition code. See `StateUpdateResult`.
      */
     virtual StateUpdateResult update(double_t interval) = 0;
-    /**
-     * Sends an event to the state. See `ControllerEvent`.
-     * The implementation is free to choose how to react to the event.
-     *
-     * The default implementation just ignores all the events.
-     */
-    virtual void notify(ControllerEvent event) {};
     /**
      * Notifies the state it was interrupted and needs to be resumed.
      * This often involves recomputing the state based on the new position of the robot.

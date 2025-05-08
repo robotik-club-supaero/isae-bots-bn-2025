@@ -6,13 +6,14 @@
 
 namespace controller {
 
-class StateManualControl : public ControllerState {
+class StateManualControl final : public ControllerState {
   public:
-    StateManualControl(Accelerations maxAcceleration);
+    StateManualControl(Speeds speedRequest, Accelerations maxAcceleration);
     ControllerStatus getStatus() const override;
     StateUpdateResult update(double_t interval) override;
-    void notify(ControllerEvent event) override;
     bool resumeState(Position2D<Meter> robotPosition) override;
+
+    void setSpeed(Speeds speeds, bool enforceMaxAccelerations = true);
 
   private:
     Ramp m_linearRamp;

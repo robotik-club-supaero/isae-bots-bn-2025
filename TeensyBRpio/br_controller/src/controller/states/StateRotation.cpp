@@ -5,8 +5,18 @@
 
 namespace controller {
 
-StateRotation::StateRotation(std::unique_ptr<OrientationProfile> profile, double_t maxAngSpeed, double_t maxAngAcceleration)
+StateRotation::StateRotation(std::shared_ptr<OrientationProfile> profile, double_t maxAngSpeed, double_t maxAngAcceleration)
     : m_profile(std::move(profile)), m_maxSpeed(maxAngSpeed), m_ramp(maxAngSpeed, maxAngAcceleration) {}
+
+StateInitialRotation::StateInitialRotation(std::shared_ptr<OrientationProfile> profile, double_t maxAngSpeed, double_t maxAngAcceleration)
+    : StateRotation(std::move(profile), maxAngSpeed, maxAngAcceleration) {
+    log(INFO, "Entering controller state: Initial rotation");
+}
+
+StateFinalRotation::StateFinalRotation(std::shared_ptr<OrientationProfile> profile, double_t maxAngSpeed, double_t maxAngAcceleration)
+    : StateRotation(std::move(profile), maxAngSpeed, maxAngAcceleration) {
+    log(INFO, "Entering controller state: Final rotation");
+}
 
 ControllerStatus StateRotation::getStatus() const {
     return ControllerStatus::ROTATING;
@@ -32,8 +42,8 @@ StateUpdateResult StateRotation::update(double_t interval) {
     }
 }
 
-void StateRotation::notify(ControllerEvent event) {
-    std::visit(overload{[&](const MaxSpeedsChanged &event) { m_maxSpeed = event.newSpeeds.angular; }, [](auto) {}}, event);
+void StateRotation::setMaxSpeed(double_t maxAngSpeed) {
+    m_maxSpeed = maxAngSpeed;
 }
 
 bool StateRotation::resumeState(Position2D<Meter> robotPosition) {

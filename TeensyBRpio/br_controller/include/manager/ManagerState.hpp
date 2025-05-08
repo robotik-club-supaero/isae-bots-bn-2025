@@ -17,7 +17,7 @@ enum ManagerStatus {
 };
 
 /// State of the manager
-template <Actuators TActuators, typename TController>
+template <Actuators TActuators>
 class ManagerState {
   public:
     virtual ManagerStatus getStatus() const = 0;

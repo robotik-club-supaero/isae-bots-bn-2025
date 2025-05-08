@@ -3,11 +3,10 @@
 
 namespace manager {
 
-template <Actuators TActuators, typename TController>
-ManagerState<TActuators, TController>::ManagerState() {}
+template <Actuators TActuators>
+ManagerState<TActuators>::ManagerState() {}
 
 } // namespace manager
 
 #include "specializations/actuators.hpp"
-#include "specializations/controller.hpp"
-template class manager::ManagerState<actuators_t, controller_t>;
+template class manager::ManagerState<actuators_t>;

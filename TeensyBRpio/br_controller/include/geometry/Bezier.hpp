@@ -3,18 +3,19 @@
 
 #include "geometry/Vector2D.hpp"
 #include "math/Polynomial.hpp"
-#include <vector>
 
+template <std::size_t N>
 class BezierCurve {
   public:
-
     /// Constructs an empty Bézier curve, starting and ending at (0, 0).
     BezierCurve() = default;
 
     /// @param points The control points
     /// @{
-    BezierCurve(std::vector<Point2D<Meter>> points);
-    BezierCurve(std::initializer_list<Point2D<Meter>> points);
+    BezierCurve(std::array<Point2D<Meter>, N> points);
+
+    template <typename... Args>
+    BezierCurve(Args &&...points) : BezierCurve(std::array{std::forward<Args>(points)...}) {}
     /// @}
 
     /**
@@ -35,16 +36,16 @@ class BezierCurve {
      */
     double_t curvature(double_t t) const;
 
-    const std::vector<Point2D<Meter>> &points() const;
+    const std::array<Point2D<Meter>, N> &points() const;
 
-    const Polynomial<Point2D<Meter>> &polynomial() const;
+    const Polynomial<Point2D<Meter>, N> &polynomial() const;
 
   private:
     /// Pre-computed Bézier polynomial
-    Polynomial<Point2D<Meter>> m_polynomial;
-    Polynomial<Point2D<Meter>> m_derivative;
-    Polynomial<Point2D<Meter>> m_secondDerivative;
-    std::vector<Point2D<Meter>> m_points;
+    Polynomial<Point2D<Meter>, N> m_polynomial;
+    Polynomial<Point2D<Meter>, N>::Derivative m_derivative;
+    Polynomial<Point2D<Meter>, N>::Derivative::Derivative m_secondDerivative;
+    std::array<Point2D<Meter>, N> m_points;
 };
 
 #endif

@@ -14,7 +14,7 @@ inline Vector2D<Meter> angleBisector(Vector2D<Meter> lineA, Vector2D<Meter> line
  *  - The direction at the start point is that of `initialDirection`
  *  - The direction at the end point is that of `finalDirection` if it is non-empty. Otherwise, it is unspecified.
  */
-BezierCurve generateBezier(Point2D<Meter> start, Point2D<Meter> end, Vector2D<Meter> initialDirection,
+BezierCurve<4> generateBezier(Point2D<Meter> start, Point2D<Meter> end, Vector2D<Meter> initialDirection,
                            std::optional<Vector2D<Meter>> finalDirection) {
     double_t distance = Point2D<Meter>::distance(start, end);
     double_t ctrlPtDistance = distance / 3;
@@ -49,7 +49,7 @@ BezierCurvesGenerator::BezierCurvesGenerator(std::optional<Angle> initialDirecti
     m_initialDirection = preferredDirection;
 }
 
-BezierCurve BezierCurvesGenerator::next() {
+BezierCurve<4> BezierCurvesGenerator::next() {
     size_type index = m_currentCurveIndex++;
 
     std::optional<Vector2D<Meter>> finalDirection = std::nullopt;

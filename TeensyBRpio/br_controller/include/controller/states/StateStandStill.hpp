@@ -5,9 +5,10 @@
 
 namespace controller {
 
-class StateStandStill : public ControllerState {
+class StateStandStill final : public ControllerState {
   public:
-    StateStandStill(Position2D<Meter> restPoint, bool advertize = true);
+    StateStandStill() = default;
+    StateStandStill(Position2D<Meter> restPoint);
     ControllerStatus getStatus() const override;
     StateUpdateResult update(double_t interval) override;
 

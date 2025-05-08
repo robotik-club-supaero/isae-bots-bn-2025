@@ -5,8 +5,8 @@
 
 namespace manager {
 
-template <Actuators TActuators, typename TController>
-class StateActive : public ManagerState<TActuators, TController> {
+template <Actuators TActuators>
+class StateActive final : public ManagerState<TActuators> {
   public:
     StateActive();
     ManagerStatus getStatus() const override;

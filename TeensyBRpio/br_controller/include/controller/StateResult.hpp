@@ -38,18 +38,13 @@ class SpeedControl {
     Speeds speeds;
 };
 
-class TrajectoryComplete {
-  public:
-    TrajectoryComplete(std::optional<Angle> finalOrientation = std::nullopt) : finalOrientation(finalOrientation) {}
-
-    std::optional<Angle> finalOrientation;
-};
+class TrajectoryComplete {};
 class RotationComplete {};
 class BrakingComplete {};
 
 using StateUpdateResult = std::variant<PositionControl, OrientationControl, SpeedControl, TrajectoryComplete, RotationComplete, BrakingComplete>;
 
-/// Code returned by the controller to help implement ROS's callbacks. 
+/// Code returned by the controller to help implement ROS's callbacks.
 class UpdateResultCode {
   public:
     enum Flag : uint8_t {

@@ -47,38 +47,38 @@ struct BinomialIterator {
  *
  * The second form allows to precompute the coefficients of the polynomial and can be evaluated using Horner's method.
  */
-Polynomial<Point2D<Meter>> bezierToPolynomial(const std::vector<Point2D<Meter>> &points) {
-    if (points.size() < 2) {
-        return points;
-    }
-    std::vector<Point2D<Meter>> coeffs;
+template <std::size_t N>
+Polynomial<Point2D<Meter>, N> bezierToPolynomial(const std::array<Point2D<Meter>, N> &points) {
+    std::array<Point2D<Meter>, N> coeffs;
 
-    for (BinomialIterator binom(points.size() - 1); binom.value; ++binom) {
+    for (BinomialIterator binom(N - 1); binom.value; ++binom) {
         Point2D<Meter> coeff = {0, 0};
         for (BinomialIterator nested_binom(binom.i); nested_binom.value; ++nested_binom) {
             coeff += points[nested_binom.i] * ((int)nested_binom.value * (((binom.i + nested_binom.i) % 2) ? (-1) : 1));
         }
-        coeffs.push_back(coeff * binom.value);
+        coeffs[binom.i] = coeff * binom.value;
     }
 
     return coeffs;
 }
 
-BezierCurve::BezierCurve(std::vector<Point2D<Meter>> points)
+template <std::size_t N>
+BezierCurve<N>::BezierCurve(std::array<Point2D<Meter>, N> points)
     : m_polynomial(bezierToPolynomial(points)), m_derivative(m_polynomial.derivative()), m_secondDerivative(m_derivative.derivative()),
       m_points(std::move(points)) {}
 
-BezierCurve::BezierCurve(std::initializer_list<Point2D<Meter>> points) : BezierCurve(std::vector(points)) {}
-
-Point2D<Meter> BezierCurve::operator()(double_t t) const {
+template <std::size_t N>
+Point2D<Meter> BezierCurve<N>::operator()(double_t t) const {
     return m_polynomial(t);
 }
 
-Vector2D<Meter> BezierCurve::derivative(double_t t) const {
+template <std::size_t N>
+Vector2D<Meter> BezierCurve<N>::derivative(double_t t) const {
     return m_derivative(t);
 }
 
-double_t BezierCurve::curvature(double_t t) const {
+template <std::size_t N>
+double_t BezierCurve<N>::curvature(double_t t) const {
     Vector2D<Meter> derivative = m_derivative(t);
     double_t derivativeNorm = derivative.norm();
     Vector2D<Meter> secondDerivative = m_secondDerivative(t);
@@ -86,9 +86,14 @@ double_t BezierCurve::curvature(double_t t) const {
     return (derivative.x * secondDerivative.y - derivative.y * secondDerivative.x) / (derivativeNorm * derivativeNorm * derivativeNorm);
 }
 
-const std::vector<Point2D<Meter>> &BezierCurve::points() const {
+template <std::size_t N>
+const std::array<Point2D<Meter>, N> &BezierCurve<N>::points() const {
     return m_points;
 }
-const Polynomial<Point2D<Meter>> &BezierCurve::polynomial() const {
+
+template <std::size_t N>
+const Polynomial<Point2D<Meter>, N> &BezierCurve<N>::polynomial() const {
     return m_polynomial;
 }
+
+template class BezierCurve<4>;

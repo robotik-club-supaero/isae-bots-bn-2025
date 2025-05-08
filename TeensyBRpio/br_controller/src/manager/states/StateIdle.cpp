@@ -3,18 +3,18 @@
 
 namespace manager {
 
-template <Actuators TActuators, typename TController>
-StateIdle<TActuators, TController>::StateIdle() {
+template <Actuators TActuators>
+StateIdle<TActuators>::StateIdle() {
     log(INFO, "Entering manager state: Idle");
 }
 
-template <Actuators TActuators, typename TController>
-ManagerStatus StateIdle<TActuators, TController>::getStatus() const {
+template <Actuators TActuators>
+ManagerStatus StateIdle<TActuators>::getStatus() const {
     return Idle;
 }
 
-template <Actuators TActuators, typename TController>
-ManagerStatus StateIdle<TActuators, TController>::update(TActuators &actuators) {
+template <Actuators TActuators>
+ManagerStatus StateIdle<TActuators>::update(TActuators &actuators) {
     // TODO: check actuators state?
     return Idle;
 }
@@ -22,5 +22,4 @@ ManagerStatus StateIdle<TActuators, TController>::update(TActuators &actuators) 
 } // namespace manager
 
 #include "specializations/actuators.hpp"
-#include "specializations/controller.hpp"
-template class manager::StateIdle<actuators_t, controller_t>;
+template class manager::StateIdle<actuators_t>;

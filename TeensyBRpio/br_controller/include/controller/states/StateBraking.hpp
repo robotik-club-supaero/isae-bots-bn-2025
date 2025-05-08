@@ -6,7 +6,7 @@
 
 namespace controller {
 
-class StateBraking : public ControllerState {
+class StateBraking final : public ControllerState {
   public:
     StateBraking(Speeds initialSpeeds, Accelerations brakeAccelerations);
     ControllerStatus getStatus() const override;
