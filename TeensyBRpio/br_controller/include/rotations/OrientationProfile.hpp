@@ -39,7 +39,7 @@ class OrientationProfile {
      */
     virtual std::optional<double_t> getRemainingAngle() const = 0;
 
-      /**
+    /**
      * Attempts to recompute the profile such that:
      * - The current orientation is reset to `newStartOrientation`.
      * - The recomputed profile eventually catches up with the remaining part of the initial profile (what this exactly means depends on the
@@ -52,6 +52,8 @@ class OrientationProfile {
      *
      */
     virtual bool recompute(Angle newStartOrientation) { return false; }
+
+    virtual ~OrientationProfile() = default;
 
   protected:
     OrientationProfile() = default;

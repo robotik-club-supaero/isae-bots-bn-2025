@@ -4,24 +4,22 @@
 #include "controller/ControllerState.hpp"
 #include "math/Ramp.hpp"
 
-#include <memory> //FIXME
-
 class OrientationProfile;
 
 namespace controller {
 
-class StateRotation : public ControllerState {
+class StateRotation {
   public:
-    ControllerStatus getStatus() const override;
-    StateUpdateResult update(double_t interval) override;
+    ControllerStatus getStatus() const;
+    StateUpdateResult update(double_t interval);
     void setMaxSpeed(double_t maxAngSpeed);
 
   protected:
     /// @param profile must not be null
-    StateRotation(std::shared_ptr<OrientationProfile> profile, double_t maxAngSpeed, double_t maxAngAcceleration);
+    StateRotation(OrientationProfile *profile, double_t maxAngSpeed, double_t maxAngAcceleration);
 
   private:
-    std::shared_ptr<OrientationProfile> m_profile;
+    OrientationProfile *m_profile;
     double_t m_maxSpeed;
     Ramp m_ramp;
 };
@@ -29,13 +27,13 @@ class StateRotation : public ControllerState {
 class StateInitialRotation final : public StateRotation {
   public:
     /// @param profile must not be null
-    StateInitialRotation(std::shared_ptr<OrientationProfile> profile, double_t maxAngSpeed, double_t maxAngAcceleration);
+    StateInitialRotation(OrientationProfile *profile, double_t maxAngSpeed, double_t maxAngAcceleration);
 };
 
 class StateFinalRotation final : public StateRotation {
   public:
     /// @param profile must not be null
-    StateFinalRotation(std::shared_ptr<OrientationProfile> profile, double_t maxAngSpeed, double_t maxAngAcceleration);
+    StateFinalRotation(OrientationProfile *profile, double_t maxAngSpeed, double_t maxAngAcceleration);
 };
 
 } // namespace controller

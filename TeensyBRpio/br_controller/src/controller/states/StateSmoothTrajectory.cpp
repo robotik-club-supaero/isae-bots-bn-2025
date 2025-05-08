@@ -4,9 +4,8 @@
 
 namespace controller {
 
-StateSmoothTrajectory::StateSmoothTrajectory(DisplacementKind kind, std::shared_ptr<Trajectory> trajectory, Speeds maxSpeeds,
-                                             double_t maxLinAcceleration)
-    : m_kind(kind), m_trajectory(std::move(trajectory)), m_lastDirection(m_trajectory->getCurrentPosition().theta), m_maxSpeeds(maxSpeeds),
+StateSmoothTrajectory::StateSmoothTrajectory(DisplacementKind kind, Trajectory *trajectory, Speeds maxSpeeds, double_t maxLinAcceleration)
+    : m_kind(kind), m_trajectory(trajectory), m_lastDirection(m_trajectory->getCurrentPosition().theta), m_maxSpeeds(maxSpeeds),
       m_ramp(maxSpeeds.linear, maxLinAcceleration) {
     log(INFO, "Entering controller state: Moving");
 }
@@ -60,7 +59,7 @@ StateUpdateResult StateSmoothTrajectory::update(double_t interval) {
             position.theta += m_kind.getAlignmentOffset();
             return PositionControl(position);
         } else {
-            m_trajectory.reset();
+            m_trajectory = nullptr;
         }
     }
     return TrajectoryComplete();

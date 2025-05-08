@@ -31,8 +31,8 @@ class Trajectory {
      *
      * If `distance == 0`:
      * - if the current position is just before a point of discontinuity, this must move it just after the discontinuity and return true,
-     * - otherwise this must be a no-op and return `false` only if the current position is already at the end of the trajectory. 
-     * 
+     * - otherwise this must be a no-op and return `false` only if the current position is already at the end of the trajectory.
+     *
      * If `distance < 0`, the behavior is undefined.
      */
     virtual bool advance(double_t distance) = 0;
@@ -91,6 +91,8 @@ class Trajectory {
      *
      */
     virtual bool recompute(Position2D<Meter> newStartPosition) { return false; }
+
+    virtual ~Trajectory() = default;
 
   protected:
     Trajectory() = default;

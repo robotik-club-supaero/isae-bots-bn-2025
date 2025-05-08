@@ -5,16 +5,16 @@
 
 namespace controller {
 
-StateRotation::StateRotation(std::shared_ptr<OrientationProfile> profile, double_t maxAngSpeed, double_t maxAngAcceleration)
-    : m_profile(std::move(profile)), m_maxSpeed(maxAngSpeed), m_ramp(maxAngSpeed, maxAngAcceleration) {}
+StateRotation::StateRotation(OrientationProfile *profile, double_t maxAngSpeed, double_t maxAngAcceleration)
+    : m_profile(profile), m_maxSpeed(maxAngSpeed), m_ramp(maxAngSpeed, maxAngAcceleration) {}
 
-StateInitialRotation::StateInitialRotation(std::shared_ptr<OrientationProfile> profile, double_t maxAngSpeed, double_t maxAngAcceleration)
-    : StateRotation(std::move(profile), maxAngSpeed, maxAngAcceleration) {
+StateInitialRotation::StateInitialRotation(OrientationProfile *profile, double_t maxAngSpeed, double_t maxAngAcceleration)
+    : StateRotation(profile, maxAngSpeed, maxAngAcceleration) {
     log(INFO, "Entering controller state: Initial rotation");
 }
 
-StateFinalRotation::StateFinalRotation(std::shared_ptr<OrientationProfile> profile, double_t maxAngSpeed, double_t maxAngAcceleration)
-    : StateRotation(std::move(profile), maxAngSpeed, maxAngAcceleration) {
+StateFinalRotation::StateFinalRotation(OrientationProfile *profile, double_t maxAngSpeed, double_t maxAngAcceleration)
+    : StateRotation(profile, maxAngSpeed, maxAngAcceleration) {
     log(INFO, "Entering controller state: Final rotation");
 }
 
@@ -32,7 +32,7 @@ StateUpdateResult StateRotation::update(double_t interval) {
                 m_ramp.ensureCanBrake(*remainingAngle);
             }
         } else {
-            m_profile.reset();
+            m_profile = nullptr;
         }
     }
     if (m_profile) {

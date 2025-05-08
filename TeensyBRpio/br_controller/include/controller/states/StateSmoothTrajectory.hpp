@@ -6,8 +6,6 @@
 #include "math/Ramp.hpp"
 #include "trajectories/Trajectory.hpp"
 
-#include <memory> //FIXME
-
 class Trajectory;
 
 namespace controller {
@@ -18,17 +16,17 @@ namespace controller {
  *
  * @see Trajectory
  */
-class StateSmoothTrajectory final : public ControllerState {
+class StateSmoothTrajectory {
   public:
     /// @param trajectory must not be null
-    StateSmoothTrajectory(DisplacementKind kind, std::shared_ptr<Trajectory> trajectory, Speeds maxSpeeds, double_t maxLinAcceleration);
-    ControllerStatus getStatus() const override;
-    StateUpdateResult update(double_t interval) override;
+    StateSmoothTrajectory(DisplacementKind kind, Trajectory *trajectory, Speeds maxSpeeds, double_t maxLinAcceleration);
+    ControllerStatus getStatus() const;
+    StateUpdateResult update(double_t interval);
     void setMaxSpeeds(Speeds maxSpeeds);
 
   private:
     DisplacementKind m_kind;
-    std::shared_ptr<Trajectory> m_trajectory;
+    Trajectory *m_trajectory;
     Angle m_lastDirection;
 
     Speeds m_maxSpeeds;

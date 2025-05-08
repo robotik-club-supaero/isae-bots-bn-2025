@@ -7,12 +7,12 @@ namespace manager {
 
 /// Idle -> Closed loop
 template <Actuators TActuators>
-class StateActivating final : public ManagerState<TActuators> {
+class StateActivating {
   public:
     /// @param actuators the reference must not escape the function
     StateActivating(TActuators &actuators);
-    ManagerStatus getStatus() const override;
-    ManagerStatus update(TActuators &actuators) override;
+    ManagerStatus getStatus() const;
+    ManagerStatus update(TActuators &actuators);
 };
 
 } // namespace manager

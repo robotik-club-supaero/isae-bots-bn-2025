@@ -6,11 +6,11 @@
 
 namespace controller {
 
-class StateManualControl final : public ControllerState {
+class StateManualControl {
   public:
     StateManualControl(Speeds speedRequest, Accelerations maxAcceleration);
-    ControllerStatus getStatus() const override;
-    StateUpdateResult update(double_t interval) override;
+    ControllerStatus getStatus() const;
+    StateUpdateResult update(double_t interval);
 
     void setSpeed(Speeds speeds, bool enforceMaxAccelerations = true);
 

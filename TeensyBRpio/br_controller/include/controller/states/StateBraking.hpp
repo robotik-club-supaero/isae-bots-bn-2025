@@ -6,11 +6,11 @@
 
 namespace controller {
 
-class StateBraking final : public ControllerState {
+class StateBraking {
   public:
     StateBraking(Speeds initialSpeeds, Accelerations brakeAccelerations);
-    ControllerStatus getStatus() const override;
-    StateUpdateResult update(double_t interval) override;
+    ControllerStatus getStatus() const;
+    StateUpdateResult update(double_t interval);
 
   private:
     Ramp m_linRamp;

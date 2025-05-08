@@ -11,11 +11,11 @@
 
 #include "controller/DisplacementKind.hpp"
 #include "defines/constraint.hpp"
+#include "defines/stl.hpp"
 #include "fsm/StateMachine.hpp"
 #include "math/Derivative.hpp"
+#include "rotations/OrientationProfile.hpp"
 #include "trajectories/Trajectory.hpp"
-
-#include <memory> //FIXME
 
 template <typename T>
 concept ErrorConverter = requires(T a, Vector2D<Meter> error, double_t interval) {
@@ -30,9 +30,9 @@ namespace controller {
 
 using setpoint_t = std::variant<Position2D<Meter>, Speeds>;
 struct no_order {};
-using trajectory_request_t = std::tuple<DisplacementKind, std::shared_ptr<Trajectory>, std::optional<Angle>>;
-using rotation_request_t = std::shared_ptr<OrientationProfile>;
-using disp_order_t = std::variant<no_order, trajectory_request_t, rotation_request_t, Speeds>;
+using trajectory_request_t = std::tuple<DisplacementKind, std::optional<Angle>>;
+struct rotation_request {};
+using disp_order_t = std::variant<no_order, trajectory_request_t, rotation_request, Speeds>;
 
 /**
  * A controller for a unicycle, nonholonomic robot. A robot is said to be unicycle if its displacement can be described only by its linear and angular
@@ -130,20 +130,26 @@ class UnicycleController : private fsm::StateMachine<StateStandStill, StateBraki
      * Starts a trajectory. The controller switches to position control if it was in speed control.
      * If the robot is already moving, the previous trajectory or rotation is cancelled.
      */
-    void startTrajectory(DisplacementKind kind, std::unique_ptr<Trajectory> trajectory, std::optional<Angle> finalOrientation = std::nullopt);
     template <Derived<Trajectory> TTrajectory, typename... Args>
-    void startTrajectory(DisplacementKind kind, Args &&...args, std::optional<Angle> finalOrientation) {
-        startTrajectory(kind, std::make_unique<TTrajectory>(std::forward<Args>(args)...), finalOrientation);
+    void startTrajectory(DisplacementKind kind, std::optional<Angle> finalOrientation, Args &&...args) {
+        cancelOrder();
+        m_currentOrder.emplace<trajectory_request_t>(kind, finalOrientation);
+        m_currentTrajectory.emplace<TTrajectory>(std::forward<Args>(args)...);
+        softReset({m_currentTrajectory->getCurrentPosition(), m_setpoint.theta});
+        startOrder(/* resume = */ false);
     }
 
     /**
      * Starts a rotation. The controller switches to position control if it was in speed control.
      * If the robot is already moving, the previous trajectory or rotation is cancelled.
      */
-    void startRotation(std::unique_ptr<OrientationProfile> rotation);
     template <Derived<OrientationProfile> TProfile, typename... Args>
     void startRotation(Args &&...args) {
-        startRotation(std::make_unique<TProfile>(std::forward<Args>(args)...));
+        cancelOrder();
+        m_currentOrder.emplace<rotation_request>();
+        m_currentRotation.emplace<TProfile>(std::forward<Args>(args)...);
+        softReset({m_setpoint, m_currentRotation->getCurrentOrientation()});
+        startOrder(/* resume = */ false);
     }
 
     /**
@@ -222,6 +228,8 @@ class UnicycleController : private fsm::StateMachine<StateStandStill, StateBraki
     TConverter m_converter;
     UpdateResultCode m_event;
     disp_order_t m_currentOrder;
+    trajectory_ptr m_currentTrajectory;
+    rotation_ptr m_currentRotation;
 
     Speeds m_lastCommand;
 };

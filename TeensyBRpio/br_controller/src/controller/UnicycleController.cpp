@@ -14,7 +14,8 @@ UnicycleController<TConverter>::UnicycleController(Vector2D<Meter> trackingOffse
                                                    Speeds maxSpeeds, Accelerations maxAccelerations, double_t speedThreshold)
     : m_offset(trackingOffset), m_brakeAccelerations(brakeAccelerations), m_maxSpeeds(maxSpeeds), m_maxAccelerations(maxAccelerations),
       m_speedThreshold(speedThreshold), m_reversing(), m_speedControl(), m_setpoint(Position2D<Meter>()), m_goalPointSpeed(), m_actualSpeed(),
-      m_trackingPointSpeed(1, 0.2), m_converter(std::move(converter)), m_event(), m_currentOrder(), m_lastCommand() {}
+      m_trackingPointSpeed(1, 0.2), m_converter(std::move(converter)), m_event(), m_currentOrder(), m_currentTrajectory(), m_currentRotation(),
+      m_lastCommand() {}
 
 template <ErrorConverter TConverter>
 Speeds UnicycleController<TConverter>::updateCommand(double_t interval, Position2D<Meter> robotPosition) {
@@ -214,31 +215,15 @@ bool UnicycleController<TConverter>::isMoving() const {
 }
 
 template <ErrorConverter TConverter>
-void UnicycleController<TConverter>::startTrajectory(DisplacementKind kind, std::unique_ptr<Trajectory> trajectory,
-                                                     std::optional<Angle> finalOrientation) {
-    softReset({trajectory->getCurrentPosition(), m_setpoint.theta});
-    m_currentOrder.emplace<trajectory_request_t>(kind, std::move(trajectory), finalOrientation);
-    startOrder(/* resume = */ false);
-}
-
-template <ErrorConverter TConverter>
-void UnicycleController<TConverter>::startRotation(std::unique_ptr<OrientationProfile> rotation) {
-    softReset({m_setpoint, rotation->getCurrentOrientation()});
-    m_currentOrder.emplace<rotation_request_t>(std::move(rotation));
-    startOrder(/* resume = */ false);
-}
-
-template <ErrorConverter TConverter>
 void UnicycleController<TConverter>::startOrder(bool resume, bool checkMoving) {
     if (checkMoving && getStatus() != ControllerStatus::Still && isMoving()) {
         brakeToStop(/* cancelOrder = */ false);
     } else {
         std::visit( //
             overload{[&](trajectory_request_t &request) {
-                         auto &kind = std::get<DisplacementKind>(request);
-                         auto &trajectory = std::get<std::shared_ptr<Trajectory>>(request);
+                         DisplacementKind &kind = std::get<DisplacementKind>(request);
                          if (resume) {
-                             if (trajectory->recompute({m_setpoint, m_setpoint.theta + kind.getAlignmentOffset()})) {
+                             if (m_currentTrajectory->recompute({m_setpoint, m_setpoint.theta + kind.getAlignmentOffset()})) {
                                  log(INFO, "Trajectory recomputed.");
                              } else {
                                  log(WARN, "Failed to recompute the trajectory. Aborting trajectory...");
@@ -246,11 +231,12 @@ void UnicycleController<TConverter>::startOrder(bool resume, bool checkMoving) {
                                  return;
                              }
                          }
-                         setCurrentState<StateFullTrajectory>(kind, trajectory, m_setpoint.theta, m_maxSpeeds, m_maxAccelerations);
+                         setCurrentState<StateFullTrajectory>(kind, m_currentTrajectory.get(), m_currentRotation, m_setpoint.theta, m_maxSpeeds,
+                                                              m_maxAccelerations);
                      },
-                     [&](rotation_request_t &request) {
+                     [&](rotation_request &request) {
                          if (resume) {
-                             if (request->recompute(m_setpoint.theta)) {
+                             if (m_currentRotation->recompute(m_setpoint.theta)) {
                                  log(INFO, "Rotation profile recomputed.");
                              } else {
                                  log(WARN, "Failed to recompute the rotation profile. Aborting rotation...");
@@ -258,7 +244,7 @@ void UnicycleController<TConverter>::startOrder(bool resume, bool checkMoving) {
                                  return;
                              }
                          }
-                         setCurrentState<StateFinalRotation>(request, m_maxSpeeds.angular, m_maxAccelerations.angular);
+                         setCurrentState<StateFinalRotation>(m_currentRotation.get(), m_maxSpeeds.angular, m_maxAccelerations.angular);
                      },
                      [&](Speeds &request) { setCurrentState<StateManualControl>(m_maxAccelerations, request); }, //
                      [](no_order &request) {}},
@@ -269,6 +255,8 @@ void UnicycleController<TConverter>::startOrder(bool resume, bool checkMoving) {
 template <ErrorConverter TConverter>
 void UnicycleController<TConverter>::cancelOrder() {
     m_currentOrder.emplace<no_order>();
+    m_currentTrajectory.reset();
+    m_currentRotation.reset();
 }
 template <ErrorConverter TConverter>
 void UnicycleController<TConverter>::transitToStandStill(Position2D<Meter> restPosition) {
@@ -305,7 +293,7 @@ ControllerStatus UnicycleController<TConverter>::getStatus() const {
     ControllerStatus status = getStateStatus<ControllerStatus>();
     return std::visit<ControllerStatus>( //
         overload{[status](const trajectory_request_t &) { return status | ControllerStatus::TRAJECTORY; },
-                 [status](const rotation_request_t &) { return status | ControllerStatus::ROTATING; },
+                 [status](const rotation_request &) { return status | ControllerStatus::ROTATING; },
                  [status](const Speeds &) { return status | ControllerStatus::SPEED_CONTROL; }, //
                  [status](const no_order &) { return status; }},
         m_currentOrder);

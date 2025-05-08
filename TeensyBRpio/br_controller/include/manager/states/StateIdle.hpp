@@ -6,11 +6,11 @@
 namespace manager {
 
 template <Actuators TActuators>
-class StateIdle final : public ManagerState<TActuators> {
+class StateIdle {
   public:
     StateIdle();
-    ManagerStatus getStatus() const override;
-    ManagerStatus update(TActuators &actuators) override;
+    ManagerStatus getStatus() const;
+    ManagerStatus update(TActuators &actuators);
 };
 
 } // namespace manager

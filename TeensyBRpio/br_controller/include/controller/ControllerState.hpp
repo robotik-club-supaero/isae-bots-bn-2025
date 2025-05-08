@@ -51,26 +51,6 @@ class ControllerStatus {
     uint8_t m_value;
 };
 
-/**
- * Base class for the state of a controller.
- */
-class ControllerState {
-  public:
-    virtual ControllerStatus getStatus() const = 0;
-    /**
-     * Updates the state.
-     *
-     * @param interval The time elapsed since the last update. If the state was just resumed, this
-     * is the time elapsed since the call to `resumeState()`.
-     *
-     * @return The updated setpoint, or a transition code. See `StateUpdateResult`.
-     */
-    virtual StateUpdateResult update(double_t interval) = 0;
-
-  protected:
-    ControllerState() = default;
-};
-
 } // namespace controller
 
 #endif

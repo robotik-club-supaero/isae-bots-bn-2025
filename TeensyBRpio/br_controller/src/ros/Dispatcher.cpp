@@ -24,7 +24,7 @@ template <typename TManager>
 inline void handleGoTo(TManager &manager, const displacement_order_t &order) {
     DisplacementKind kind = ((order.kind & FLAG_REVERSE) == 0) ? FORWARD : REVERSE;
     std::optional<Angle> finalOrientation = ((order.kind & FLAG_FINAL_ORIENTATION) != 0) ? std::make_optional(order.theta) : std::nullopt;
-    bool allowCurve = false&&(order.kind & FLAG_ALLOW_CURVE) != 0;
+    bool allowCurve = false && (order.kind & FLAG_ALLOW_CURVE) != 0;
 
     auto pathRaw = message_cast<std::span<const point_t>>(order.path);
     if (pathRaw.empty()) {
@@ -43,13 +43,13 @@ inline void handleGoTo(TManager &manager, const displacement_order_t &order) {
         }
 
         Angle initialDirection = robotPosition.theta + kind.getAlignmentOffset();
-        std::unique_ptr<Trajectory> trajectory;
         if (allowCurve) {
-            trajectory = std::make_unique<PathTrajectory>(initialDirection, finalOrientation, std::move(path));
+            PathTrajectory trajectory(initialDirection, finalOrientation, std::move(path));
+            controller.template startTrajectory<PathTrajectory>(kind, finalOrientation, std::move(trajectory));
         } else {
-            trajectory = std::make_unique<PolygonalTrajectory>(std::move(path));
+            PolygonalTrajectory trajectory(std::move(path));
+            controller.template startTrajectory<PolygonalTrajectory>(kind, finalOrientation, std::move(trajectory));
         }
-        controller.startTrajectory(kind, std::move(trajectory), finalOrientation);
     });
 }
 

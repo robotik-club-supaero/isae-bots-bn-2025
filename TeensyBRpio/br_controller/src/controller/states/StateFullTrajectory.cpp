@@ -6,9 +6,9 @@
 #include "trajectories/LinearTrajectory.hpp"
 
 namespace controller {
-StateFullTrajectory::StateFullTrajectory(DisplacementKind kind, std::shared_ptr<Trajectory> trajectory, Angle initialOrientation, Speeds maxSpeeds,
-                                         Accelerations maxAccelerations)
-    : m_kind(kind), m_trajectory(std::move(trajectory)), m_maxSpeeds(maxSpeeds), m_maxAccelerations(maxAccelerations) {
+StateFullTrajectory::StateFullTrajectory(DisplacementKind kind, Trajectory *trajectory, rotation_ptr &rotation_buffer, Angle initialOrientation,
+                                         Speeds maxSpeeds, Accelerations maxAccelerations)
+    : m_kind(kind), m_trajectory(trajectory), m_rotation_buffer(rotation_buffer), m_maxSpeeds(maxSpeeds), m_maxAccelerations(maxAccelerations) {
     startInitialRotation(initialOrientation);
 }
 
@@ -35,9 +35,8 @@ StateUpdateResult StateFullTrajectory::update(double_t interval) {
 }
 
 void StateFullTrajectory::startInitialRotation(Angle initialRobotOrientation) {
-    std::shared_ptr<OrientationProfile> profile =
-        std::make_shared<SetHeadingProfile>(initialRobotOrientation, m_trajectory->getCurrentPosition().theta + m_kind.getAlignmentOffset());
-    setCurrentState<StateInitialRotation>(std::move(profile), m_maxSpeeds.angular, m_maxAccelerations.angular);
+    m_rotation_buffer.emplace<SetHeadingProfile>(initialRobotOrientation, m_trajectory->getCurrentPosition().theta + m_kind.getAlignmentOffset());
+    setCurrentState<StateInitialRotation>(m_rotation_buffer.get(), m_maxSpeeds.angular, m_maxAccelerations.angular);
 }
 void StateFullTrajectory::setMaxSpeeds(Speeds maxSpeeds) {
     m_maxSpeeds = maxSpeeds;

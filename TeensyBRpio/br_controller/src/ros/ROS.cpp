@@ -1,7 +1,6 @@
 #include "ros/ROS.hpp"
 #include "defines/math.hpp"
 #include "logging.hpp"
-#include "manager/ManagerState.hpp"
 #include "ros/Callbacks.hpp"
 
 using UpdateResultCode = controller::UpdateResultCode;

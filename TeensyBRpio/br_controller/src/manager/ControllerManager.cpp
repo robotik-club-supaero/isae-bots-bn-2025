@@ -1,9 +1,6 @@
 #include "manager/ControllerManager.hpp"
 #include "logging.hpp"
 
-#include <memory>
-#include <string>
-
 #define TEMPLATE template <Actuators TActuators, CanControl<TActuators> TController, PositionFeedback TFeedback, Clock TClock>
 #define MANAGER ControllerManager<TActuators, TController, TFeedback, TClock>
 

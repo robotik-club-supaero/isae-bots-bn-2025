@@ -15,7 +15,6 @@
 #include "manager/states/StateDeactivating.hpp"
 #include "manager/states/StateIdle.hpp"
 
-#include <memory>
 #include <optional>
 
 namespace manager {

@@ -16,18 +16,6 @@ enum ManagerStatus {
     Active
 };
 
-/// State of the manager
-template <Actuators TActuators>
-class ManagerState {
-  public:
-    virtual ManagerStatus getStatus() const = 0;
-    /// @param actuators The reference must not escape the function
-    virtual ManagerStatus update(TActuators &actuators) = 0;
-
-  protected:
-    ManagerState();
-};
-
 } // namespace manager
 
 #endif
