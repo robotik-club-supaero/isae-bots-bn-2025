@@ -19,7 +19,7 @@ class Dispatcher {
     class DispatcherSubscription : public ros_impl::subscription_t<T> {
       public:
         template <std::invocable<TManager &, const T &> Fun>
-        DispatcherSubscription(ros_impl::Node &node, const string_t &topic, const std::weak_ptr<TManager> &manager, Fun callback)
+        DispatcherSubscription(ros_impl::Node &node, const char *topic, const std::weak_ptr<TManager> &manager, Fun callback)
             : ros_impl::subscription_t<T>(node.createSubscription<T>(topic, [callback, manager](const T &msg) {
                   if (auto lock = manager.lock()) {
                       callback(*lock, msg);

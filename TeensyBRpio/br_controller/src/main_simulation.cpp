@@ -42,7 +42,7 @@ int main(int argc, char **argv) {
     rclcpp::shutdown();
 }
 
-void log(LogSeverity severity, const string_t &message) {
+void log(LogSeverity severity, const char *message) {
     if (ros) {
         ros->sendLog(severity, message);
     }

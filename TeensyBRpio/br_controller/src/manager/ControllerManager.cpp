@@ -62,7 +62,7 @@ bool MANAGER::update() {
 
 TEMPLATE
 void MANAGER::update(double_t interval) {
-    ManagerStatus status = updateState<ManagerStatus, TActuators&>(m_actuators);
+    ManagerStatus status = updateState<ManagerStatus, TActuators &>(m_actuators);
     if (status != this->getStatus()) {
         switch (status) {
             case Idle:
@@ -78,7 +78,7 @@ void MANAGER::update(double_t interval) {
             case Deactivating:
                 // Only returned by StateDeactivating
             default:
-                log(ERROR, "Invalid response from manager state!" + std::to_string(status));
+                log(ERROR, "Invalid response from manager state!");
         }
     }
 

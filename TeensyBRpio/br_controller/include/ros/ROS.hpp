@@ -48,7 +48,7 @@ class ROS : public ros_impl::node_t {
 
     /// Spins the ROS node and call "loop" on the attached manager. It is an error to call this function before a manager is attached.
     void loop();
-    void sendLog(LogSeverity severity, const string_t &message);
+    void sendLog(LogSeverity severity, const char *message);
 
   private:
     std::shared_ptr<manager_t> m_manager;

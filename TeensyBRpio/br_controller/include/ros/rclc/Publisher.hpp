@@ -36,12 +36,12 @@ class Publisher {
   private:
     friend class Node;
 
-    Publisher(std::shared_ptr<rcl_node_t> node, const string_t &topic, QosReliability reliability)
+    Publisher(std::shared_ptr<rcl_node_t> node, const char *topic, QosReliability reliability)
         : m_node(std::move(node)), m_publisher(std::make_unique<rcl_publisher_t>()), m_msg() {
         if (reliability == AllowBestEffort) {
-            RCCHECK_HARD(rclc_publisher_init_best_effort(m_publisher.get(), m_node.get(), type_support_t<T>::get(), topic.c_str()));
+            RCCHECK_HARD(rclc_publisher_init_best_effort(m_publisher.get(), m_node.get(), type_support_t<T>::get(), topic));
         } else {
-            RCCHECK_HARD(rclc_publisher_init_default(m_publisher.get(), m_node.get(), type_support_t<T>::get(), topic.c_str()));
+            RCCHECK_HARD(rclc_publisher_init_default(m_publisher.get(), m_node.get(), type_support_t<T>::get(), topic));
         }
     }
 

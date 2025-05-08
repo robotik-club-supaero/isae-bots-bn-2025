@@ -1,5 +1,4 @@
 #include "math/Derivative.hpp"
-#include "defines/string.h"
 
 #define TEMPLATE                                                                                                                                     \
     template <typename TDerivative, typename TValue>                                                                                                 \

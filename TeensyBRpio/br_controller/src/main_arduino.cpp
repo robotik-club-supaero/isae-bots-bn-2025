@@ -23,7 +23,7 @@ void loop() {
     blinkingLed->loop();
 }
 
-void log(LogSeverity severity, const string_t &message) {
+void log(LogSeverity severity, const char *message) {
     if (rosInstance) {
         rosInstance->sendLog(severity, message);
     }

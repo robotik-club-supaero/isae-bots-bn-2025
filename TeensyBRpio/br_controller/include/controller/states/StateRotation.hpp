@@ -15,7 +15,7 @@ class StateRotation {
     void setMaxSpeed(double_t maxAngSpeed);
 
   protected:
-    /// @param profile must not be null
+    /// @param profile must not be null and must be valid for the lifetime of this state
     StateRotation(OrientationProfile *profile, double_t maxAngSpeed, double_t maxAngAcceleration);
 
   private:
@@ -26,13 +26,13 @@ class StateRotation {
 
 class StateInitialRotation final : public StateRotation {
   public:
-    /// @param profile must not be null
+    /// @param profile must not be null and must be valid for the lifetime of this state
     StateInitialRotation(OrientationProfile *profile, double_t maxAngSpeed, double_t maxAngAcceleration);
 };
 
 class StateFinalRotation final : public StateRotation {
   public:
-    /// @param profile must not be null
+    /// @param profile must not be null and must be valid for the lifetime of this state
     StateFinalRotation(OrientationProfile *profile, double_t maxAngSpeed, double_t maxAngAcceleration);
 };
 

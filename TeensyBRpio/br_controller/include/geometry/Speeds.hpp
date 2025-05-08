@@ -2,10 +2,7 @@
 #define _SPEEDS_HPP_
 
 #include "defines/math.hpp"
-
-#ifdef _BR_DEBUG
-#include <string>
-#endif
+#include "defines/string.hpp"
 
 // TODO: rename class Speeds to a name that can apply to Accelerations and Tolerances as well, and
 // create an alias for Speeds.
@@ -37,8 +34,8 @@ class Speeds {
     /// (Maybe signed) angular speed or acceleration (rad/s or rad/s²)
     double_t angular;
 
-#ifdef _BR_DEBUG
-    operator std::string() const { return "(" + std::to_string(linear) + ", " + std::to_string(angular) + ")"; }
+#ifdef _STRING_EXT_
+    operator std::string() const { return "(" + to_string(linear) + ", " + to_string(angular) + ")"; }
 #endif
 };
 

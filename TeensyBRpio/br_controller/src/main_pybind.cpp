@@ -99,7 +99,7 @@ PYBIND11_MODULE(br_trajectories, m) {
         py::arg("allowCurve") = true, py::arg("limitMicros") = 100000000);
 }
 
-void log(LogSeverity _severity, const string_t &_message) {
+void log(LogSeverity _severity, const char *_message) {
     // Ignore all logs
 }
 

@@ -3,9 +3,7 @@
 
 #include "fsm/PreallocUniquePtr.hpp"
 
-#include "rotations/OrientationProfile.hpp"
 #include "rotations/SetHeadingProfile.hpp"
-#include "trajectories/LinearTrajectory.hpp"
 #include "trajectories/PathTrajectory.hpp"
 #include "trajectories/PolygonalTrajectory.hpp"
 

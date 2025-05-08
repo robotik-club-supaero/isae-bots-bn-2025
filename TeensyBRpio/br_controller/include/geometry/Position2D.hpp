@@ -2,15 +2,12 @@
 #define _POSITION_2D_HPP_
 
 #include "defines/math.hpp"
+#include "defines/string.hpp"
 #include "geometry/Angle.hpp"
 #include "geometry/Speeds.hpp"
 #include "geometry/Vector2D.hpp"
 
-#ifdef _BR_DEBUG
-#include "defines/string.h"
-#endif
-
-/** 
+/**
  * A 2D-position with orientation. The unit of x and y is given by type parameter `Unit`.
  * theta is in radians.
  *
@@ -68,7 +65,7 @@ class Position2D : public Vector2D<Unit> {
      * @param xr The signed distance to move in the direction of this position's theta.
      * @param yr The signed distance to move in the direction normal to this position's theta.
      * @param theta The signed angle to rotate
-     * 
+     *
      * This is equivalent to `this + Position2D(this.makeAbsolute({xr, yr}), theta)`.
      */
     Position2D<Unit, TAngle> relativeOffset(double_t xr, double_t yr = 0, TAngle theta = 0) const;
@@ -96,8 +93,8 @@ class Position2D : public Vector2D<Unit> {
 
     TAngle theta;
 
-#ifdef _BR_DEBUG
-    operator std::string() const { return "(" + std::to_string(this->x) + ", " + std::to_string(this->y) + ", " + to_string(theta) + ")"; }
+#ifdef _STRING_EXT_
+    operator std::string() const { return "(" + to_string(this->x) + ", " + to_string(this->y) + ", " + to_string(theta) + ")"; }
 #endif
 };
 

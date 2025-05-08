@@ -14,8 +14,6 @@
 #include "defines/stl.hpp"
 #include "fsm/StateMachine.hpp"
 #include "math/Derivative.hpp"
-#include "rotations/OrientationProfile.hpp"
-#include "trajectories/Trajectory.hpp"
 
 template <typename T>
 concept ErrorConverter = requires(T a, Vector2D<Meter> error, double_t interval) {
@@ -24,11 +22,10 @@ concept ErrorConverter = requires(T a, Vector2D<Meter> error, double_t interval)
     { a.value() } -> std::convertible_to<Vector2D<Meter>>;
 };
 
-class OrientationProfile;
-
 namespace controller {
 
 using setpoint_t = std::variant<Position2D<Meter>, Speeds>;
+
 struct no_order {};
 using trajectory_request_t = std::tuple<DisplacementKind, std::optional<Angle>>;
 struct rotation_request {};
@@ -228,7 +225,9 @@ class UnicycleController : private fsm::StateMachine<StateStandStill, StateBraki
     TConverter m_converter;
     UpdateResultCode m_event;
     disp_order_t m_currentOrder;
+    /// Pre-allocated buffer to store the current trajectory
     trajectory_ptr m_currentTrajectory;
+    /// Pre-allocated buffer to store the current rotation profile
     rotation_ptr m_currentRotation;
 
     Speeds m_lastCommand;

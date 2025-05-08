@@ -2,12 +2,9 @@
 #define _POLYNOMIAL_HPP_
 
 #include "defines/math.hpp"
+#include "defines/string.hpp"
 
 #include <array>
-
-#ifdef _BR_DEBUG
-#include <string>
-#endif
 
 template <std::size_t N>
 struct DerivativeDegree {
@@ -41,11 +38,11 @@ class Polynomial {
     const std::array<T, N> &coeffs() const;
     std::array<T, N> &coeffs();
 
-#ifdef _BR_DEBUG
+#ifdef _STRING_EXT_
     operator std::string() const {
         std::string str = "(";
         for (int i = m_coeffs.size() - 1; i >= 0; i--) {
-            str += std::string(m_coeffs[i]) + "X^" + std::to_string(i);
+            str += std::string(m_coeffs[i]) + "X^" + to_string(i);
             if (i > 0) {
                 str += ", ";
             }

@@ -2,7 +2,6 @@
 #define _ROS_IMPL_NODE_HPP_
 
 #include "Clock.hpp"
-#include "defines/string.h"
 #include "logging.hpp"
 #include "ros/message_cast.hpp"
 #include "ros/rclc/Publisher.hpp"
@@ -18,9 +17,6 @@
 #include <functional>
 #include <memory>
 #include <optional>
-#ifndef ARDUINO
-#include <iostream>
-#endif
 
 namespace ros_rclc {
 
@@ -39,13 +35,13 @@ class Subscription;
 class Node {
 
   public:
-    Node(string_t name) : m_name(std::move(name)), m_msgLog(), m_logger() {
+    Node(const char *name) : m_msgLog(), m_logger() {
         RCCHECK_HARD(rclc_support_init(m_support.get(), 0, NULL, m_allocator.get()));
-        RCCHECK_HARD(rclc_node_init_default(m_node.get(), m_name.c_str(), "", m_support.get()));
+        RCCHECK_HARD(rclc_node_init_default(m_node.get(), name, "", m_support.get()));
         RCCHECK_HARD(rclc_executor_init(m_executor.get(), &m_support->context, 7, m_allocator.get()));
 
         rcl_interfaces__msg__Log__init(&m_msgLog);
-        rosidl_runtime_c__String__assignn(&m_msgLog.name, m_name.c_str(), m_name.size());
+        rosidl_runtime_c__String__assign(&m_msgLog.name, name);
 
         m_logger.emplace(createPublisher<rcl_interfaces__msg__Log>("rosout", /* reliability = */ ReliableOnly));
     }
@@ -63,16 +59,16 @@ class Node {
     void spin_once() { RCCHECK_HARD(rclc_executor_spin_some(m_executor.get(), 0)); }
 
     template <typename T>
-    Subscription<T> createSubscription(const string_t &topic, std::function<void(const T &)> callback) {
+    Subscription<T> createSubscription(const char *topic, std::function<void(const T &)> callback) {
         return Subscription<T>(m_node, m_executor.get(), topic, callback);
     }
 
     template <typename T>
-    Publisher<T> createPublisher(const string_t &topic, QosReliability reliability = AllowBestEffort) {
+    Publisher<T> createPublisher(const char *topic, QosReliability reliability = AllowBestEffort) {
         return Publisher<T>(m_node, topic, reliability);
     }
 
-    void sendLog(LogSeverity severity, const string_t &message) {
+    void sendLog(LogSeverity severity, const char *message) {
         switch (severity) {
             case INFO:
                 m_msgLog.level = rcl_interfaces__msg__Log__INFO;
@@ -90,12 +86,12 @@ class Node {
                 m_msgLog.level = rcl_interfaces__msg__Log__DEBUG;
                 break;
             default:
-                sendLog(ERROR, "Unknown log type: %d; defaulting to INFO");
+                sendLog(ERROR, "Unknown log type; defaulting to INFO");
                 m_msgLog.level = rcl_interfaces__msg__Log__INFO;
                 break;
         }
 
-        rosidl_runtime_c__String__assignn(&m_msgLog.msg, message.c_str(), message.size());
+        rosidl_runtime_c__String__assign(&m_msgLog.msg, message);
 
         instant_t stamp = SystemClock().micros();
         m_msgLog.stamp.sec = static_cast<int32_t>(stamp / 1000000);
@@ -104,10 +100,6 @@ class Node {
         if (m_logger) {
             m_logger->publish(m_msgLog);
         }
-
-#ifndef ARDUINO
-        std::cout << severityToString(severity) << " " << message << std::endl;
-#endif
     }
 
   private:
@@ -117,7 +109,6 @@ class Node {
     std::unique_ptr<rclc_executor_t> m_executor = std::make_unique<rclc_executor_t>();
     std::shared_ptr<rcl_node_t> m_node = std::make_shared<rcl_node_t>();
 
-    string_t m_name;
     rcl_interfaces__msg__Log m_msgLog;
     // We use our own publisher to /rosout instead of the logging macros because micro_ros does not publish logs automatically
     std::optional<Publisher<rcl_interfaces__msg__Log>> m_logger;

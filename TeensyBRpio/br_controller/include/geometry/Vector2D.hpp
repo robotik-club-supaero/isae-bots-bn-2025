@@ -2,11 +2,10 @@
 #define _VECTOR_2D_HPP_
 
 #include "defines/math.hpp"
+#include "defines/string.hpp"
 #include "geometry/Angle.hpp"
 
-#include <string>
-
-/** 
+/**
  * A 2D-vector.
  *
  * @tparam Unit The unit of x and y. Only `Meter` and `Millimeter` are supported.
@@ -70,7 +69,9 @@ class Vector2D {
     double_t x;
     double_t y;
 
-    operator std::string() const { return "(" + std::to_string(x) + ", " + std::to_string(y) + ")"; }
+#ifdef _STRING_EXT_
+    operator std::string() const { return "(" + to_string(x) + ", " + to_string(y) + ")"; }
+#endif
 };
 
 template <typename Unit>

@@ -112,7 +112,7 @@ void _ROS::loop() {
 }
 
 TEMPLATE
-void _ROS::sendLog(LogSeverity severity, const string_t &message) {
+void _ROS::sendLog(LogSeverity severity, const char *message) {
     ros_impl::node_t::sendLog(severity, message);
 }
 

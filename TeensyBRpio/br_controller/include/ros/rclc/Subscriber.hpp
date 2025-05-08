@@ -62,11 +62,11 @@ class Subscription {
     }
 
     friend class Node;
-    Subscription(std::shared_ptr<rcl_node_t> node, rclc_executor_t *executor, const string_t &topic, std::function<void(const T &)> callback)
+    Subscription(std::shared_ptr<rcl_node_t> node, rclc_executor_t *executor, const char *topic, std::function<void(const T &)> callback)
         : m_node(std::move(node)), m_subscription(std::make_unique<rcl_subscription_t>()), m_msg(std::make_unique<MsgT>(callback)) {
         static micro_ros_utilities_memory_conf_t MEMORY_CONF = generateMemoryConf();
-        RCCHECK_HARD(micro_ros_utilities_create_message_memory(type_support_t<T>::get(), m_msg.get(), MEMORY_CONF) ? RCL_RET_OK : RCL_RET_ERROR);        
-        RCCHECK_HARD(rclc_subscription_init_default(m_subscription.get(), m_node.get(), type_support_t<T>::get(), topic.c_str()));
+        RCCHECK_HARD(micro_ros_utilities_create_message_memory(type_support_t<T>::get(), m_msg.get(), MEMORY_CONF) ? RCL_RET_OK : RCL_RET_ERROR);
+        RCCHECK_HARD(rclc_subscription_init_default(m_subscription.get(), m_node.get(), type_support_t<T>::get(), topic));
         RCCHECK_HARD(rclc_executor_add_subscription(executor, m_subscription.get(), m_msg.get(),
                                                     (rclc_subscription_callback_t)MessageWrapper<T>::dispatch, ON_NEW_DATA));
     }

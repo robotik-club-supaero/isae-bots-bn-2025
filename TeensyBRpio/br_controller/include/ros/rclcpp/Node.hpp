@@ -1,8 +1,6 @@
 #ifndef _ROS_IMPL_NODE_HPP_
 #define _ROS_IMPL_NODE_HPP_
 
-#include "defines/string.h"
-
 #include "ros/qos/Reliability.hpp"
 #include "ros/rclcpp/Publisher.hpp"
 
@@ -11,23 +9,23 @@
 namespace ros_rclcpp {
 class Node {
   public:
-    Node(string_t name) : m_node(std::make_shared<rclcpp::Node>(std::move(name))) {}
+    Node(const char *name) : m_node(std::make_shared<rclcpp::Node>(name)) {}
 
     void spin_once() { rclcpp::spin_some(m_node); }
 
     template <typename T>
-    rclcpp::Subscription<T>::SharedPtr createSubscription(const string_t &topic, std::function<void(const T &)> callback) {
+    rclcpp::Subscription<T>::SharedPtr createSubscription(const char *topic, std::function<void(const T &)> callback) {
         return m_node->template create_subscription<T>( //
             topic, 10, [callback](std::unique_ptr<T> msg) -> void { callback(*msg); });
     }
 
     template <typename T>
-    Publisher<T> createPublisher(const string_t &topic, QosReliability reliability = ReliableOnly) {
+    Publisher<T> createPublisher(const char *topic, QosReliability reliability = ReliableOnly) {
         std::ignore = reliability; // Always use a reliable QOS for the simulation
         return Publisher<T>(m_node->template create_publisher<T>(topic, 10));
     }
 
-    void sendLog(LogSeverity severity, const string_t &message) {
+    void sendLog(LogSeverity severity, const char *message) {
         const char *msgRaw = message.c_str();
         auto logger = m_node->get_logger();
 

@@ -4,7 +4,6 @@
 #include "defines/constraint.hpp"
 
 #include <algorithm>
-#include <concepts>
 
 #include <math.h> // type double_t
 
