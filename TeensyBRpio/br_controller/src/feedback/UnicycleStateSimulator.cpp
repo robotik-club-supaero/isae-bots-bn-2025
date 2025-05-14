@@ -39,7 +39,7 @@ UnicycleStateSimulator::Noise::Noise(double_t standardDeviation) {
 }
 
 double_t UnicycleStateSimulator::Noise::operator()() {
-    static std::default_random_engine generator(SystemClock().micros());
+    static std::default_random_engine generator(micros());
     if (m_noise) {
         return (*m_noise)(generator);
     } else {

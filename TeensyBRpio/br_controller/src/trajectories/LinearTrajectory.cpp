@@ -25,7 +25,7 @@ std::optional<double_t> LinearTrajectory::getRemainingDistance() const {
     return std::make_optional<double_t>(m_totalLength - m_position);
 }
 
-double_t LinearTrajectory::getMaxCurvature(double_t distance) const {
+double_t LinearTrajectory::getMaxCurvature(double_t distance) {
     return 0;
 }
 

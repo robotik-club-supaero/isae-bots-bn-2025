@@ -4,7 +4,7 @@
 #include "trajectories/Trajectory.hpp"
 
 /// A straight line between the origin and the destination.
-class LinearTrajectory : public SmoothTrajectory {
+class LinearTrajectory final : public SmoothTrajectory {
   public:
     LinearTrajectory(Point2D<Meter> origin, Point2D<Meter> destination);
 
@@ -18,7 +18,7 @@ class LinearTrajectory : public SmoothTrajectory {
     std::optional<double_t> getRemainingDistance() const override;
 
     /// @copydoc Trajectory::getMaxCurvature()
-    double_t getMaxCurvature(double_t distance) const override;
+    double_t getMaxCurvature(double_t distance) override;
 
     /// @copydoc Trajectory::recompute()
     bool recompute(Position2D<Meter> newStartPosition) override;

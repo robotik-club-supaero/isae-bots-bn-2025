@@ -3,7 +3,7 @@
 
 #define TEMPLATE                                                                                                                                     \
     template <typename TValue>                                                                                                                       \
-        requires Add<TValue> && Mul<TValue> && Default<TValue>
+        requires Add<TValue> && Mul<TValue> && std::is_default_constructible_v<TValue>
 
 TEMPLATE
 LowPassFilter<TValue>::LowPassFilter(double_t tau) : m_tau(tau), m_output() {}

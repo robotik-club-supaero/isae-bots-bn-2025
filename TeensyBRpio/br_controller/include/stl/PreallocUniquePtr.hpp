@@ -1,13 +1,9 @@
-// NB: this may not belong to directory "fsm", but technically it does store a state and I didn't want to create one more folder just for it.
-
 #ifndef _PREALLOC_UNIQUE_PTR_HPP_
 #define _PREALLOC_UNIQUE_PTR_HPP_
 
-#include <cstddef>
+#include "defines/math.hpp"
 
-constexpr bool is_power_of_two(std::size_t n) {
-    return n != 0 && (n & (n - 1)) == 0;
-}
+#include <cstddef>
 
 /// @brief A unique pointer that pre-allocates a buffer for the contained object. The buffer is only allocated once, and is re-used
 /// throughout the lifetime of the smart pointer for all the managed objects (there may only be one at a time).
@@ -23,7 +19,7 @@ class prealloc_unique_ptr {
 
   private:
     struct Alloc {
-        alignas(Align) char buffer[Size];
+        std::aligned_storage<Size, Align>::type buffer;
     };
 
     Alloc *m_alloc;

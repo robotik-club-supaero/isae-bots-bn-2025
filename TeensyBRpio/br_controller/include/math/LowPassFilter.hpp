@@ -7,7 +7,7 @@
  * First-order low pass fiter.
  */
 template <typename TValue = double_t>
-    requires Add<TValue> && Mul<TValue> && Default<TValue>
+    requires Add<TValue> && Mul<TValue> && std::is_default_constructible_v<TValue>
 class LowPassFilter {
   public:
     LowPassFilter(double_t tau);

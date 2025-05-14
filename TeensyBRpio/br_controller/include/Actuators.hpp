@@ -3,8 +3,8 @@
 
 #include "geometry/Position2D.hpp"
 
+#include "defines/math.hpp"
 #include <concepts>
-#include <math.h> // type double_t
 
 #if 0
 // PSEUDO-CODE (for documentation purposes only)

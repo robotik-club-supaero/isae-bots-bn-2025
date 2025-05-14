@@ -19,7 +19,7 @@
  * See http://www.bedwani.ch/regul/discret/top/df.htm
  */
 template <typename TDerivative = double_t, typename TValue = TDerivative>
-    requires Add<TValue> && Mul<TValue, TDerivative> && Default<TValue> && Clampable<TValue>
+    requires Add<TValue> && Mul<TValue, TDerivative> && std::is_default_constructible_v<TValue> && Clampable<TValue>
 class Derivative {
   public:
     /**

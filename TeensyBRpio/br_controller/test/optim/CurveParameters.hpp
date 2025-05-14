@@ -18,33 +18,34 @@ struct ControlPoints {
     bool operator==(const ControlPoints &other) const { return pt1 == other.pt1 && pt2 == other.pt2; }
 };
 
-double measureTime(std::unique_ptr<Trajectory> trajectory, double limit = -1);
+template <Derived<Trajectory> T>
+double measureTime(T &&trajectory, double limit = -1);
 
 /// Control points of a multi-Bézier trajectory
 class CurveParameters {
   public:
-    CurveParameters(std::vector<Point2D<Meter>> path) : m_path(std::move(path)), m_ctrlPoints() {
+    CurveParameters(SmallDeque<Point2D<Meter>> path) : m_path(std::move(path)), m_ctrlPoints() {
         /// Initial guess = current implementation of `PathTrajectory`
         PathTrajectory trajectory(std::nullopt, std::nullopt, m_path);
         trajectory.forceGenerate();
 
         for (std::size_t i = 0; i < trajectory.numOfGeneratedCurves(); i++) {
-            const BezierCurve &curve = trajectory.getGeneratedCurve(i);
+            const BezierCurve<4> &curve = trajectory.getGeneratedCurve(i);
             m_ctrlPoints.push_back(ControlPoints(curve.points()[1], curve.points()[2]));
         }
     }
     double cost(std::optional<double> limit = std::nullopt) const {
         DisableLoggingGuard _guard;
-        return measureTime(std::make_unique<MultiCurveTrajectory<BezierCurve>>(generateTrajectory()), limit.value_or(-1));
+        return measureTime<MultiCurveTrajectory<BezierCurve<4>>>(generateTrajectory(), limit.value_or(-1));
     }
 
-    MultiCurveTrajectory<BezierCurve> generateTrajectory() const {
-        std::vector<BezierCurve> curves;
+    MultiCurveTrajectory<BezierCurve<4>> generateTrajectory() const {
+        std::vector<BezierCurve<4>> curves;
         for (std::size_t i = 0; i < m_path.size() - 1; i++) {
             ControlPoints ctrlPts = m_ctrlPoints[i];
-            curves.push_back(BezierCurve({m_path[i], ctrlPts.pt1, ctrlPts.pt2, m_path[i + 1]}));
+            curves.push_back(BezierCurve<4>({m_path[i], ctrlPts.pt1, ctrlPts.pt2, m_path[i + 1]}));
         }
-        MultiCurveTrajectory<BezierCurve> c(std::move(curves));
+        MultiCurveTrajectory<BezierCurve<4>> c(std::move(curves));
         c.forceGenerate();
         return c;
     }
@@ -65,7 +66,7 @@ class CurveParameters {
     bool operator==(const CurveParameters &other) const { return m_path == other.m_path && m_ctrlPoints == other.m_ctrlPoints; }
 
   private:
-    std::vector<Point2D<Meter>> m_path;
+    SmallDeque<Point2D<Meter>> m_path;
     std::vector<ControlPoints> m_ctrlPoints;
 
     void randomNeighbourInPlace(double_t dist_hint) {
@@ -93,6 +94,6 @@ class CurveParameters {
 };
 
 std::normal_distribution<double_t> CurveParameters::rng(0, 0.5);
-std::default_random_engine CurveParameters::generator(SystemClock().micros());
+std::default_random_engine CurveParameters::generator(micros());
 
 #endif

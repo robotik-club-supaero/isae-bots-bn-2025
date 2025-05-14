@@ -52,7 +52,7 @@ class UpdateResultCode {
         TERMINAL = 1,
         TRAJECTORY_COMPLETE = 2,
         ROTATION_COMPLETE = 4,
-        WAS_REVERSE = 8,
+        WAS_REVERSE = 8
     };
     constexpr UpdateResultCode() = default;
     constexpr UpdateResultCode(uint8_t value) : m_value(value) {}

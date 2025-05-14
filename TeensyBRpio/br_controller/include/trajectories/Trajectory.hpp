@@ -65,7 +65,8 @@ class Trajectory {
 
     /**
      * Returns the maximum absolute curvature of the trajectory for the next `distance` meters, starting at the current position.
-     * The curvature is used to anticipate deceleration in turns.
+     * The curvature is used to anticipate deceleration in turns. This function is not required to be `const` so that lazily-computed trajectories
+     * may update the generated portion of the trajectory when this function is called.
      *
      * - Returning 0 means the trajectory is a straight line and effectively disables turn anticipation.
      *   0 is also a valid default value for trajectories that do not support curvature estimation.
@@ -74,7 +75,7 @@ class Trajectory {
      *
      * If `distance < 0`, the behavior is undefined.
      */
-    virtual double_t getMaxCurvature(double_t distance) const = 0;
+    virtual double_t getMaxCurvature(double_t distance) = 0;
 
     /**
      * Attempts to recompute the trajectory such that:

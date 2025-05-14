@@ -7,8 +7,9 @@
 /// Draws intermediary control points of a Bézier curve.
 class BezierDrawable : public sf::Drawable {
   public:
-    BezierDrawable(const TableTransform &transform, const BezierCurve &curve, sf::Color color = DEFAULT_COLOR) : m_controlPoints() {
-        const std::vector<Point2D<Meter>> controlPoints = curve.points();
+    template <std::size_t N>
+    BezierDrawable(const TableTransform &transform, const BezierCurve<N> &curve, sf::Color color = DEFAULT_COLOR) : m_controlPoints() {
+        const std::array<Point2D<Meter>, N> controlPoints = curve.points();
         for (std::size_t i = 1; i < controlPoints.size() - 1; i++) {
             sf::CircleShape sfPoint(4); // Radius of 4 pixels
             sfPoint.setFillColor(color);

@@ -9,8 +9,8 @@
 /// Draws multi-Bézier-curve trajectory with intermediary control points.
 class BezierTrajectoryDrawable : public TrajectoryDrawable {
   public:
-    template <CurveGenerator<BezierCurve> TGenerator>
-    BezierTrajectoryDrawable(const TableTransform &transform, MultiCurveTrajectory<BezierCurve, TGenerator> &trajectory, double_t step,
+    template <CurveGenerator<BezierCurve<4>> TGenerator>
+    BezierTrajectoryDrawable(const TableTransform &transform, MultiCurveTrajectory<BezierCurve<4>, TGenerator> &trajectory, double_t step,
                              sf::Color color = DEFAULT_COLOR, sf::Color secondaryColor = BezierDrawable::DEFAULT_COLOR)
         : TrajectoryDrawable(color), m_curves() {
         trajectory.forceGenerate();

@@ -20,10 +20,10 @@ int main() {
             if (joystick.processEvent(event)) {
                 manager.sendOrder([&](controller_t &controller, Position2D<Meter> robotPosition) {
                     sf::Vector2f value = joystick.getValue();
-                    if (abs(value.x) < 0.1) {
+                    if (std::abs(value.x) < 0.1) {
                         value.x = 0;
                     }
-                    if (abs(value.y) < 0.1) {
+                    if (std::abs(value.y) < 0.1) {
                         value.y = 0;
                     }
                     Speeds speeds(-value.y * controller.getMaxSpeeds().linear, -value.x * controller.getMaxSpeeds().angular);

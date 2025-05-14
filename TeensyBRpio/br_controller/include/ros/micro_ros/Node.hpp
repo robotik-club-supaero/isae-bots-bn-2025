@@ -3,10 +3,10 @@
 
 #include "Clock.hpp"
 #include "logging.hpp"
-#include "ros/message_cast.hpp"
-#include "ros/rclc/Publisher.hpp"
-#include "ros/rclc/Subscriber.hpp"
-#include "ros/rclc/macros.hpp"
+
+#include "ros/micro_ros/Publisher.hpp"
+#include "ros/micro_ros/Subscriber.hpp"
+#include "ros/micro_ros/macros.hpp"
 
 #include <rcl/rcl.h>
 #include <rcl_interfaces/msg/log.h>
@@ -18,54 +18,42 @@
 #include <memory>
 #include <optional>
 
-namespace ros_rclc {
+namespace ros2 {
 
-template <>
-class type_support_t<rcl_interfaces__msg__Log> {
+namespace rcl_interfaces {
+namespace msg {
+class Log : public rcl_interfaces__msg__Log {
   public:
-    static support_t get() { return ROSIDL_GET_MSG_TYPE_SUPPORT(rcl_interfaces, msg, Log); }
+    using rcl_interfaces__msg__Log::rcl_interfaces__msg__Log;
+    static ros2::support_t type_support() { return ROSIDL_GET_MSG_TYPE_SUPPORT(rcl_interfaces, msg, Log); }
 };
-
-template <typename T>
-class Publisher;
-
-template <typename T>
-class Subscription;
+} // namespace msg
+} // namespace rcl_interfaces
 
 class Node {
 
   public:
     Node(const char *name) : m_msgLog(), m_logger() {
-        RCCHECK_HARD(rclc_support_init(m_support.get(), 0, NULL, m_allocator.get()));
+        RCCHECK_HARD(rclc_support_init(m_support.get(), 0, NULL, &m_allocator));
         RCCHECK_HARD(rclc_node_init_default(m_node.get(), name, "", m_support.get()));
-        RCCHECK_HARD(rclc_executor_init(m_executor.get(), &m_support->context, 7, m_allocator.get()));
+        RCCHECK_HARD(rclc_executor_init(m_executor.get(), &m_support->context, 7, &m_allocator));
 
         rcl_interfaces__msg__Log__init(&m_msgLog);
         rosidl_runtime_c__String__assign(&m_msgLog.name, name);
 
-        m_logger.emplace(createPublisher<rcl_interfaces__msg__Log>("rosout", /* reliability = */ ReliableOnly));
-    }
-    ~Node() {
-        m_logger.reset();
-
-        if (m_executor) {
-            rcl_interfaces__msg__Log__fini(&m_msgLog);
-            RCCHECK_SOFT(rclc_executor_fini(m_executor.get()));
-            RCCHECK_SOFT(rcl_node_fini(m_node.get()));
-            RCCHECK_SOFT(rclc_support_fini(m_support.get()));
-        }
+        m_logger.emplace(createPublisher<rcl_interfaces::msg::Log>("rosout", /* reliability = */ ReliableOnly));
     }
 
     void spin_once() { RCCHECK_HARD(rclc_executor_spin_some(m_executor.get(), 0)); }
 
     template <typename T>
     Subscription<T> createSubscription(const char *topic, std::function<void(const T &)> callback) {
-        return Subscription<T>(m_node, m_executor.get(), topic, callback);
+        return Subscription<T>(m_node.get(), m_executor.get(), topic, callback);
     }
 
     template <typename T>
     Publisher<T> createPublisher(const char *topic, QosReliability reliability = AllowBestEffort) {
-        return Publisher<T>(m_node, topic, reliability);
+        return Publisher<T>(m_node.get(), topic, reliability);
     }
 
     void sendLog(LogSeverity severity, const char *message) {
@@ -93,7 +81,7 @@ class Node {
 
         rosidl_runtime_c__String__assign(&m_msgLog.msg, message);
 
-        instant_t stamp = SystemClock().micros();
+        instant_t stamp = micros();
         m_msgLog.stamp.sec = static_cast<int32_t>(stamp / 1000000);
         m_msgLog.stamp.nanosec = static_cast<int32_t>((stamp % 1000000) * 1000);
 
@@ -103,16 +91,15 @@ class Node {
     }
 
   private:
-    // Not sure if boxing is necessary
-    std::unique_ptr<rcl_allocator_t> m_allocator = std::make_unique<rcl_allocator_t>(rcl_get_default_allocator());
+    rcl_allocator_t m_allocator = rcl_get_default_allocator();
     std::unique_ptr<rclc_support_t> m_support = std::make_unique<rclc_support_t>();
     std::unique_ptr<rclc_executor_t> m_executor = std::make_unique<rclc_executor_t>();
-    std::shared_ptr<rcl_node_t> m_node = std::make_shared<rcl_node_t>();
+    std::unique_ptr<rcl_node_t> m_node = std::make_unique<rcl_node_t>();
 
-    rcl_interfaces__msg__Log m_msgLog;
+    rcl_interfaces::msg::Log m_msgLog;
     // We use our own publisher to /rosout instead of the logging macros because micro_ros does not publish logs automatically
-    std::optional<Publisher<rcl_interfaces__msg__Log>> m_logger;
+    std::optional<Publisher<rcl_interfaces::msg::Log>> m_logger;
 };
-} // namespace ros_rclc
+} // namespace ros2
 
 #endif

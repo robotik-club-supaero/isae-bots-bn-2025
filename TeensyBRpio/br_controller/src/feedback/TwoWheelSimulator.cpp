@@ -15,7 +15,7 @@ TwoWheelSimulator::TwoWheelSimulator(double_t wheelDiameter, double_t wheelDista
 }
 
 void TwoWheelSimulator::update(double_t interval) {
-    static std::default_random_engine generator(SystemClock().micros());
+    static std::default_random_engine generator(micros());
 
     // Apply max acceleration to wheel speed (simulates damping)
     WheelSpeeds wheelSpeeds = m_requestedSpeeds->toWheelSpeeds(m_wheelRadius, m_wheelDistance);
@@ -34,10 +34,10 @@ void TwoWheelSimulator::update(double_t interval) {
 
     // Apply min and max speeds
     wheelSpeeds = clamp(wheelSpeeds, -m_maxWheelSpeed, m_maxWheelSpeed);
-    if (abs(m_leftWheelSpeed.getTargetSpeed()) < m_minWheelSpeed) {
+    if (std::abs(m_leftWheelSpeed.getTargetSpeed()) < m_minWheelSpeed) {
         wheelSpeeds.left = 0;
     }
-    if (abs(m_rightWheelSpeed.getTargetSpeed()) < m_minWheelSpeed) {
+    if (std::abs(m_rightWheelSpeed.getTargetSpeed()) < m_minWheelSpeed) {
         wheelSpeeds.right = 0;
     }
 

@@ -31,7 +31,7 @@ StateUpdateResult StateSmoothTrajectory::update(double_t interval) {
             }
 
             Position2D<Meter> position = m_trajectory->getCurrentPosition();
-            double_t angularSpeed = abs(position.theta - m_lastDirection) / interval;
+            double_t angularSpeed = std::abs(position.theta - m_lastDirection) / interval;
 
             // V_lin = R V_ang; curvature = 1 / R
             double_t actualCurvature = currentRampSpeed == 0 ? 0 : angularSpeed / currentRampSpeed;

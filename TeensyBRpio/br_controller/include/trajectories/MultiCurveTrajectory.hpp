@@ -1,9 +1,10 @@
 #ifndef _MULTI_CURVE_TRAJECTORY_HPP_
 #define _MULTI_CURVE_TRAJECTORY_HPP_
 
+#include "stl/SmallDeque.hpp"
 #include "trajectories/CurveTrajectory.hpp"
+
 #include <concepts>
-#include <deque>
 
 /**
  * Possibly lazy contiguous curve generator.
@@ -20,30 +21,35 @@ concept CurveGenerator = requires(T &t, const T &t_const) {
     { t_const.hasNext() } -> std::convertible_to<bool>;
 };
 
+#ifndef ARDUINO
+
+#include <vector>
+
 /**
  * A wrapper around a vector of pre-generated curves that implements concept CurveGenerator.
  */
 template <Curve TCurve>
 class GeneratorVector {
   public:
-    GeneratorVector(std::vector<TCurve> curves) : m_curves(curves.begin(), curves.end()) {}
-    GeneratorVector(std::deque<TCurve> curves) : m_curves(std::move(curves)) {}
+    GeneratorVector(std::vector<TCurve> curves) : m_curves(std::move(curves)), m_index() {}
 
     template <class InputIt>
-    GeneratorVector(InputIt first, InputIt last) : m_curves(first, last) {}
+    GeneratorVector(InputIt first, InputIt last) : GeneratorVector(std::vector<TCurve>(first, last)) {}
 
-    GeneratorVector(std::initializer_list<TCurve> curves) : m_curves(curves) {}
+    GeneratorVector(std::initializer_list<TCurve> curves) : GeneratorVector(std::vector<TCurve>(curves)) {}
 
     TCurve next() {
-        TCurve curve = std::move(m_curves.front());
-        m_curves.pop_front();
+        TCurve curve = std::move(m_curves[m_index++]);
         return curve;
     }
-    bool hasNext() const { return !m_curves.empty(); }
+    bool hasNext() const { return m_index < m_curves.size(); }
 
   private:
-    std::deque<TCurve> m_curves;
+    std::vector<TCurve> m_curves;
+    std::size_t m_index;
 };
+
+#endif
 
 /**
  * A trajectory that follows contiguous, possibly lazily generated, differentiable parametric curves.
@@ -54,7 +60,11 @@ class GeneratorVector {
  * @tparam TCurve,TGenerator Must be complete types
  * See concept CurveGenerator.
  */
+#ifndef ARDUINO
 template <Curve TCurve, CurveGenerator<TCurve> TGenerator = GeneratorVector<TCurve>>
+#else
+template <Curve TCurve, CurveGenerator<TCurve> TGenerator>
+#endif
 class MultiCurveTrajectory : public SmoothTrajectory {
   public:
     using size_type = std::size_t;
@@ -63,15 +73,17 @@ class MultiCurveTrajectory : public SmoothTrajectory {
      * @param generator Must generate at least one curve (i.e. `generator.hasNext()` must be true when given to this constructor).
      */
     MultiCurveTrajectory(TGenerator generator)
-        : m_currentCurve(generator.next()), m_currentCurveIndex(), m_generator(std::move(generator)), m_pendingCurvesLength(-1) {}
+        : m_currentCurve(generator.next()), m_generator(std::move(generator)), m_generatedCurves(), m_pendingCurvesLength(-1) {}
 
     /// @copydoc Trajectory::advance()
-    bool advance(double_t distance) override {
-        double_t remainingOnCurrentCurve = *m_currentCurve.getRemainingDistance();
-
-        while (distance >= remainingOnCurrentCurve && setupNextCurve()) {
-            distance -= remainingOnCurrentCurve;
-            remainingOnCurrentCurve = *m_currentCurve.getRemainingDistance();
+    bool advance(double_t distance) override final {
+        m_currentCurve.forceGenerate(distance);
+        while (std::optional<double_t> remainingOnCurrentCurve = m_currentCurve.getRemainingDistance()) {
+            if (distance < *remainingOnCurrentCurve || !setupNextCurve()) {
+                break;
+            }
+            distance -= *remainingOnCurrentCurve;
+            m_currentCurve.forceGenerate(distance);
         }
         if (m_pendingCurvesLength < 0) {
             computeRemainingDistance();
@@ -81,30 +93,40 @@ class MultiCurveTrajectory : public SmoothTrajectory {
     }
 
     /// @copydoc Trajectory::getCurrentPosition()
-    Position2D<Meter> getCurrentPosition() const override { return m_currentCurve.getCurrentPosition(); }
+    Position2D<Meter> getCurrentPosition() const override final { return m_currentCurve.getCurrentPosition(); }
 
     /// @copydoc Trajectory::getRemainingDistance()
-    std::optional<double_t> getRemainingDistance() const override {
+    std::optional<double_t> getRemainingDistance() const override final {
         if (m_pendingCurvesLength < 0 || m_generator.hasNext()) {
             return std::nullopt;
+        };
+        if (auto remainingOnCurrentCurve = m_currentCurve.getRemainingDistance()) {
+            return *remainingOnCurrentCurve + m_pendingCurvesLength;
+        } else {
+            return std::nullopt;
         }
-        return *m_currentCurve.getRemainingDistance() + m_pendingCurvesLength;
     }
 
     /// @copydoc Trajectory::getMaxCurvature()
     /// This generates the next `distance` meters of the trajectory if they are not already generated.
-    double_t getMaxCurvature(double_t distance) const override {
+    double_t getMaxCurvature(double_t distance) override final {
         double_t curvature = 0;
         size_type i = 0;
         while (distance >= 0) {
-            std::optional<std::reference_wrapper<const trajectory_t>> curve_opt = getCurve(i);
+            std::optional<std::reference_wrapper<trajectory_t>> curve_opt = getCurve(i);
             if (!curve_opt) {
                 break;
             }
+            trajectory_t &curve = curve_opt->get();
 
-            const trajectory_t &curve = curve_opt->get();
             curvature = std::max(curvature, curve.getMaxCurvature(distance));
-            distance -= *curve.getRemainingDistance();
+
+            if (auto remainingOnCurve = curve.getRemainingDistance()) {
+                distance -= *remainingOnCurve;
+            } else {
+                // getMaxCurvature generates the trajectory, so this means the trajectory is strictly longer than `distance`.
+                break;
+            }
             ++i;
         }
 
@@ -114,26 +136,13 @@ class MultiCurveTrajectory : public SmoothTrajectory {
     const TCurve &getCurrentCurve() const { return m_currentCurve.getCurve(); }
 
     /**
-     * Returns the number of completed curves since the trajectory began.
-     *
-     * NB: Unlike `getGeneratedCurve`, this counts from the beginning of the trajectory, not from the current curve.
-     * As a result, calling `getGeneratedCurve(getCurrentCurveIndex())` is unsound.
-     */
-    size_type getCurrentCurveIndex() const { return m_currentCurveIndex; }
-
-    /**
      * Returns the curve at position `index`. The `0-th` curve is the current curve.
      * This does not generate the curve if it is not already generated.
      *
      * This is undefined behavior if `index >= numOfGeneratedCurves()`.
      */
-    const TCurve &getGeneratedCurve(size_type index) const {
-        if (index == 0) {
-            return getCurrentCurve();
-        } else {
-            return m_generatedCurves[index - 1].getCurve();
-        }
-    }
+    const TCurve &getGeneratedCurve(size_type index) const { return getGeneratedTrajectory(index).getCurve(); }
+
     /**
      * Returns the number of generated oncoming curves, including the current curve.
      *
@@ -159,11 +168,15 @@ class MultiCurveTrajectory : public SmoothTrajectory {
         while (m_generator.hasNext()) {
             m_generatedCurves.push_back(m_generator.next());
         }
-        advance(0);
+        for (auto it = m_generatedCurves.begin(); it != m_generatedCurves.end(); ++it) {
+            it->forceGenerate();
+        }
+        m_currentCurve.forceGenerate();
     }
 
   protected:
     const TGenerator &getGenerator() const { return m_generator; }
+    TGenerator &getGenerator() { return m_generator; }
 
   private:
     using trajectory_t = CurveTrajectory<TCurve>;
@@ -179,25 +192,38 @@ class MultiCurveTrajectory : public SmoothTrajectory {
             m_generatedCurves.pop_front();
         }
 
-        m_currentCurveIndex++;
         computeRemainingDistance();
         return true;
     }
     void computeRemainingDistance() {
         if (!m_generator.hasNext()) {
             m_pendingCurvesLength = 0;
-            for (auto it = m_generatedCurves.begin(); it != m_generatedCurves.end(); ++it) {
-                m_pendingCurvesLength += *it->getRemainingDistance();
+            for (const auto &curve : m_generatedCurves) {
+                if (auto distance = curve.getRemainingDistance()) {
+                    m_pendingCurvesLength += *distance;
+                } else {
+                    m_pendingCurvesLength = -1;
+                    break;
+                }
             }
         }
     }
+
+    const CurveTrajectory<TCurve> &getGeneratedTrajectory(size_type index) const {
+        if (index == 0) {
+            return m_currentCurve;
+        } else {
+            return m_generatedCurves[index - 1];
+        }
+    }
+
     /**
      * Returns the curve at position `index`. The `0-th` curve is the current curve.
      * This generates the next `index - 1` curves if they are not generated yet.
      *
      * This returns an empty optional if there are less than `index` remaining curves after the current curve.
      */
-    std::optional<std::reference_wrapper<const trajectory_t>> getCurve(size_type index) const {
+    std::optional<std::reference_wrapper<trajectory_t>> getCurve(size_type index) {
         if (index == 0) {
             return m_currentCurve;
         } else {
@@ -205,16 +231,21 @@ class MultiCurveTrajectory : public SmoothTrajectory {
                 if (!m_generator.hasNext()) {
                     return std::nullopt;
                 }
-                m_generatedCurves.push_back(m_generator.next());
+                if (!m_generatedCurves.reserve(1)) {
+                    // Not enough memory to generate the curve. (This should not happen)
+                    // Eventually, when the current curve is complete and "popped", free memory will become sufficient again.
+                    return std::nullopt;
+                }
+                // We made sure the capacity was sufficient above, so this can't fail.
+                std::ignore = m_generatedCurves.push_back(m_generator.next());
             }
             return m_generatedCurves[index - 1];
         }
     }
 
     trajectory_t m_currentCurve;
-    size_type m_currentCurveIndex;
-    mutable TGenerator m_generator;
-    mutable std::deque<trajectory_t> m_generatedCurves;
+    TGenerator m_generator;
+    SmallDeque<trajectory_t> m_generatedCurves;
     double_t m_pendingCurvesLength;
 };
 

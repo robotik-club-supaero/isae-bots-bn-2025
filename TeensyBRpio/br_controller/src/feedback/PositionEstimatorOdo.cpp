@@ -11,7 +11,8 @@ template <OdoEncoder T, typename TMethod>
 void PositionEstimatorOdo<T, TMethod>::resetPosition(Position2D<Meter> pos) {
     m_position = pos;
     m_positionThetaOffset += pos.theta - Angle(m_positionThetaOdo);
-    m_positionThetaOdo = ((double_t)m_odoRightCount * m_correctionFactorLR - (double_t)m_odoLeftCount) / m_ticksPerRad + m_positionThetaOffset;
+    m_positionThetaOdo =
+        (static_cast<double_t>(m_odoRightCount) * m_correctionFactorLR - static_cast<double_t>(m_odoLeftCount)) / m_ticksPerRad + m_positionThetaOffset;
 }
 
 template <OdoEncoder T, typename TMethod>
@@ -52,9 +53,9 @@ void PositionEstimatorOdo<T, TMethod>::update(double_t interval) {
      */
     if (deltaL != 0 || deltaR != 0) {
         double_t old_positionTheta = m_positionThetaOdo;
-        m_positionThetaOdo = ((double_t)m_odoRightCount * m_correctionFactorLR - (double_t)m_odoLeftCount) / m_ticksPerRad + m_positionThetaOffset;
-
-        double_t R = ((double_t)deltaR * m_correctionFactorLR + (double_t)deltaL) / 2000. / m_ticksPerMillimeter;
+        m_positionThetaOdo = (static_cast<double_t>(m_odoRightCount) * m_correctionFactorLR - static_cast<double_t>(m_odoLeftCount)) / m_ticksPerRad +
+                             m_positionThetaOffset;
+        double_t R = (static_cast<double_t>(deltaR) * m_correctionFactorLR + static_cast<double_t>(deltaL)) / 2000. / m_ticksPerMillimeter;
 
         // Dans le repere local du roobot (x etant devant)
         double_t dx = R;
@@ -71,23 +72,21 @@ void PositionEstimatorOdo<T, TMethod>::update(double_t interval) {
 }
 
 template <OdoEncoder T>
-void MethodMoveFirst::applyMethod(const PositionEstimatorOdo<T, MethodMoveFirst> &estimator, double_t &dx, double_t &dy, double_t deltaL,
-                                  double_t deltaR) {
+void MethodMoveFirst::applyMethod(const PositionEstimatorOdo<T, MethodMoveFirst> &estimator, double_t &dx, double_t &dy, double_t deltaL, double_t deltaR) {
     dx *= 1.0;
     dy *= 0.0;
 }
 
 template <OdoEncoder T>
-void MethodUpdateThetaFirst::applyMethod(const PositionEstimatorOdo<T, MethodUpdateThetaFirst> &estimator, double_t &dx, double_t &dy,
-                                         double_t deltaL, double_t deltaR) {
-    double_t deltaTheta = ((double_t)deltaR * estimator.m_correctionFactorLR - (double_t)deltaL) / estimator.m_ticksPerRad;
+void MethodUpdateThetaFirst::applyMethod(const PositionEstimatorOdo<T, MethodUpdateThetaFirst> &estimator, double_t &dx, double_t &dy, double_t deltaL,
+                                         double_t deltaR) {
+    double_t deltaTheta = (static_cast<double_t>(deltaR) * estimator.m_correctionFactorLR - static_cast<double_t>(deltaL)) / estimator.m_ticksPerRad;
     dx *= std::cos(deltaTheta);
     dy *= std::sin(deltaTheta);
 }
 
 template <OdoEncoder T>
-void LegacyMethod3::applyMethod(const PositionEstimatorOdo<T, LegacyMethod3> &estimator, double_t &dx, double_t &dy, double_t deltaL,
-                                double_t deltaR) {
+void LegacyMethod3::applyMethod(const PositionEstimatorOdo<T, LegacyMethod3> &estimator, double_t &dx, double_t &dy, double_t deltaL, double_t deltaR) {
     double_t deltaTheta = (deltaR * estimator.m_correctionFactorLR - deltaL) / estimator.m_ticksPerRad;
     if (deltaTheta != 0) {
         dx *= std::sin(deltaTheta) / deltaTheta;

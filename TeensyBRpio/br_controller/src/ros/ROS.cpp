@@ -5,10 +5,8 @@
 
 using UpdateResultCode = controller::UpdateResultCode;
 
-#define TEMPLATE template <Actuators TActuators, PositionFeedback TFeedback, Clock TClock>
-#define _ROS ROS<TActuators, TFeedback, TClock>
-
-using namespace ros_impl::messages;
+#define TEMPLATE template <Actuators TActuators, PositionFeedback TFeedback>
+#define _ROS ROS<TActuators, TFeedback>
 
 template <typename T>
 constexpr bool hasOdos = requires(const T &t) {
@@ -23,12 +21,12 @@ constexpr bool hasTwoWheels = requires(const T &t) {
 };
 
 TEMPLATE
-_ROS::ROS(TClock clock, duration_t sendPositionInterval, duration_t logInterval)
-    : ros_impl::node_t("base_roulante"), m_clock(std::move(clock)), m_sendInterval(sendPositionInterval), m_logInterval(logInterval), m_lastSend(0),
-      m_lastLog(0), m_wasActive(false), m_dispatcher(), m_pubPositionFeedback(this->template createPublisher<position_t>("/br/currentPosition")),
-      m_pubHN(this->template createPublisher<msg_int16_t>("/br/callbacks", /* reliability = */ ReliableOnly)), //
-      m_pubLog(this->template createPublisher<log_entry_t>("/br/logTotaleArray")),
-      m_pubOdosTicks(this->template createPublisher<odos_count_t>("/br/odosCount")) {}
+_ROS::ROS(duration_t sendPositionInterval, duration_t logInterval)
+    : ros2::Node("base_roulante"), m_sendInterval(sendPositionInterval), m_logInterval(logInterval), m_lastSend(0), m_lastLog(0), m_wasActive(false),
+      m_dispatcher(), m_pubPositionFeedback(this->template createPublisher<br_messages::msg::Position>("/br/currentPosition")),
+      m_pubHN(this->template createPublisher<std_msgs::msg::Int16>("/br/callbacks", /* reliability = */ ReliableOnly)), //
+      m_pubLog(this->template createPublisher<br_messages::msg::LogEntry>("/br/logTotaleArray")),
+      m_pubOdosTicks(this->template createPublisher<br_messages::msg::OdosCount>("/br/odosCount")) {}
 
 TEMPLATE
 void _ROS::attachManager(std::shared_ptr<manager_t> manager) {
@@ -53,35 +51,35 @@ void _ROS::loop() {
     while (m_manager->update()) {
         if (!m_wasActive && m_manager->getStatus() == manager::Active) {
             m_wasActive = true;
-            m_pubHN.publish(OK_READY);
+            sendCallback(OK_READY);
         } else if (m_wasActive && m_manager->getStatus() == manager::Idle) {
             m_wasActive = false;
-            m_pubHN.publish(OK_IDLE);
+            sendCallback(OK_IDLE);
         }
 
         UpdateResultCode event = m_manager->getController().getLastEvent();
         if (event & UpdateResultCode::ROTATION_COMPLETE) {
-            m_pubHN.publish(OK_TURN);
+            sendCallback(OK_TURN);
         }
         if (event & UpdateResultCode::TRAJECTORY_COMPLETE) {
             if ((event & UpdateResultCode::WAS_REVERSE) && (event & UpdateResultCode::TERMINAL)) {
-                m_pubHN.publish(OK_REVERSE);
+                sendCallback(OK_REVERSE);
             }
-            m_pubHN.publish(OK_POS);
+            sendCallback(OK_POS);
         }
         if ((event & UpdateResultCode::TERMINAL) && event != UpdateResultCode::STOPPED) {
-            m_pubHN.publish(OK_ORDER);
+            sendCallback(OK_ORDER);
         }
     }
 
-    duration_t now = m_clock.micros();
+    duration_t now = micros();
     if (getDurationMicros(m_lastSend, now) > m_sendInterval) {
         m_lastSend = now;
-        m_pubPositionFeedback.publish(m_manager->getPositionFeedback().getRobotPosition().toMillimeters());
+        m_pubPositionFeedback.publish(br_messages::position_cast(m_manager->getPositionFeedback().getRobotPosition().toMillimeters()));
 
         if constexpr (hasOdos<TFeedback>) {
             const TFeedback &feedback = m_manager->getPositionFeedback();
-            m_pubOdosTicks.publish(odos_count_t{feedback.getLeftOdoCount(), feedback.getRightOdoCount()});
+            m_pubOdosTicks.publish(br_messages::make_odos_count(feedback.getLeftOdoCount(), feedback.getRightOdoCount()));
         }
     }
 
@@ -91,12 +89,12 @@ void _ROS::loop() {
 
         m_log.time = now;
 
-        m_log.robot_pos = message_cast<position_t>(m_manager->getPositionFeedback().getRobotPosition());
-        m_log.setpoint_pos = message_cast<position_t>(m_manager->getController().getSetpoint());
-        m_log.goal_point_pos = message_cast<point_t>(m_manager->getController().getGoalPoint());
-        m_log.goal_point_speed = message_cast<point_t>(m_manager->getController().getGoalPointSpeed());
-        m_log.asserv_error = message_cast<point_t>(m_manager->getController().getErrorConverter().lastError());
-        m_log.command = message_cast<command_t>(m_manager->getController().getLastCommand());
+        m_log.robot_pos = br_messages::position_cast(m_manager->getPositionFeedback().getRobotPosition());
+        m_log.setpoint_pos = br_messages::position_cast(m_manager->getController().getSetpoint());
+        m_log.goal_point_pos = br_messages::point_cast(m_manager->getController().getGoalPoint());
+        m_log.goal_point_speed = br_messages::point_cast(m_manager->getController().getGoalPointSpeed());
+        m_log.asserv_error = br_messages::point_cast(m_manager->getController().getErrorConverter().lastError());
+        m_log.command = br_messages::command_cast(m_manager->getController().getLastCommand());
 
         if constexpr (hasTwoWheels<TActuators>) {
             m_log.commande_motor_r = m_manager->getActuators().getLastRightSpeed();
@@ -113,11 +111,16 @@ void _ROS::loop() {
 
 TEMPLATE
 void _ROS::sendLog(LogSeverity severity, const char *message) {
-    ros_impl::node_t::sendLog(severity, message);
+    ros2::Node::sendLog(severity, message);
+}
+
+TEMPLATE
+void _ROS::sendCallback(AsservCallback callback) {
+    m_pubHN.publish(std_msgs::make_message(static_cast<int16_t>(callback)));
 }
 
 // Explicit instantiation of the ROS node
 // Template classes need either to have all their implementation in the .hpp file or to be explicitly instantiated for the particular types they are
 // used with.
 #include "specializations/ros.hpp"
-template class ROS<actuators_t, feedback_t, _clock_t>;
+template class ROS<actuators_t, feedback_t>;

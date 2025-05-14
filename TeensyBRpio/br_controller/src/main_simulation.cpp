@@ -4,8 +4,6 @@
 #include "specializations/manager.hpp"
 #include "specializations/ros.hpp"
 
-#include "rclcpp/rclcpp.hpp"
-
 #include <atomic>
 #include <memory>
 #include <optional>
@@ -27,19 +25,17 @@ int main(int argc, char **argv) {
     sigfillset(&sa.sa_mask);
     sigaction(SIGINT, &sa, NULL);
 
-    rclcpp::init(argc, argv);
+    ros2::init(argc, argv);
 
     ros.emplace();
-
-    std::shared_ptr<manager_t> manager(std::make_shared<manager_t>(createManager()));
-    ros->attachManager(manager);
+    ros->attachManager(createManager());
 
     while (!quit.load()) {
         ros->loop();
     }
 
     ros.reset();
-    rclcpp::shutdown();
+    ros2::shutdown();
 }
 
 void log(LogSeverity severity, const char *message) {

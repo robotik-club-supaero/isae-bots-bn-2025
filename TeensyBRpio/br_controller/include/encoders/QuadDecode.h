@@ -31,6 +31,9 @@ class QuadDecode final {
     QuadDecode(const QuadDecode &&) = delete;
     QuadDecode(QuadDecode &&) = delete;
 
+    QuadDecode &operator=(const QuadDecode &) = delete;
+    QuadDecode &operator=(QuadDecode &&) = delete;
+
     int16_t retenue1;
     int16_t retenue2;
 
@@ -124,8 +127,7 @@ class QuadDecode final {
 };
 
 /**
- * Wrapper around the singleton instance of QuadDecode. This allows type `encoders_t` to satisfy concept "Default" (i.e. to have
- * a constructor without arguments).
+ * Wrapper around the singleton instance of QuadDecode. This allows type `encoders_t` to be default-constructible.
  *
  * All the instances of this class delegate to the same QuadDecode object. This class is not thread-safe.
  */

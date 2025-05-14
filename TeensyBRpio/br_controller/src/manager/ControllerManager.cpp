@@ -1,22 +1,20 @@
 #include "manager/ControllerManager.hpp"
 #include "logging.hpp"
 
-#define TEMPLATE template <Actuators TActuators, CanControl<TActuators> TController, PositionFeedback TFeedback, Clock TClock>
-#define MANAGER ControllerManager<TActuators, TController, TFeedback, TClock>
+#define TEMPLATE template <Actuators TActuators, CanControl<TActuators> TController, PositionFeedback TFeedback>
+#define MANAGER ControllerManager<TActuators, TController, TFeedback>
 
 namespace manager {
 
 TEMPLATE
-MANAGER::ControllerManager(duration_t updateInterval, TClock clock, TController controller, TActuators actuators, TFeedback feedback)
-    : ControllerManager(updateInterval, updateInterval, std::move(clock), std::move(controller), std::move(actuators), std::move(feedback)) {}
+MANAGER::ControllerManager(duration_t updateInterval, TController controller, TActuators actuators, TFeedback feedback)
+    : ControllerManager(updateInterval, updateInterval, std::move(controller), std::move(actuators), std::move(feedback)) {}
 
 TEMPLATE
-MANAGER::ControllerManager(duration_t minUpdateInterval, duration_t maxUpdateInterval, TClock clock, TController controller, TActuators actuators,
+MANAGER::ControllerManager(duration_t minUpdateInterval, duration_t maxUpdateInterval, TController controller, TActuators actuators,
                            TFeedback feedback)
-    : m_clock(std::move(clock)), m_minUpdateInterval(minUpdateInterval), m_maxUpdateInterval(maxUpdateInterval), m_lastUpdate(),
-      m_controller(std::move(controller)), m_actuators(std::move(actuators)), m_feedback(std::move(feedback)) {
-    this->template setCurrentState<StateIdle>();
-}
+    : m_minUpdateInterval(minUpdateInterval), m_maxUpdateInterval(maxUpdateInterval), m_lastUpdate(), m_controller(std::move(controller)),
+      m_actuators(std::move(actuators)), m_feedback(std::move(feedback)) {}
 
 TEMPLATE
 ManagerStatus MANAGER::getStatus() const {
@@ -43,7 +41,7 @@ void MANAGER::setActive(bool active) {
 
 TEMPLATE
 bool MANAGER::update() {
-    instant_t nowMicros = m_clock.micros();
+    instant_t nowMicros = micros();
     if (!m_lastUpdate) {
         m_lastUpdate.emplace(nowMicros);
         return false;
@@ -53,7 +51,7 @@ bool MANAGER::update() {
     if (intervalMicros >= m_minUpdateInterval) {
         duration_t tickInterval = std::min(m_maxUpdateInterval, intervalMicros);
         *m_lastUpdate += tickInterval;
-        update((double_t)tickInterval / 1e6);
+        update(static_cast<double_t>(tickInterval) / 1e6);
         return true;
     } else {
         return false;
@@ -62,7 +60,7 @@ bool MANAGER::update() {
 
 TEMPLATE
 void MANAGER::update(double_t interval) {
-    ManagerStatus status = updateState<ManagerStatus, TActuators &>(m_actuators);
+    ManagerStatus status = this->template updateState<ManagerStatus>(m_actuators);
     if (status != this->getStatus()) {
         switch (status) {
             case Idle:
@@ -144,10 +142,6 @@ TEMPLATE
 const TFeedback &MANAGER::getPositionFeedback() const {
     return m_feedback;
 }
-TEMPLATE
-const TClock &MANAGER::getClock() const {
-    return m_clock;
-}
 
 } // namespace manager
 
@@ -155,4 +149,4 @@ const TClock &MANAGER::getClock() const {
 // Template classes need either to have all their implementation in the .hpp file or to be explicitly instantiated for the particular types they are
 // used with.
 #include "specializations/manager.hpp"
-template class manager::ControllerManager<actuators_t, controller_t, feedback_t, _clock_t>;
+template class manager::ControllerManager<actuators_t, controller_t, feedback_t>;

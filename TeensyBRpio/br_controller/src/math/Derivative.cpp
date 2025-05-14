@@ -2,7 +2,7 @@
 
 #define TEMPLATE                                                                                                                                     \
     template <typename TDerivative, typename TValue>                                                                                                 \
-        requires Add<TValue> && Mul<TValue, TDerivative> && Default<TValue> && Clampable<TValue>
+        requires Add<TValue> && Mul<TValue, TDerivative> && std::is_default_constructible_v<TValue> && Clampable<TValue>
 
 TEMPLATE
 Derivative<TDerivative, TValue>::Derivative(double_t gain, double_t filter, TValue initialValue, std::optional<double_t> saturation)
@@ -54,7 +54,5 @@ std::optional<double_t> Derivative<TDerivative, TValue>::saturation() const {
 }
 
 #include "geometry/Position2D.hpp"
-#include "geometry/Speeds.hpp"
-template class Derivative<double_t>;
 template class Derivative<Vector2D<Meter>>;
 template class Derivative<Position2D<Meter, double_t>, Position2D<Meter>>;

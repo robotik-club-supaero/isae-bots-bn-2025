@@ -2,7 +2,6 @@
 #define _SPEC_ROS_HPP_
 
 #include "specializations/actuators.hpp"
-#include "specializations/clock.hpp"
 #include "specializations/feedback.hpp"
 
 #include "ros/ROS.hpp"
@@ -13,6 +12,6 @@
 
 #endif // #ifdef ARDUINO
 
-using ros_t = ROS<actuators_t, feedback_t, _clock_t>;
+using ros_t = ROS<actuators_t, feedback_t>;
 
 #endif

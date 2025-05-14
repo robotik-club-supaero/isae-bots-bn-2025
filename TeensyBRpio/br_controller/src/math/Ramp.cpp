@@ -43,7 +43,7 @@ void Ramp::update(double_t interval) {
         double_t maxDiff = m_maxAcceleration * interval;
         double_t requiredDiff = m_targetSpeed - m_currentSpeed;
 
-        if (abs(requiredDiff) < maxDiff) {
+        if (std::abs(requiredDiff) < maxDiff) {
             m_currentSpeed = m_targetSpeed;
             m_isComplete = true;
         } else {
@@ -54,7 +54,7 @@ void Ramp::update(double_t interval) {
 
 double_t Ramp::getBrakingDistance(double_t targetSpeed) const {
     double_t delta_v = targetSpeed - m_currentSpeed;
-    return abs(delta_v * (m_currentSpeed + delta_v / 2) / m_maxAcceleration);
+    return std::abs(delta_v * (m_currentSpeed + delta_v / 2) / m_maxAcceleration);
 }
 
 double_t Ramp::computeSpeedFromBrakingDistance(double_t distance) const {

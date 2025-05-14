@@ -1,89 +1,114 @@
 #ifndef _ROS_IMPL_HPP_
+#define _ROS_IMPL_HPP_
 
 #ifdef ARDUINO
-#include "ros/rclc/rclc_impl.hpp"
+#include "ros/micro_ros/ros_impl.hpp"
 #else
-#include "ros/rclcpp/rclcpp_impl.hpp"
-#endif // #ifdef ARDUINO
+#include "ros/rclcpp/ros_impl.hpp"
+#endif
 
-DEFINE_ROS_MESSAGE(bool_t, std_msgs, Bool);
-DEFINE_ROS_MESSAGE(empty_t, std_msgs, Empty);
-DEFINE_ROS_MESSAGE(msg_int16_t, std_msgs, Int16);
-
-DEFINE_ROS_MESSAGE(command_t, br_messages, Command);
-DEFINE_ROS_MESSAGE(displacement_order_t, br_messages, DisplacementOrder);
-DEFINE_ROS_MESSAGE(gains_t, br_messages, GainsPid);
-DEFINE_ROS_MESSAGE(log_entry_t, br_messages, LogEntry);
-DEFINE_ROS_MESSAGE(odos_count_t, br_messages, OdosCount);
-DEFINE_ROS_MESSAGE(point_t, br_messages, Point);
-DEFINE_ROS_MESSAGE(position_t, br_messages, Position);
-
-#include "geometry/Position2D.hpp"
-#include "ros/Callbacks.hpp"
-#include "ros/message_cast.hpp"
-
-#define CAST_POSITION(UNIT)                                                                                                                          \
-    template <>                                                                                                                                      \
-    inline Position2D<UNIT> message_cast<Position2D<UNIT>, ros_impl::messages::position_t>(const ros_impl::messages::position_t &msg) {              \
-        return Position2D<UNIT>(static_cast<double_t>(msg.x), static_cast<double_t>(msg.y), static_cast<double_t>(msg.theta));                       \
-    }                                                                                                                                                \
-    template <>                                                                                                                                      \
-    inline ros_impl::messages::position_t message_cast<ros_impl::messages::position_t, Position2D<UNIT>>(const Position2D<UNIT> &value) {            \
-        ros_impl::messages::position_t msg;                                                                                                          \
-        msg.x = static_cast<float>(value.x);                                                                                                         \
-        msg.y = static_cast<float>(value.y);                                                                                                         \
-        msg.theta = static_cast<float>(value.theta);                                                                                                 \
-        return msg;                                                                                                                                  \
-    }
-
-#define CAST_POINT(UNIT)                                                                                                                             \
-    template <>                                                                                                                                      \
-    inline Point2D<UNIT> message_cast<Point2D<UNIT>, ros_impl::messages::point_t>(const ros_impl::messages::point_t &msg) {                          \
-        return Point2D<UNIT>(static_cast<double_t>(msg.x), static_cast<double_t>(msg.y));                                                            \
-    }                                                                                                                                                \
-    template <>                                                                                                                                      \
-    inline ros_impl::messages::point_t message_cast<ros_impl::messages::point_t, Point2D<UNIT>>(const Point2D<UNIT> &value) {                        \
-        ros_impl::messages::point_t msg;                                                                                                          \
-        msg.x = static_cast<float>(value.x);                                                                                                         \
-        msg.y = static_cast<float>(value.y);                                                                                                         \
-        return msg;                                                                                                                                  \
-    }
-
-#define CAST_WRAPPER(I, O)                                                                                                                           \
-    template <>                                                                                                                                      \
-    inline const O &message_cast<const O &, I>(const I &msg) {                                                                                       \
-        return msg.data;                                                                                                                             \
-    }                                                                                                                                                \
-    template <>                                                                                                                                      \
-    inline I message_cast<I, O>(const O &data) {                                                                                                     \
-        I msg;                                                                                                                                       \
-        msg.data = data;                                                                                                                             \
-        return msg;                                                                                                                                  \
-    }
-
-CAST_POSITION(Meter);
-CAST_POSITION(Millimeter);
-CAST_POINT(Meter);
-CAST_POINT(Millimeter);
-
-template <>
-inline Speeds message_cast<Speeds, ros_impl::messages::command_t>(const ros_impl::messages::command_t &msg) {
-    return Speeds(static_cast<double_t>(msg.linear), static_cast<double_t>(msg.angular));
+namespace std_msgs {
+inline msg::Bool make_message(bool data) {
+    msg::Bool message;
+    message.data = data;
+    return message;
 }
-template <>
-inline ros_impl::messages::command_t message_cast<ros_impl::messages::command_t, Speeds>(const Speeds &value) {
-    ros_impl::messages::command_t msg;
-    msg.linear = static_cast<float>(value.linear);
-    msg.angular = static_cast<float>(value.angular);
-    return msg;
+inline msg::Int16 make_message(int16_t data) {
+    msg::Int16 message;
+    message.data = data;
+    return message;
+}
+} // namespace std_msgs
+
+namespace br_messages {
+
+template <typename Unit>
+inline Position2D<Unit> position_cast(const msg::Position &msg) {
+    return Position2D<Millimeter>(msg.x, msg.y, msg.theta).convert<Unit>();
 }
 
-CAST_WRAPPER(ros_impl::messages::msg_int16_t, int16_t);
-CAST_WRAPPER(ros_impl::messages::bool_t, bool);
+template <typename Unit>
+inline msg::Position position_cast(const Position2D<Unit> &position) {
+    Position2D<Millimeter> position_millis = position.toMillimeters();
 
-template <>
-inline ros_impl::messages::msg_int16_t message_cast<ros_impl::messages::msg_int16_t, AsservCallback>(const AsservCallback &callback) {
-    return message_cast<ros_impl::messages::msg_int16_t>(static_cast<int16_t>(callback));
+    msg::Position message;
+    message.x = position_millis.x;
+    message.y = position_millis.y;
+    message.theta = position_millis.theta;
+    return message;
 }
+
+template <typename Unit>
+inline Point2D<Unit> point_cast(const msg::Point &msg) {
+    return Point2D<Millimeter>(msg.x, msg.y).convert<Unit>();
+}
+
+template <typename Unit>
+inline msg::Point point_cast(const Point2D<Unit> &point) {
+    Point2D<Millimeter> point_millis = point.toMillimeters();
+
+    msg::Point message;
+    message.x = point_millis.x;
+    message.y = point_millis.y;
+    return message;
+}
+
+inline Speeds command_cast(const msg::Command &msg) {
+    return Speeds(msg.linear, msg.angular);
+}
+
+inline msg::Command command_cast(const Speeds &speed) {
+    msg::Command message;
+    message.linear = speed.linear;
+    message.angular = speed.angular;
+    return message;
+}
+
+inline msg::OdosCount make_odos_count(int32_t left, int32_t right) {
+    msg::OdosCount message;
+    message.left = left;
+    message.right = right;
+    return message;
+}
+
+class PathView {
+    const __detail::__PathView m_inner;
+
+  public:
+    class Iterator {
+        __detail::__PathView::iterator m_inner;
+        friend class PathView;
+
+        Iterator(__detail::__PathView::iterator &&inner) : m_inner(std::move(inner)) {}
+
+      public:
+        Point2D<Meter> operator*() const { return point_cast<Meter>(*m_inner); }
+        Iterator &operator++() {
+            ++m_inner;
+            return *this;
+        }
+        Iterator operator++(int) { return Iterator(m_inner++); }
+        bool operator==(const Iterator &other) const { return m_inner == other.m_inner; }
+        bool operator!=(const Iterator &other) const { return m_inner != other.m_inner; }
+    };
+
+    using iterator = Iterator;
+
+    PathView(__detail::__PathView &&path) : m_inner(std::move(path)) {}
+
+    iterator begin() const { return m_inner.begin(); }
+    iterator end() const { return m_inner.end(); }
+    std::size_t size() const { return m_inner.size(); }
+    bool empty() const { return m_inner.empty(); }
+    Point2D<Meter> operator[](std::size_t i) const { return point_cast<Meter>(m_inner[i]); }
+};
+
+inline PathView getPathView(const msg::DisplacementOrder &order) {
+    return PathView(__detail::__PathView(order.path));
+}
+
+} // namespace br_messages
+
+namespace ros2 {}
 
 #endif

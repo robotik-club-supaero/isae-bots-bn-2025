@@ -7,11 +7,6 @@
 using duration_t = unsigned long int;
 using instant_t = unsigned long int;
 
-template <typename T>
-concept Clock = requires(T c) {
-    { c.micros() } -> std::convertible_to<instant_t>;
-};
-
 inline duration_t getDurationMicros(instant_t before, instant_t now) {
     if (now >= before) {
         return now - before;
@@ -25,23 +20,13 @@ inline duration_t getDurationMicros(instant_t before, instant_t now) {
 #ifdef ARDUINO
 #include <Arduino.h>
 
-class SystemClock {
-  public:
-    SystemClock() = default;
-    instant_t micros() const { return ::micros(); }
-};
-
 #else
 #include <chrono>
 
-class SystemClock {
-  public:
-    SystemClock() = default;
-    instant_t micros() const {
-        using namespace std::chrono;
-        return duration_cast<microseconds>(steady_clock::now().time_since_epoch()).count();
-    }
-};
+inline instant_t micros() {
+    using namespace std::chrono;
+    return duration_cast<microseconds>(steady_clock::now().time_since_epoch()).count();
+}
 
 #endif
 #endif

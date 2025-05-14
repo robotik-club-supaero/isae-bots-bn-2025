@@ -97,3 +97,4 @@ const Polynomial<Point2D<Meter>, N> &BezierCurve<N>::polynomial() const {
 }
 
 template class BezierCurve<4>;
+template class BezierCurve<2>;

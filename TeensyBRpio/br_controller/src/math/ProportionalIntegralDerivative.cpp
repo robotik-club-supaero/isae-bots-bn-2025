@@ -2,12 +2,11 @@
 
 #define TEMPLATE                                                                                                                                     \
     template <typename TValue>                                                                                                                       \
-        requires Add<TValue> && Mul<TValue> && Default<TValue> && Clampable<TValue>
+        requires Add<TValue> && Mul<TValue> && std::is_default_constructible_v<TValue> && Clampable<TValue>
 
 TEMPLATE
 ProportionalIntegralDerivative<TValue>::ProportionalIntegralDerivative(double_t kp, double_t ti, double_t td, double_t filter,
-                                                                       std::optional<double_t> outputSaturation,
-                                                                       std::optional<double_t> integralSaturation,
+                                                                       std::optional<double_t> outputSaturation, std::optional<double_t> integralSaturation,
                                                                        std::optional<double_t> derivativeSaturation)
     : m_kp(kp), m_ki(ti == 0 ? 0 : 1 / ti), m_value(), m_integral(integralSaturation), m_derivative(td, filter, {}, derivativeSaturation),
       m_saturation(outputSaturation) {}
@@ -90,5 +89,4 @@ const Derivative<TValue> &ProportionalIntegralDerivative<TValue>::getDerivative(
 }
 
 #include "geometry/Vector2D.hpp"
-template class ProportionalIntegralDerivative<double_t>;
 template class ProportionalIntegralDerivative<Vector2D<Meter>>;

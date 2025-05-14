@@ -3,6 +3,7 @@
 
 #include "configuration.hpp"
 
+#include "controller/Arena.hpp"
 #include "controller/states/StateBraking.hpp"
 #include "controller/states/StateFullTrajectory.hpp"
 #include "controller/states/StateManualControl.hpp"
@@ -11,9 +12,11 @@
 
 #include "controller/DisplacementKind.hpp"
 #include "defines/constraint.hpp"
-#include "defines/stl.hpp"
-#include "fsm/StateMachine.hpp"
 #include "math/Derivative.hpp"
+#include "stl/SmallDeque.hpp"
+#include "stl/StateMachine.hpp"
+
+#include <span>
 
 template <typename T>
 concept ErrorConverter = requires(T a, Vector2D<Meter> error, double_t interval) {
@@ -72,7 +75,7 @@ class UnicycleController : private fsm::StateMachine<StateStandStill, StateBraki
 
     /// Initializes the controller with the default values from the configuration file.
     UnicycleController()
-        requires Default<TConverter>
+        requires std::is_default_constructible_v<TConverter>
         : UnicycleController({ASSERV_ALPHA, ASSERV_BETA}, TConverter(), {BRAKING_LINEAR_ACCELERATION, BRAKING_ROTATION_ACCELERATION},
                              {MAX_LINEAR_GOAL_SPEED, MAX_ROTATION_GOAL_SPEED}, {DEFAULT_LINEAR_ACCELERATION, DEFAULT_ROTATION_ACCELERATION},
                              STOPPED_SPEED_THRESHOLD) {}
@@ -131,10 +134,21 @@ class UnicycleController : private fsm::StateMachine<StateStandStill, StateBraki
     void startTrajectory(DisplacementKind kind, std::optional<Angle> finalOrientation, Args &&...args) {
         cancelOrder();
         m_currentOrder.emplace<trajectory_request_t>(kind, finalOrientation);
-        m_currentTrajectory.emplace<TTrajectory>(std::forward<Args>(args)...);
-        softReset({m_currentTrajectory->getCurrentPosition(), m_setpoint.theta});
+        m_arena.currentTrajectory.emplace<TTrajectory>(std::forward<Args>(args)...);
+        softReset({m_arena.currentTrajectory->getCurrentPosition(), m_setpoint.theta});
         startOrder(/* resume = */ false);
     }
+
+    /**
+     * Starts a trajectory that follows the specified path.
+     * If the robot is already moving, the previous trajectory or rotation is cancelled.
+     *
+     * `path` must not include the initial robot position.
+     * 
+     * @return true if the trajectory was started, false if allocating memory for the trajectory failed.
+     */
+    bool startPath(DisplacementKind kind, CurveKind allowCurve, Position2D<Meter> initialPosition, std::optional<Angle> finalOrientation,
+                   SmallDeque<Point2D<Meter>> path);
 
     /**
      * Starts a rotation. The controller switches to position control if it was in speed control.
@@ -144,8 +158,8 @@ class UnicycleController : private fsm::StateMachine<StateStandStill, StateBraki
     void startRotation(Args &&...args) {
         cancelOrder();
         m_currentOrder.emplace<rotation_request>();
-        m_currentRotation.emplace<TProfile>(std::forward<Args>(args)...);
-        softReset({m_setpoint, m_currentRotation->getCurrentOrientation()});
+        m_arena.currentRotation.emplace<TProfile>(std::forward<Args>(args)...);
+        softReset(Position2D<Meter>(m_setpoint, m_arena.currentRotation->getCurrentOrientation()));
         startOrder(/* resume = */ false);
     }
 
@@ -225,10 +239,7 @@ class UnicycleController : private fsm::StateMachine<StateStandStill, StateBraki
     TConverter m_converter;
     UpdateResultCode m_event;
     disp_order_t m_currentOrder;
-    /// Pre-allocated buffer to store the current trajectory
-    trajectory_ptr m_currentTrajectory;
-    /// Pre-allocated buffer to store the current rotation profile
-    rotation_ptr m_currentRotation;
+    Arena m_arena;
 
     Speeds m_lastCommand;
 };

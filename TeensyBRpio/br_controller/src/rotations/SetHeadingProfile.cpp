@@ -21,7 +21,7 @@ Angle SetHeadingProfile::getCurrentOrientation() const {
 }
 
 std::optional<double_t> SetHeadingProfile::getRemainingAngle() const {
-    return abs(m_targetHeading - m_currentHeading);
+    return std::abs(m_targetHeading - m_currentHeading);
 }
 
 bool SetHeadingProfile::recompute(Angle newStartOrientation) {

@@ -12,13 +12,19 @@ namespace py = pybind11;
 
 constexpr controller::ControllerStatus Still = controller::ControllerStatus::Still;
 
+namespace PYBIND11_NAMESPACE {
+namespace detail {
+// Conversion SmallDeque<T> <-> Python list
+template <typename T>
+struct type_caster<SmallDeque<T>> : public list_caster<SmallDeque<T>, T> {};
+} // namespace detail
+} // namespace PYBIND11_NAMESPACE
+
 PYBIND11_MODULE(br_trajectories, m) {
     m.doc() = "Python bindings to display and simulate trajectories. This does NOT allow to communicate with the program that runs the BR, you need "
               "to use ROS for that.";
 
-    py::class_<Angle>(m, "Angle")
-        .def(py::init<double_t>())
-        .def_property_readonly("value", &Angle::value);
+    py::class_<Angle>(m, "Angle").def(py::init<double_t>()).def_property_readonly("value", &Angle::value);
 
     py::class_<Point2D<Meter>>(m, "Point2D")
         .def(py::init<>())
@@ -43,9 +49,9 @@ PYBIND11_MODULE(br_trajectories, m) {
         .def("__repr__", &Position2D<Meter>::operator std::string)
         .def_readwrite("theta", &Position2D<Meter>::theta);
 
-    py::class_<BezierCurve>(m, "BezierCurve")         //
-        .def(py::init<std::vector<Point2D<Meter>>>()) //
-        .def("at", &BezierCurve::operator());
+    py::class_<BezierCurve<4>>(m, "BezierCurve")        //
+        .def(py::init<std::array<Point2D<Meter>, 4>>()) //
+        .def("at", &BezierCurve<4>::operator());
 
     py::class_<DisplacementKind>(m, "DisplacementKind")
         .def_property_readonly_static("FORWARD", []() { return FORWARD; })
@@ -53,35 +59,30 @@ PYBIND11_MODULE(br_trajectories, m) {
 
     py::implicitly_convertible<double_t, Angle>();
 
-    m.def("getTrajectoryCurves", [](Position2D<Meter> robotPosition, std::optional<Angle> finalOrientation, std::vector<Point2D<Meter>> path) {
-        std::vector<BezierCurve> curves;
+    m.def("getTrajectoryCurves", [](Position2D<Meter> robotPosition, std::optional<Angle> finalOrientation, SmallDeque<Point2D<Meter>> path) {
+        std::vector<BezierCurve<4>> curves;
         curves.reserve(path.size());
 
-        path.insert(path.begin(), robotPosition);
+        path.push_front(robotPosition);
+
         // We use BezierCurvesGenerator instead of PathTrajectory, because we just want the Bézier curves and don't need
         // all the length and curvature sampling
         BezierCurvesGenerator trajectory(robotPosition.theta, finalOrientation, std::move(path));
+
         while (trajectory.hasNext()) {
             curves.push_back(trajectory.next());
         }
         return curves;
     });
-    m.def(
+    &m.def(
         "measureTrajectoryDuration",
-        [](Position2D<Meter> robotPosition, std::vector<Point2D<Meter>> path, DisplacementKind kind, std::optional<Angle> finalOrientation,
+        [](Position2D<Meter> robotPosition, SmallDeque<Point2D<Meter>> path, DisplacementKind kind, std::optional<Angle> finalOrientation,
            bool allowCurve, duration_t limitMicros) {
-            path.insert(path.begin(), robotPosition);
-
-            std::unique_ptr<Trajectory> trajectory;
-            if (allowCurve) {
-                trajectory = std::make_unique<PathTrajectory>(robotPosition.theta, finalOrientation, std::move(path));
-            } else {
-                trajectory = std::make_unique<PolygonalTrajectory>(std::move(path));
-            }
+            path.push_front(robotPosition);
 
             manager_t manager = createManager(robotPosition);
             manager.sendOrder([&](controller_t &controller, Position2D<Meter> position) {
-                controller.startTrajectory(kind, std::move(trajectory), finalOrientation);
+                controller.startPath(kind, allowCurve, position, finalOrientation, path);
             });
 
             duration_t time = 0;

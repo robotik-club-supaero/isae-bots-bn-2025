@@ -1,30 +1,24 @@
 #ifndef _ROS_IMPL_PUBLISHER_HPP_
 #define _ROS_IMPL_PUBLISHER_HPP_
 
-#include "ros/message_cast.hpp"
+#include "ros/qos/Reliability.hpp"
 
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
 
-namespace ros_rclcpp {
+namespace ros2 {
 
 class Node;
 
 template <typename T>
 class Publisher {
   public:
-  template <typename M>
-    void publish(const M &msg) {
-        m_msg = message_cast<T>(msg);
-        m_publisher->publish(m_msg);
-    }
+    void publish(const T &msg) { m_inner->publish(msg); }
 
   private:
     friend class Node;
-    Publisher(typename rclcpp::Publisher<T>::SharedPtr inner) : m_publisher(inner) {}
+    typename rclcpp::Publisher<T>::SharedPtr m_inner;
 
-    typename rclcpp::Publisher<T>::SharedPtr m_publisher;
-    T m_msg;
+    Publisher(rclcpp::Publisher<T>::SharedPtr &&inner) : m_inner(std::move(inner)) {}
 };
-} // namespace ros_rclcpp
-
+} // namespace ros2
 #endif

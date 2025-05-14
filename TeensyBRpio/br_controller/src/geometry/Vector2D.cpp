@@ -90,7 +90,7 @@ double_t Vector2D<Unit>::dot(Vector2D<Unit> a, Vector2D<Unit> b) {
     template class Vector2D<UNIT>;                                                                                                                   \
                                                                                                                                                      \
     template <>                                                                                                                                      \
-    Vector2D<UNIT> clamp<Vector2D<UNIT>>(Vector2D<UNIT> value, double_t minBound, double_t maxBound) {                                               \
+    Vector2D<UNIT> clamp<Vector2D<UNIT>>(Vector2D<UNIT> value, double_t minBound, double_t maxBound) {                                                     \
         return Vector2D<UNIT>(std::clamp(value.x, minBound, maxBound), std::clamp(value.y, minBound, maxBound));                                     \
     }
 

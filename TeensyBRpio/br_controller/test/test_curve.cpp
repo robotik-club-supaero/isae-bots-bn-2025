@@ -14,19 +14,22 @@
 
 constexpr controller::ControllerStatus Still = controller::ControllerStatus::Still;
 
-manager_t startTrajectorySimulation(std::unique_ptr<Trajectory> trajectory) {
-    manager_t manager = createManager(trajectory->getCurrentPosition());
+template <Derived<Trajectory> T, typename... Args>
+manager_t startTrajectorySimulation(Args &&...args) {
+    T trajectory(std::forward<Args>(args)...);
+    manager_t manager = createManager(trajectory.getCurrentPosition());
     manager.sendOrder(
-        [&](controller_t &controller, Position2D<Meter> position) { controller.startTrajectory(FORWARD, std::move(trajectory), std::nullopt); });
+        [&](controller_t &controller, Position2D<Meter> position) { controller.startTrajectory<T>(FORWARD, std::nullopt, std::move(trajectory)); });
     return manager;
 }
 
-double measureTime(std::unique_ptr<Trajectory> trajectory, double limit) {
+template <Derived<Trajectory> T>
+double measureTime(T &&trajectory, double limit) {
     DisableLoggingGuard _guard;
 
     duration_t limit_micros = limit > 0 ? (duration_t)(limit * 1e6) : std::numeric_limits<duration_t>::max();
 
-    manager_t manager = startTrajectorySimulation(std::move(trajectory));
+    manager_t manager = startTrajectorySimulation<T>(std::forward<T>(trajectory));
     duration_t time = 0;
     while (manager.getController().getStatus() != Still || manager.getController().isMoving()) {
         manager.update(UPDATE_INTERVAL / 1e6);
@@ -40,7 +43,7 @@ double measureTime(std::unique_ptr<Trajectory> trajectory, double limit) {
 
 int main() {
     constexpr double_t STEP = 0.001;
-    std::vector<Point2D<Meter>> points;
+    SmallDeque<Point2D<Meter>> points;
 
     Window window("Bezier Curve");
 
@@ -91,7 +94,7 @@ int main() {
                     if (event.key.code == sf::Keyboard::Key::R && points.size() > 1) {
                         // -- SIMULATE TRAJECTORY --
                         paused = false;
-                        manager.emplace(startTrajectorySimulation(std::make_unique<PathTrajectory>(std::nullopt, std::nullopt, points)));
+                        manager.emplace(startTrajectorySimulation<PathTrajectory>(std::nullopt, std::nullopt, points));
                         manager2.reset();
                     } else if (event.key.code == sf::Keyboard::Key::O && points.size() > 1) {
                         // -- OPTIMIZE TRAJECTORY --
@@ -104,13 +107,14 @@ int main() {
                         params = optimize_local_search(params, 0.05, 100);
                         std::cout << "New cost: " << params.cost() << std::endl;
 
-                        MultiCurveTrajectory<BezierCurve> trajectory = params.generateTrajectory();
+                        MultiCurveTrajectory<BezierCurve<4>> trajectory = params.generateTrajectory();
                         trajectoryDrawable2.emplace(
                             BezierTrajectoryDrawable(window, trajectory, STEP, sf::Color(150, 200, 50), sf::Color(50, 200, 0)));
 
                         paused = false;
-                        manager.emplace(startTrajectorySimulation(std::make_unique<PathTrajectory>(std::nullopt, std::nullopt, points)));
-                        manager2.emplace(startTrajectorySimulation(std::make_unique<MultiCurveTrajectory<BezierCurve>>(params.generateTrajectory())));
+
+                        manager.emplace(startTrajectorySimulation<PathTrajectory>(std::nullopt, std::nullopt, points));
+                        manager2.emplace(startTrajectorySimulation<MultiCurveTrajectory<BezierCurve<4>>>(params.generateTrajectory()));
                     } else if (event.key.code == sf::Keyboard::Key::P) {
                         paused = !paused;
                         if (!paused) {

@@ -2,7 +2,7 @@
 #define _POSITION_FEEDBACK_HPP_
 
 #include <concepts>
-#include <math.h> // type double_t
+#include "defines/math.hpp"
 
 #if 0
 // PSEUDO-CODE (for documentation purposes only)

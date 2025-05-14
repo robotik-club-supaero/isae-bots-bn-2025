@@ -11,12 +11,7 @@ class BezierCurve {
     BezierCurve() = default;
 
     /// @param points The control points
-    /// @{
     BezierCurve(std::array<Point2D<Meter>, N> points);
-
-    template <typename... Args>
-    BezierCurve(Args &&...points) : BezierCurve(std::array{std::forward<Args>(points)...}) {}
-    /// @}
 
     /**
      * Returns `B(t)` where `B` is the function describing this Bézier curve.

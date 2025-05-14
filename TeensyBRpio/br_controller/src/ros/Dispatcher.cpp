@@ -10,8 +10,7 @@ constexpr uint8_t FLAG_ALLOW_CURVE = 0b0100;
 
 constexpr double_t CONTROL_MAX_SPEED = 255.;
 
-using namespace ros_impl;
-using namespace ros_impl::messages;
+using namespace ros2;
 
 template <typename TManager>
 inline void handleRotate(TManager &manager, const Angle &orientation) {
@@ -21,46 +20,45 @@ inline void handleRotate(TManager &manager, const Angle &orientation) {
 }
 
 template <typename TManager>
-inline void handleGoTo(TManager &manager, const displacement_order_t &order) {
+inline void handleGoTo(TManager &manager, const br_messages::msg::DisplacementOrder &order) {
     DisplacementKind kind = ((order.kind & FLAG_REVERSE) == 0) ? FORWARD : REVERSE;
     std::optional<Angle> finalOrientation = ((order.kind & FLAG_FINAL_ORIENTATION) != 0) ? std::make_optional(order.theta) : std::nullopt;
-    bool allowCurve = false && (order.kind & FLAG_ALLOW_CURVE) != 0;
+    bool allowCurve = (order.kind & FLAG_ALLOW_CURVE) != 0;
 
-    auto pathRaw = message_cast<std::span<const point_t>>(order.path);
-    if (pathRaw.empty()) {
+    auto path_view = br_messages::getPathView(order);
+    if (path_view.empty()) {
         if (finalOrientation) {
             handleRotate(manager, *finalOrientation);
         }
         return;
     }
-    std::vector<Point2D<Meter>> path;
-    path.reserve(pathRaw.size() + 1);
 
     manager.sendOrder([&](TManager::controller_t &controller, Position2D<Meter> robotPosition) {
-        path.push_back(robotPosition);
-        for (point_t point : pathRaw) {
-            path.push_back(message_cast<Point2D<Millimeter>>(point).toMeters());
-        }
+        // We cancel the previous order to free the memory used by the previous trajectory (if any).
+        // This reduces fragmentation and the probability of allocation failure.
+        controller.brakeToStop();
 
-        Angle initialDirection = robotPosition.theta + kind.getAlignmentOffset();
-        if (allowCurve) {
-            PathTrajectory trajectory(initialDirection, finalOrientation, std::move(path));
-            controller.template startTrajectory<PathTrajectory>(kind, finalOrientation, std::move(trajectory));
-        } else {
-            PolygonalTrajectory trajectory(std::move(path));
-            controller.template startTrajectory<PolygonalTrajectory>(kind, finalOrientation, std::move(trajectory));
+        SmallDeque<Point2D<Meter>> path;
+        if (!path.reserve(path_view.size() + 1)) {
+            log(ERROR, "Could not initialize trajectory because of memory exhaustion");
+            // TODO callback
+            return;
         }
+        for (const Point2D<Meter> &point : path_view) {
+            std::ignore = path.push_back(point);
+        }
+        controller.startPath(kind, allowCurve, robotPosition, finalOrientation, std::move(path));
     });
 }
 
 template <typename TManager>
-inline void handleStop(TManager &manager, const empty_t &_msg) {
+inline void handleStop(TManager &manager, const std_msgs::msg::Empty &_msg) {
     manager.sendOrder([&](TManager::controller_t &controller, Position2D<Meter> robotPosition) { controller.brakeToStop(); });
 }
 
 template <typename TManager>
-inline void handleCommand(TManager &manager, const command_t &command) {
-    Speeds speeds = message_cast<Speeds>(command) / CONTROL_MAX_SPEED;
+inline void handleCommand(TManager &manager, const br_messages::msg::Command &command) {
+    Speeds speeds = br_messages::command_cast(command) / CONTROL_MAX_SPEED;
     manager.sendOrder([&](TManager::controller_t &controller, Position2D<Meter> robotPosition) { //
         speeds.linear *= controller.getMaxSpeeds().linear;
         speeds.angular *= controller.getMaxSpeeds().angular;
@@ -70,26 +68,26 @@ inline void handleCommand(TManager &manager, const command_t &command) {
 }
 
 template <typename TManager>
-inline void handleIdle(TManager &manager, const bool_t &msg) {
-    manager.setActive(message_cast<const bool &>(msg));
+inline void handleIdle(TManager &manager, const std_msgs::msg::Bool &msg) {
+    manager.setActive(msg.data);
 }
 
 template <typename TManager>
-inline void handleResetPosition(TManager &manager, const position_t &position) {
-    manager.resetPosition(message_cast<Position2D<Millimeter>>(position).toMeters());
+inline void handleResetPosition(TManager &manager, const br_messages::msg::Position &position) {
+    manager.resetPosition(br_messages::position_cast<Meter>(position));
 }
 
 template <typename TManager>
-inline void handleSetGains(TManager &manager, const gains_t &gains) {
+inline void handleSetGains(TManager &manager, const br_messages::msg::GainsPid &gains) {
     auto pid = manager.getController().getErrorConverter();
     manager.getController().setErrorConverter(
         {gains.kp, gains.ti, gains.td, pid.filter(), pid.saturation(), pid.integralSaturation(), pid.derivativeSaturation()});
 }
 
 template <typename TManager>
-inline void handleSetSpeed(TManager &manager, const msg_int16_t &speedFactor) {
+inline void handleSetSpeed(TManager &manager, const std_msgs::msg::Int16 &speedFactor) {
     Speeds maxSpeeds = manager.getController().getMaxSpeeds();
-    manager.getController().setMaxSpeeds(maxSpeeds * clamp(static_cast<double_t>(message_cast<const int16_t &>(speedFactor)), 1., 100.) / 100.,
+    manager.getController().setMaxSpeeds(maxSpeeds * clamp(static_cast<double_t>(speedFactor.data), 1., 100.) / 100.,
                                          /* persist = */ false);
 }
 

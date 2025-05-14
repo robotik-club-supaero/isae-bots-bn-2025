@@ -19,7 +19,7 @@
  * where `e` is the error and `D(e, t)` is the filtered derivative of `e`. See class `Derivative` for more details.
  */
 template <typename TValue = double_t>
-    requires Add<TValue> && Mul<TValue> && Default<TValue> && Clampable<TValue>
+    requires Add<TValue> && Mul<TValue> && std::is_default_constructible_v<TValue> && Clampable<TValue>
 class ProportionalIntegralDerivative {
   public:
     /**

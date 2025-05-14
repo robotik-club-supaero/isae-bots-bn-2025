@@ -2,7 +2,7 @@
 
 #define TEMPLATE                                                                                                                                     \
     template <typename TValue>                                                                                                                       \
-        requires Add<TValue> && Mul<TValue> && Default<TValue> && Clampable<TValue>
+        requires Add<TValue> && Mul<TValue> && std::is_default_constructible_v<TValue> && Clampable<TValue>
 
 TEMPLATE
 Integral<TValue>::Integral(std::optional<double_t> saturation) : m_value(), m_saturation(saturation) {}
@@ -36,5 +36,4 @@ std::optional<double_t> Integral<TValue>::saturation() const {
 }
 
 #include "geometry/Vector2D.hpp"
-template class Integral<double_t>;
 template class Integral<Vector2D<Meter>>;

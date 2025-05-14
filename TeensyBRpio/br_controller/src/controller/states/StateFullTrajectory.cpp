@@ -6,8 +6,8 @@
 #include "trajectories/LinearTrajectory.hpp"
 
 namespace controller {
-StateFullTrajectory::StateFullTrajectory(DisplacementKind kind, Trajectory *trajectory, rotation_ptr &rotation_buffer, Angle initialOrientation,
-                                         Speeds maxSpeeds, Accelerations maxAccelerations)
+StateFullTrajectory::StateFullTrajectory(DisplacementKind kind, Trajectory *trajectory, Arena::rotation_ptr &rotation_buffer,
+                                         Angle initialOrientation, Speeds maxSpeeds, Accelerations maxAccelerations)
     : m_kind(kind), m_trajectory(trajectory), m_rotation_buffer(rotation_buffer), m_maxSpeeds(maxSpeeds), m_maxAccelerations(maxAccelerations) {
     startInitialRotation(initialOrientation);
 }

@@ -10,24 +10,24 @@ public:
     ODriveArduino(Stream& serial);
 
     // Commands
-    void SetPosition(int motor_number, float position);
-    void SetPosition(int motor_number, float position, float velocity_feedforward);
-    void SetPosition(int motor_number, float position, float velocity_feedforward, float current_feedforward);
-    void SetVelocity(int motor_number, float velocity);
-    void SetVelocity(int motor_number, float velocity, float current_feedforward);
-    void SetCurrent(int motor_number, float current);
-    void TrapezoidalMove(int motor_number, float position);
+    void SetPosition(int motor_number, double_t position);
+    void SetPosition(int motor_number, double_t position, double_t velocity_feedforward);
+    void SetPosition(int motor_number, double_t position, double_t velocity_feedforward, double_t current_feedforward);
+    void SetVelocity(int motor_number, double_t velocity);
+    void SetVelocity(int motor_number, double_t velocity, double_t current_feedforward);
+    void SetCurrent(int motor_number, double_t current);
+    void TrapezoidalMove(int motor_number, double_t position);
     // Getters
-    float GetVelocity(int motor_number);
-    float GetPosition(int motor_number);
+    double_t GetVelocity(int motor_number);
+    double_t GetPosition(int motor_number);
     // General params
-    float readFloat();
+    double_t readFloat();
     int32_t readInt();
 
     String test();
 
     // State helper
-    bool run_state(int axis, int requested_state, bool wait_for_idle, float timeout = 10.0f);
+    bool run_state(int axis, int requested_state, bool wait_for_idle, double_t timeout = 10.0f);
 
     int getCurrentAxisState(int axis);
 

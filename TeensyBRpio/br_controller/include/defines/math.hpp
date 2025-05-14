@@ -4,8 +4,10 @@
 #include "defines/constraint.hpp"
 
 #include <algorithm>
+#include <cmath>
+#include <limits>
 
-#include <math.h> // type double_t
+using double_t = double;
 
 template <typename T>
 concept Add = requires(T a) {
@@ -14,7 +16,7 @@ concept Add = requires(T a) {
 };
 template <typename TValue, typename TOutput = TValue>
 concept Mul = requires(double_t a, TValue b) {
-    { b * a } -> std::convertible_to<TOutput>;
+    { b *a } -> std::convertible_to<TOutput>;
 };
 
 /* #region convert */
@@ -66,8 +68,12 @@ concept Convertible = requires(double_t a) {
 
 /// @return 0 if val == 0, 1 if val > 0, -1 if val < 0
 template <typename T>
-int sign(T val) {
+constexpr inline int sign(T val) {
     return (T(0) < val) - (val < T(0));
+}
+
+constexpr inline bool is_power_of_two(std::size_t n) {
+    return n != 0 && (n & (n - 1)) == 0;
 }
 
 /* #region clamp */

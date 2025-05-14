@@ -6,7 +6,11 @@
 
 #include <rclcpp/rclcpp.hpp>
 
-namespace ros_rclcpp {
+namespace ros2 {
+
+template <typename T>
+using Subscription = rclcpp::Subscription<T>::SharedPtr;
+
 class Node {
   public:
     Node(const char *name) : m_node(std::make_shared<rclcpp::Node>(name)) {}
@@ -14,9 +18,8 @@ class Node {
     void spin_once() { rclcpp::spin_some(m_node); }
 
     template <typename T>
-    rclcpp::Subscription<T>::SharedPtr createSubscription(const char *topic, std::function<void(const T &)> callback) {
-        return m_node->template create_subscription<T>( //
-            topic, 10, [callback](std::unique_ptr<T> msg) -> void { callback(*msg); });
+    Subscription<T> createSubscription(const char *topic, std::function<void(const T &)> callback) {
+        return m_node->template create_subscription<T>(topic, 10, [callback](const T::SharedPtr msg) -> void { callback(*msg); });
     }
 
     template <typename T>
@@ -26,19 +29,18 @@ class Node {
     }
 
     void sendLog(LogSeverity severity, const char *message) {
-        const char *msgRaw = message.c_str();
         auto logger = m_node->get_logger();
 
         if (severity == INFO) {
-            RCLCPP_INFO(logger, msgRaw);
+            RCLCPP_INFO(logger, message);
         } else if (severity == WARN) {
-            RCLCPP_WARN(logger, msgRaw);
+            RCLCPP_WARN(logger, message);
         } else if (severity == ERROR) {
-            RCLCPP_ERROR(logger, msgRaw);
+            RCLCPP_ERROR(logger, message);
         } else if (severity == FATAL) {
-            RCLCPP_FATAL(logger, msgRaw);
+            RCLCPP_FATAL(logger, message);
         } else if (severity == DEBUG) {
-            RCLCPP_DEBUG(logger, msgRaw);
+            RCLCPP_DEBUG(logger, message);
         } else {
             RCLCPP_ERROR(logger, "Unknown log type: %d; defaulting to INFO", severity);
             sendLog(INFO, message);
@@ -46,7 +48,7 @@ class Node {
     }
 
   private:
-    std::shared_ptr<rclcpp::Node> m_node;
+    rclcpp::Node::SharedPtr m_node;
 };
-} // namespace ros_rclcpp
+} // namespace ros2
 #endif

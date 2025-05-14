@@ -22,7 +22,7 @@ class PositionEstimatorOdo {
     PositionEstimatorOdo(T encoder, double_t ticksPerRad, double_t ticksPerMillimeter, double_t correctionFactorLR);
 
     PositionEstimatorOdo()
-        requires Default<T>
+        requires std::is_default_constructible_v<T>
         : PositionEstimatorOdo(T(), ECARTS_ODOS, UNITS_ODOS, L_R_ODOS) {}
 
     /**

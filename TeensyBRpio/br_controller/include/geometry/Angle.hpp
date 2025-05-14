@@ -7,8 +7,7 @@ template <typename Unit>
 class Vector2D;
 
 /**
- * A signed angle in radians, in (-PI, PI]. This type supports implicit conversion
- * from and to double_t.
+ * A signed angle in radians, in (-PI, PI]. This type supports implicit conversion from and to double_t.
  */
 class Angle {
   public:
@@ -40,10 +39,10 @@ class Angle {
 
 namespace std {
 inline double_t cos(Angle angle) {
-    return cos((double_t)angle);
+    return cos(static_cast<double_t>(angle));
 }
 inline double_t sin(Angle angle) {
-    return sin((double_t)angle);
+    return sin(static_cast<double_t>(angle));
 }
 } // namespace std
 

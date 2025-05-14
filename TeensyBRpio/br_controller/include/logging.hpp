@@ -36,6 +36,24 @@ inline void log(LogSeverity severity, const std::string &message) {
 [[noreturn]] inline void abort(const std::string &message) {
     abort(message.c_str());
 }
+
+inline const char *severityToString(LogSeverity severity) {
+    switch (severity) {
+        case DEBUG:
+            return "DEBUG";
+        case INFO:
+            return "INFO";
+        case WARN:
+            return "WARN";
+        case ERROR:
+            return "ERROR";
+        case FATAL:
+            return "FATAL";
+            default:
+            return "";
+    }
+}
+
 #endif
 
 #endif
