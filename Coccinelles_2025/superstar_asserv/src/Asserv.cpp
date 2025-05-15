@@ -62,6 +62,10 @@ void Asserv::asserv_global(float vitesse_l_consigne, float vitesse_r_consigne, f
     float output_l = m_asservPID_l.computeOutput(erreur_l, micros());
     float output_r = m_asservPID_r.computeOutput(erreur_r, micros());
 
+    //Serial.println("erreur_l" + String(erreur_l));
+    //Serial.println("erreur_r" + String(erreur_r));  
+    //Serial.println("output_l" + String(output_l));
+    //Serial.println("output_r" + String(output_r));
     float erreur_theta = theta_consigne - m_p_mesure_pos->position_theta;
     erreur_theta = fmod(erreur_theta, 2 * PI);
     if (erreur_theta > PI)
@@ -81,7 +85,7 @@ void Asserv::loop()
 {
     if (micros() - m_time >= 1e4)
     {
-        asserv_global(0, 0, PI / 2);
+        asserv_global(255, 255, 0);
         m_time = micros();
     }
 }

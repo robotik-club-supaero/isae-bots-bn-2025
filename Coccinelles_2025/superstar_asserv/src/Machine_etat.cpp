@@ -24,13 +24,12 @@ void Machine_etats::setup()
 
 void Machine_etats::loop()
 {
-    Serial.println("herein") ;
 
     if (millis() - m_time >= dt)
     {   
         if (millis() - m_time_global >= time_global)
         {
-            Serial.println("endh") ;
+            Serial.println("end") ;
             m_p_asserv->asserv_global(0, 0, angle);
             etat = END;
         }
@@ -40,12 +39,12 @@ void Machine_etats::loop()
         Serial.println(tirette) ;
         // Récupère la distance au danger le plus proche
         //m_minimum_distance = m_p_ultrason->m_distance ;
-        Serial.print("m_minimum_distance = ") ;
-        Serial.println(m_minimum_distance) ;
+        Serial.print("etat = ") ;
+        Serial.println(etat) ;
+        Serial.println();
         switch (etat)
         {
             case INIT:
-            Serial.println(tirette) ;
             if ((millis() - m_time_global >= START_TIME) && tirette == 0) {
                 m_time_global = millis() ;
                 etat = MOVE ;
@@ -109,7 +108,7 @@ void Machine_etats::loop()
         case END:
             Serial.println("end") ;
             m_p_asserv->asserv_global(0, 0, 0);
-            m_p_servo->blink(1, ANGLE1, ANGLE2) ;
+            //m_p_servo->blink(1, ANGLE1, ANGLE2) ;
             break;
 
         }

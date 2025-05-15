@@ -1,4 +1,5 @@
 #include <Mesure_pos.h>
+#include <define.h>
 
 Mesure_pos::Mesure_pos(Encodeur *p_encodeur_r, Encodeur *p_encodeur_l)
 {
@@ -14,8 +15,18 @@ void Mesure_pos::setup()
     position_theta = 0;
     position_x = 0;
     position_y = 0;
-    mesure_r = m_p_encoder_R->mesure();
-    mesure_l = m_p_encoder_L->mesure();
+    if (INV_L == 1 ){
+        mesure_l = -m_p_encoder_L->mesure();
+    }
+    else{
+        mesure_l = m_p_encoder_L->mesure();
+    }
+    if (INV_R == 1 ){
+        mesure_r = -m_p_encoder_R->mesure();
+    }
+    else{
+        mesure_r = m_p_encoder_R->mesure();
+    }
     m_time = millis();
 }
 
@@ -29,8 +40,21 @@ void Mesure_pos::loop()
 {
     if (millis() - m_time >= dt)
     {
-        float position_l = (m_p_encoder_L->mesure() - mesure_l);
-        float position_r = (m_p_encoder_R->mesure() - mesure_r);
+        float position_l = 0;
+        float position_r = 0;
+        if (INV_L == 1 ){
+            position_l = -m_p_encoder_L->mesure() - mesure_l;
+        }
+        else{
+            position_l = m_p_encoder_L->mesure() - mesure_l;
+        }
+        if (INV_R == 1 ){
+            position_r = -m_p_encoder_R->mesure() - mesure_r;
+        }
+        else{
+            position_r = m_p_encoder_R->mesure() - mesure_r;
+        }
+
         // Positions
         position_theta += (position_l - position_r) * K_angle;
         position_x += ((position_l * K_l + position_r * K_r) / 2) * cos(position_theta);
@@ -53,16 +77,26 @@ void Mesure_pos::loop()
         Serial.println("Position_x = " + String(position_x));
         Serial.println("Position_y = " + String(position_y));
         Serial.println("Position_theta = " + String(position_theta));
-        // Serial.println("Vitesse_x = " + String(Vitesse_x));
-        // Serial.println("Vitesse_y = " + String(Vitesse_y));
-        // Serial.println("Vr=" + String(vitesse_r));
-        // Serial.println("Vl=" + String(vitesse_l));
+        //Serial.println("Vitesse_x = " + String(Vitesse_x));
+        //Serial.println("Vitesse_y = " + String(Vitesse_y));
+        //Serial.println("Vr=" + String(vitesse_r));
+        //Serial.println("Vl=" + String(vitesse_l));
 
         // Serial.println("Mesure_r = " + String(mesure_r));
         // Serial.println("Mesure_l= " + String(mesure_l));
         //    Maj des mesures et temps ;
-        mesure_r = m_p_encoder_R->mesure();
-        mesure_l = m_p_encoder_L->mesure();
+        if (INV_L == 1 ){
+            mesure_l = -m_p_encoder_L->mesure();
+        }
+        else{
+            mesure_l = m_p_encoder_L->mesure();
+        }
+        if (INV_R == 1 ){
+            mesure_r = -m_p_encoder_R->mesure();
+        }
+        else{
+            mesure_r = m_p_encoder_R->mesure();
+        }
         m_time = millis();
     }
 }

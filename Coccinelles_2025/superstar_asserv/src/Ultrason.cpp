@@ -29,7 +29,7 @@ void Ultrason::loop()
         digitalWrite(m_trigger_PIN, LOW); 
         
         // Lecture de la durée de l'echo
-        m_duration = pulseIn(m_echo_PIN, HIGH);
+        m_duration = pulseIn(m_echo_PIN, HIGH, max_duration);
         Serial.print("Duration: ");
         Serial.println(m_duration);
         // Calcul de la distance en cm

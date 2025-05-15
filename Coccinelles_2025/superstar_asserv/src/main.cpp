@@ -34,41 +34,46 @@ void setup()
   ultrason.setup();
   mesure_pos.setup();
   // Si on veut tester les encodeurs , on les setup
-  /*
-  encoder_L.setup();
-  encoder_R.setup();
-  */
+  
+  
+  //encoder_L.setup();
+  //encoder_R.setup();
+  
 
-  Serial.begin(9600); // Initialisation de la communication série
+  Serial.begin(115200); // Initialisation de la communication série
+  
+  
   moteur_g.setup();     // Initialisation des moteurs
   moteur_d.setup();
-  Serial.println("here");
+  Serial.println("moteur setup");
   // Test moteur
   /*
   moteur_g.set_speed(255); //TODO : regler la vitesse pour tester la vitesse max
   moteur_d.set_speed(255);
   */
+ 
   asserv.setup();
-  Serial.println("here2");
+  Serial.println("asserv setup");
   machine_etats.setup();
-  Serial.println("here3");
+  Serial.println("machine etats setup");
+  
 }
 
 void loop()
 {
-  /*
-  #DEBUG
-  encoder_L.loop();
-  encoder_R.loop();
-  */
-
+    
+  //DEBUG
+  //encoder_L.loop();
+  //encoder_R.loop();
+  
   
   ultrason.loop();
   mesure_pos.loop();
-  Serial.println("here4");
-  // #DEBUG Si on veut tester les asservissements , on decommente la lige suivante et on commente machine_etats.loop()
-  asserv.loop();
+//  Serial.println("mesure pos loop");
+//  // #DEBUG Si on veut tester les asservissements , on decommente la lige suivante et on commente machine_etats.loop()
+//  asserv.loop();
   machine_etats.loop();
-  Serial.println("here5");
-  delay(100); // Delay de 100ms entre chaque boucle
+//  Serial.println("machie etats loop");
+//  delay(100); // Delay de 100ms entre chaque boucle
+//le délai -pause des problèmes sur l'asserv !!
 }
