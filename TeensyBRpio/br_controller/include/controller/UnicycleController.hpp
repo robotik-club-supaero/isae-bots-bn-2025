@@ -19,7 +19,7 @@
 #include <span>
 
 template <typename T>
-concept ErrorConverter = requires(T a, Vector2D<Meter> error, double_t interval) {
+concept ErrorConverter = requires(T a, Vector2D<Meter> error, number_t interval) {
     a.update(error, interval);
     a.reset();
     { a.value() } -> std::convertible_to<Vector2D<Meter>>;
@@ -68,10 +68,10 @@ class UnicycleController : private fsm::StateMachine<StateStandStill, StateBraki
      * @param maxSpeeds Maximal absolute speeds when moving or rotating. Both speeds must be strictly positive.
      * @param maxAccelerations Maximal accelerations/decelerations when starting and completing a trajectory or a rotation. Both accelerations must
      * be strictly positive.
-     * @param double_t speedThreshold The (linear) speed of the tracking point under which the robot is considered to be still. Must be positive.
+     * @param number_t speedThreshold The (linear) speed of the tracking point under which the robot is considered to be still. Must be positive.
      */
     UnicycleController(Vector2D<Meter> trackingOffset, TConverter converter, Accelerations brakeAccelerations, Speeds maxSpeeds,
-                       Accelerations maxAccelerations, double_t speedThreshold);
+                       Accelerations maxAccelerations, number_t speedThreshold);
 
     /// Initializes the controller with the default values from the configuration file.
     UnicycleController()
@@ -86,7 +86,7 @@ class UnicycleController : private fsm::StateMachine<StateStandStill, StateBraki
      * @param interval The time elapsed since the last update
      * @param robotPosition The actual position of the center of the robot
      */
-    Speeds updateCommand(double_t interval, Position2D<Meter> robotPosition);
+    Speeds updateCommand(number_t interval, Position2D<Meter> robotPosition);
 
     // Orders
 
@@ -190,7 +190,7 @@ class UnicycleController : private fsm::StateMachine<StateStandStill, StateBraki
     Vector2D<Meter> getGoalPoint() const;
     Vector2D<Meter> getGoalPointSpeed() const;
 
-    Position2D<Meter, double_t> getEstimatedRobotSpeed() const;
+    Position2D<Meter, number_t> getEstimatedRobotSpeed() const;
 
     const TConverter &getErrorConverter() const;
     void setErrorConverter(TConverter converter);
@@ -218,22 +218,22 @@ class UnicycleController : private fsm::StateMachine<StateStandStill, StateBraki
     /// Resets the command but keeps the internal state of the controller
     void softReset(Position2D<Meter> robotPosition = {});
 
-    std::variant<Position2D<Meter>, Speeds> computeSetpoint(double_t interval, Position2D<Meter> robotPosition);
-    Speeds computeCommand(double_t interval, Position2D<Meter> robotPosition, setpoint_t setpoint);
+    std::variant<Position2D<Meter>, Speeds> computeSetpoint(number_t interval, Position2D<Meter> robotPosition);
+    Speeds computeCommand(number_t interval, Position2D<Meter> robotPosition, setpoint_t setpoint);
 
     Vector2D<Meter> m_offset;
     Accelerations m_brakeAccelerations;
     Speeds m_maxSpeeds;
 
     Accelerations m_maxAccelerations;
-    double_t m_speedThreshold;
+    number_t m_speedThreshold;
 
     bool m_reversing;
     bool m_speedControl;
     Position2D<Meter> m_setpoint;
     Derivative<Vector2D<Meter>> m_goalPointSpeed;
     /// Estimated speed of the robot
-    Derivative<Position2D<Meter, double_t>, Position2D<Meter>> m_actualSpeed;
+    Derivative<Position2D<Meter, number_t>, Position2D<Meter>> m_actualSpeed;
     Derivative<Vector2D<Meter>> m_trackingPointSpeed;
 
     TConverter m_converter;

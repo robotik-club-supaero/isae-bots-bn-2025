@@ -9,7 +9,7 @@ namespace msg {
 class Position : public br_messages__msg__Position {
   public:
     Position() = default;
-    Position(double_t x, double_t y, double_t theta) {
+    Position(number_t x, number_t y, number_t theta) {
         this->x = x;
         this->y = y;
         this->theta = theta;

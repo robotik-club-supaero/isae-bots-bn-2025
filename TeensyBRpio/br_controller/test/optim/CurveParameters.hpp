@@ -57,7 +57,7 @@ class CurveParameters {
     ///
     /// @param dist_hint The greater, the more the control points will move
     /// @return the new parameters. The current object is untouched.
-    CurveParameters randomNeighbour(double_t dist_hint) const {
+    CurveParameters randomNeighbour(number_t dist_hint) const {
         CurveParameters neighbour = *this;
         neighbour.randomNeighbourInPlace(dist_hint);
         return neighbour;
@@ -69,15 +69,15 @@ class CurveParameters {
     SmallDeque<Point2D<Meter>> m_path;
     std::vector<ControlPoints> m_ctrlPoints;
 
-    void randomNeighbourInPlace(double_t dist_hint) {
+    void randomNeighbourInPlace(number_t dist_hint) {
         for (std::size_t i = 0; i < m_path.size() - 1; i++) {
             m_ctrlPoints[i].pt2 += {rand() * dist_hint, rand() * dist_hint};
         }
 
         m_ctrlPoints[0].pt1 += {rand() * dist_hint, rand() * dist_hint};
         for (std::size_t i = 1; i < m_path.size() - 1; i++) {
-            double_t dist = (m_ctrlPoints[i].pt1 - m_path[i]).norm();
-            double_t var;
+            number_t dist = (m_ctrlPoints[i].pt1 - m_path[i]).norm();
+            number_t var;
             do {
                 var = rand() * dist_hint;
             } while (dist + var <= 0);
@@ -87,13 +87,13 @@ class CurveParameters {
         }
     }
 
-    static std::normal_distribution<double_t> rng;
+    static std::normal_distribution<number_t> rng;
     static std::default_random_engine generator;
 
-    static double_t rand() { return rng(generator); }
+    static number_t rand() { return rng(generator); }
 };
 
-std::normal_distribution<double_t> CurveParameters::rng(0, 0.5);
+std::normal_distribution<number_t> CurveParameters::rng(0, 0.5);
 std::default_random_engine CurveParameters::generator(micros());
 
 #endif

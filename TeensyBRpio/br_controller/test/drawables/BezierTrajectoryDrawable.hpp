@@ -10,7 +10,7 @@
 class BezierTrajectoryDrawable : public TrajectoryDrawable {
   public:
     template <CurveGenerator<BezierCurve<4>> TGenerator>
-    BezierTrajectoryDrawable(const TableTransform &transform, MultiCurveTrajectory<BezierCurve<4>, TGenerator> &trajectory, double_t step,
+    BezierTrajectoryDrawable(const TableTransform &transform, MultiCurveTrajectory<BezierCurve<4>, TGenerator> &trajectory, number_t step,
                              sf::Color color = DEFAULT_COLOR, sf::Color secondaryColor = BezierDrawable::DEFAULT_COLOR)
         : TrajectoryDrawable(color), m_curves() {
         trajectory.forceGenerate();

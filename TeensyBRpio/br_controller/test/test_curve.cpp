@@ -42,7 +42,7 @@ double measureTime(T &&trajectory, double limit) {
 }
 
 int main() {
-    constexpr double_t STEP = 0.001;
+    constexpr number_t STEP = 0.001;
     SmallDeque<Point2D<Meter>> points;
 
     Window window("Bezier Curve");

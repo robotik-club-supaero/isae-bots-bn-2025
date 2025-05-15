@@ -18,7 +18,7 @@
  *
  * See http://www.bedwani.ch/regul/discret/top/df.htm
  */
-template <typename TDerivative = double_t, typename TValue = TDerivative>
+template <typename TDerivative = number_t, typename TValue = TDerivative>
     requires Add<TValue> && Mul<TValue, TDerivative> && std::is_default_constructible_v<TValue> && Clampable<TValue>
 class Derivative {
   public:
@@ -26,14 +26,14 @@ class Derivative {
      * @param gain,filter See class documentation. gain must be strictly positive. filter must be positive or zero.
      * @param initialValue Sets f(0) in case it is not zero. (see class documentation).
      */
-    Derivative(double_t gain = 1, double_t filter = 0, TValue initialValue = {}, std::optional<double_t> saturation = std::nullopt);
+    Derivative(number_t gain = 1, number_t filter = 0, TValue initialValue = {}, std::optional<number_t> saturation = std::nullopt);
 
     /**
      * Updates the estimation of the derivative.
      * @param value The current value of the function.
      * @param interval The time elapsed since the last call to update (or the creation of the estimator). Must be strictly positive.
      */
-    void update(TValue value, double_t interval);
+    void update(TValue value, number_t interval);
     /**
      * Resets the estimator to its initial state.
      * @param initialValue Sets f(0) in case it is not zero. Note that if this parameter is omitted, then f(0) is set to 0. The value of
@@ -48,16 +48,16 @@ class Derivative {
     /// Returns the last input value used in function `update`. 
     TValue getLastInput() const;
 
-    double_t gain() const;
-    double_t filter() const;
-    std::optional<double_t> saturation() const;
+    number_t gain() const;
+    number_t filter() const;
+    std::optional<number_t> saturation() const;
 
   private:
-    double_t m_gain;
-    double_t m_filter;
+    number_t m_gain;
+    number_t m_filter;
     TValue m_lastValue;
     TDerivative m_lastDerivative;
-    std::optional<double_t> m_saturation;
+    std::optional<number_t> m_saturation;
 };
 
 #endif

@@ -16,7 +16,7 @@ ControllerStatus StateFullTrajectory::getStatus() const {
     return getStateStatus<ControllerStatus>() | ControllerStatus::TRAJECTORY;
 }
 
-StateUpdateResult StateFullTrajectory::update(double_t interval) {
+StateUpdateResult StateFullTrajectory::update(number_t interval) {
     StateUpdateResult result = updateState<StateUpdateResult>(interval);
     if (std::holds_alternative<RotationComplete>(result)) {
         setCurrentState<StateSmoothTrajectory>(m_kind, m_trajectory, m_maxSpeeds, m_maxAccelerations.linear);

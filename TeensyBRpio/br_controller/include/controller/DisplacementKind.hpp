@@ -11,7 +11,7 @@ class DisplacementKind {
     explicit operator bool() const = delete;
 
     /// Difference between the direction of the trajectory and the orientation of the robot
-    Angle getAlignmentOffset() const { return m_value == FORWARD ? 0 : std::numbers::pi_v<double_t>; }
+    Angle getAlignmentOffset() const { return m_value == FORWARD ? 0 : std::numbers::pi_v<number_t>; }
 
   private:
     Value m_value;

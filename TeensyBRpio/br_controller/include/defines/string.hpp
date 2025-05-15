@@ -11,7 +11,7 @@ constexpr bool toString = requires(const T &t) { std::to_string(t); };
 } // namespace __util
 
 template <typename T>
-std::string to_string(const T &obj) {
+inline std::string to_string(const T &obj) {
     if constexpr (__util::toString<T>) {
         return std::to_string(obj);
     } else {

@@ -27,7 +27,7 @@ class MotorStub {
 
     void switchOn();
     void switchOff();
-    void update(double_t interval);
+    void update(number_t interval);
     bool isReady() const;
     bool isIdle() const;
     void sendCommand(Speeds speeds);

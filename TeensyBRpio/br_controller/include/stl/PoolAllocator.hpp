@@ -47,9 +47,7 @@ class PoolAllocator {
      * Allocates an uninitialized array.
      *
      * The allocated array can hold `n` elements of type `T`. The array can later be extended with `extend`, provided there is enough trailing free
-     * space.
-     *
-     * If `n == 0`, this is a no-op and returns the null pointer.
+     * space. If the allocations fails, a null pointer is returned. Empty allocations (`n == 0`) are not supported and will always fail.
      *
      * If `T` is a zero-sized or incomplete type, or has a stricter alignment than that permitted by this allocator, the program is ill-formed.
      *
@@ -94,14 +92,14 @@ class PoolAllocator {
     }
 
 #ifdef _BR_DEBUG
-    double_t memory_usage_percentage() const {
+    number_t memory_usage_percentage() const {
         std::size_t used_count = 0;
         for (std::size_t i = 0; i < BlockCount; i++) {
             if (m_used[i]) {
                 used_count++;
             }
         }
-        return static_cast<double_t>(used_count) / static_cast<double_t>(BlockCount);
+        return static_cast<number_t>(used_count) / static_cast<number_t>(BlockCount);
     }
 #endif
 
@@ -130,7 +128,7 @@ class PoolAllocator {
     }
 
     [[nodiscard]] void *allocateBlocks(std::size_t block_count) {
-        if (block_count == 0 || block_count == ALLOC_FAILED) {
+        if (block_count == 0 || block_count == ALLOC_FAILED || block_count > BlockCount) {
             return nullptr;
         }
         std::size_t index = ALLOC_FAILED;
@@ -160,10 +158,7 @@ class PoolAllocator {
             }
         }
         if (index != ALLOC_FAILED) {
-            m_hint = index + block_count;
-            if (m_hint >= BlockCount) {
-                m_hint = 0;
-            }
+            setHint(index + block_count);
             return &m_buffer[index];
         } else {
             return nullptr;
@@ -189,7 +184,7 @@ class PoolAllocator {
             m_used[i + j] = true;
         }
         if (m_hint >= i + old_block_count && m_hint < i + new_block_count) {
-            m_hint = i + new_block_count;
+            setHint(i + new_block_count);
         }
         return true;
     }
@@ -204,7 +199,7 @@ class PoolAllocator {
             m_used[i + j] = false;
         }
         if (i < m_hint) {
-            m_hint = i;
+            setHint(i);
         }
     }
 
@@ -218,6 +213,13 @@ class PoolAllocator {
             }
         }
         return true;
+    }
+
+    void setHint(std::size_t hint) {
+        hint = m_hint;
+        if (m_hint >= BlockCount) {
+            m_hint = 0;
+        }
     }
 
     using block = std::aligned_storage<BlockSize, Align>::type;

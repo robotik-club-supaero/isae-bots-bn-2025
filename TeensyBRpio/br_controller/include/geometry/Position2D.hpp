@@ -12,13 +12,13 @@
  * theta is in radians.
  *
  * @tparam Unit The unit of x and y. Only `Meter` and `Millimeter` are supported.
- * @tparam TAngle The type of the angle. Only `Angle` and `double_t` are supported.
+ * @tparam TAngle The type of the angle. Only `Angle` and `number_t` are supported.
  */
 template <typename Unit, typename TAngle = Angle>
 class Position2D : public Vector2D<Unit> {
   public:
     Position2D();
-    Position2D(double_t x, double_t y, TAngle theta);
+    Position2D(number_t x, number_t y, TAngle theta);
     Position2D(Vector2D<Unit> position, TAngle theta = 0);
 
     template <typename To>
@@ -68,7 +68,7 @@ class Position2D : public Vector2D<Unit> {
      *
      * This is equivalent to `this + Position2D(this.makeAbsolute({xr, yr}), theta)`.
      */
-    Position2D<Unit, TAngle> relativeOffset(double_t xr, double_t yr = 0, TAngle theta = 0) const;
+    Position2D<Unit, TAngle> relativeOffset(number_t xr, number_t yr = 0, TAngle theta = 0) const;
 
     void operator+=(Position2D<Unit, TAngle> pos);
     void operator-=(Position2D<Unit, TAngle> pos);
@@ -80,16 +80,16 @@ class Position2D : public Vector2D<Unit> {
 
     Position2D<Unit, TAngle> operator+(Position2D<Unit, Angle> pos) const;
     Position2D<Unit, TAngle> operator-(Position2D<Unit, Angle> pos) const;
-    Position2D<Unit, double_t> operator+(Position2D<Unit, double_t> pos) const;
-    Position2D<Unit, double_t> operator-(Position2D<Unit, double_t> pos) const;
+    Position2D<Unit, number_t> operator+(Position2D<Unit, number_t> pos) const;
+    Position2D<Unit, number_t> operator-(Position2D<Unit, number_t> pos) const;
 
     Position2D<Unit, TAngle> operator+(Speeds relativeOffset) const;
     Position2D<Unit, TAngle> operator-(Speeds relativeOffset) const;
 
-    Position2D<Unit, double_t> operator*(double_t factor) const;
-    Position2D<Unit, double_t> operator/(double_t factor) const;
-    Position2D<Unit, double_t> operator*(Speeds factor) const;
-    Position2D<Unit, double_t> operator/(Speeds factor) const;
+    Position2D<Unit, number_t> operator*(number_t factor) const;
+    Position2D<Unit, number_t> operator/(number_t factor) const;
+    Position2D<Unit, number_t> operator*(Speeds factor) const;
+    Position2D<Unit, number_t> operator/(Speeds factor) const;
 
     TAngle theta;
 
@@ -99,11 +99,11 @@ class Position2D : public Vector2D<Unit> {
 };
 
 template <typename Unit, typename TAngle>
-inline Position2D<Unit, double_t> operator*(double_t factor, Position2D<Unit, TAngle> pos) {
+inline Position2D<Unit, number_t> operator*(number_t factor, Position2D<Unit, TAngle> pos) {
     return pos * factor;
 }
 template <typename Unit, typename TAngle>
-inline Position2D<Unit, double_t> operator*(Speeds factor, Position2D<Unit, TAngle> pos) {
+inline Position2D<Unit, number_t> operator*(Speeds factor, Position2D<Unit, TAngle> pos) {
     return pos * factor;
 }
 

@@ -51,7 +51,7 @@ bool MANAGER::update() {
     if (intervalMicros >= m_minUpdateInterval) {
         duration_t tickInterval = std::min(m_maxUpdateInterval, intervalMicros);
         *m_lastUpdate += tickInterval;
-        update(static_cast<double_t>(tickInterval) / 1e6);
+        update(static_cast<number_t>(tickInterval) / 1e6);
         return true;
     } else {
         return false;
@@ -59,7 +59,7 @@ bool MANAGER::update() {
 }
 
 TEMPLATE
-void MANAGER::update(double_t interval) {
+void MANAGER::update(number_t interval) {
     ManagerStatus status = this->template updateState<ManagerStatus>(m_actuators);
     if (status != this->getStatus()) {
         switch (status) {
@@ -84,7 +84,7 @@ void MANAGER::update(double_t interval) {
     if (isActive()) {
         auto command = m_controller.updateCommand(interval, m_feedback.getRobotPosition());
         m_actuators.sendCommand(command);
-    };
+    }
     m_actuators.update(interval);
 }
 

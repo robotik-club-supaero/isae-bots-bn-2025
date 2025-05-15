@@ -6,7 +6,7 @@
 
 class TrajectoryDrawable : public sf::Drawable {
   public:
-    TrajectoryDrawable(const TableTransform &transform, Trajectory &trajectory, double_t step, sf::Color color = DEFAULT_COLOR)
+    TrajectoryDrawable(const TableTransform &transform, Trajectory &trajectory, number_t step, sf::Color color = DEFAULT_COLOR)
         : TrajectoryDrawable(color) {
         appendTrajectory(transform, trajectory, step);
     }
@@ -14,7 +14,7 @@ class TrajectoryDrawable : public sf::Drawable {
   protected:
     static const sf::Color DEFAULT_COLOR;
     TrajectoryDrawable(sf::Color color = DEFAULT_COLOR) : m_vertices(sf::LinesStrip), m_color(color) {}
-    void appendTrajectory(const TableTransform &transform, Trajectory &trajectory, double_t step) {
+    void appendTrajectory(const TableTransform &transform, Trajectory &trajectory, number_t step) {
         while (trajectory.advance(step)) {
             m_vertices.append(sf::Vertex(transform.toScreenCoordinates(trajectory.getCurrentPosition()), m_color));
         }

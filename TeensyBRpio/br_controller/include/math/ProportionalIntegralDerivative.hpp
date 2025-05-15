@@ -18,7 +18,7 @@
  *
  * where `e` is the error and `D(e, t)` is the filtered derivative of `e`. See class `Derivative` for more details.
  */
-template <typename TValue = double_t>
+template <typename TValue = number_t>
     requires Add<TValue> && Mul<TValue> && std::is_default_constructible_v<TValue> && Clampable<TValue>
 class ProportionalIntegralDerivative {
   public:
@@ -28,9 +28,9 @@ class ProportionalIntegralDerivative {
      * @param td = kd/kp Derivative time (positive or null)
      * @param filter Weight of the low-pass filter for the derivative. See class Derivative.
      */
-    ProportionalIntegralDerivative(double_t kp, double_t ti, double_t td, double_t filter = 0,
-                                   std::optional<double_t> outputSaturation = std::nullopt, std::optional<double_t> integralSaturation = std::nullopt,
-                                   std::optional<double_t> derivativeSaturation = std::nullopt);
+    ProportionalIntegralDerivative(number_t kp, number_t ti, number_t td, number_t filter = 0,
+                                   std::optional<number_t> outputSaturation = std::nullopt, std::optional<number_t> integralSaturation = std::nullopt,
+                                   std::optional<number_t> derivativeSaturation = std::nullopt);
 
     ProportionalIntegralDerivative()
         : ProportionalIntegralDerivative(DEFAULT_KP, DEFAULT_TI, DEFAULT_TD, DERIVATIVE_FILTER, PID_SATURATION, INTEGRAL_SATURATION,
@@ -41,7 +41,7 @@ class ProportionalIntegralDerivative {
      * @param value The current value of the error.
      * @param interval The time elapsed since the last call to update. Must be strictly positive.
      */
-    void update(TValue error, double_t interval);
+    void update(TValue error, number_t interval);
     void reset();
 
     operator TValue() const;
@@ -51,21 +51,21 @@ class ProportionalIntegralDerivative {
     TValue lastError() const;
 #endif
 
-    double_t kp() const;
-    double_t ti() const;
-    double_t td() const;
-    double_t filter() const;
+    number_t kp() const;
+    number_t ti() const;
+    number_t td() const;
+    number_t filter() const;
 
-    std::optional<double_t> saturation() const;
-    std::optional<double_t> integralSaturation() const;
-    std::optional<double_t> derivativeSaturation() const;
+    std::optional<number_t> saturation() const;
+    std::optional<number_t> integralSaturation() const;
+    std::optional<number_t> derivativeSaturation() const;
 
     const Integral<TValue> &getIntegral() const;
     const Derivative<TValue> &getDerivative() const;
 
   private:
-    double_t m_kp;
-    double_t m_ki;
+    number_t m_kp;
+    number_t m_ki;
 
     TValue m_value;
 #ifdef _BR_DEBUG
@@ -74,7 +74,7 @@ class ProportionalIntegralDerivative {
 
     Integral<TValue> m_integral;
     Derivative<TValue> m_derivative;
-    std::optional<double_t> m_saturation;
+    std::optional<number_t> m_saturation;
 };
 
 #endif

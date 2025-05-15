@@ -3,7 +3,7 @@
 
 SetHeadingProfile::SetHeadingProfile(Angle initialHeading, Angle targetHeading) : m_currentHeading(initialHeading), m_targetHeading(targetHeading) {}
 
-bool SetHeadingProfile::advance(double_t diffAngle) {
+bool SetHeadingProfile::advance(number_t diffAngle) {
     if (m_currentHeading == m_targetHeading) {
         return false;
     }
@@ -20,7 +20,7 @@ Angle SetHeadingProfile::getCurrentOrientation() const {
     return m_currentHeading;
 }
 
-std::optional<double_t> SetHeadingProfile::getRemainingAngle() const {
+std::optional<number_t> SetHeadingProfile::getRemainingAngle() const {
     return std::abs(m_targetHeading - m_currentHeading);
 }
 

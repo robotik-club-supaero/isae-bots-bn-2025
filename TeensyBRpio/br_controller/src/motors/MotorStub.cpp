@@ -15,7 +15,7 @@ void MotorStub::switchOff() {
     m_isReady = false;
 }
 
-void MotorStub::update(double_t interval) {
+void MotorStub::update(number_t interval) {
     // Nothing to do
 }
 

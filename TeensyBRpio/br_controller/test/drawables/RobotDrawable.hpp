@@ -17,7 +17,7 @@ class RobotDrawable : public sf::Drawable {
         setPosition(transform.toScreenCoordinates(position), position.theta);
     }
     void setPosition(sf::Vector2f screenPosition, Angle orientation) {
-        double_t rotation = 180. / Angle::Pi * (Angle::Pi / 2 - orientation.value());
+        number_t rotation = 180. / Angle::Pi * (Angle::Pi / 2 - orientation.value());
 
         m_robotMarker.setPosition(screenPosition);
         m_robotMarker.setRotation(rotation);

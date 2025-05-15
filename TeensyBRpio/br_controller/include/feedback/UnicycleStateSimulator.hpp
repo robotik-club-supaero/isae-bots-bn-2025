@@ -21,12 +21,12 @@ class UnicycleStateSimulator {
      * The standard deviation is the same for both Speeds (which may not be physically homogeneous).
      * TODO: improve how the noise is implemented
      */
-    UnicycleStateSimulator(double_t noise_stddev);
+    UnicycleStateSimulator(number_t noise_stddev);
     UnicycleStateSimulator() : UnicycleStateSimulator(NOISE_STD_DEV) {}
 
     void setSpeeds(Speeds speeds);
     void resetPosition(Position2D<Meter> pos);
-    void update(double_t interval);
+    void update(number_t interval);
 
     Position2D<Meter> getRobotPosition() const;
     MotorStub createMotorStub() const;
@@ -34,11 +34,11 @@ class UnicycleStateSimulator {
   private:
     class Noise {
       public:
-        Noise(double_t standardDeviation);
-        double_t operator()();
+        Noise(number_t standardDeviation);
+        number_t operator()();
 
       private:
-        std::optional<std::normal_distribution<double_t>> m_noise;
+        std::optional<std::normal_distribution<number_t>> m_noise;
     };
 
     std::shared_ptr<Speeds> m_speeds;

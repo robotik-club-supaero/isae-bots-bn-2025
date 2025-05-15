@@ -17,19 +17,19 @@ class Ramp {
      * Creates a new ramp with the given target speed, maximal acceleration, and initial speed.
      * See Ramp::setTargetSpeed and Ramp::setMaximalAcceleration.
      */
-    Ramp(double_t targetSpeed, double_t maximalAcceleration, double_t currentSpeed = 0);
+    Ramp(number_t targetSpeed, number_t maximalAcceleration, number_t currentSpeed = 0);
 
     /** Returns the current speed computed by the ramp. The unit is the same as the target speed set with Ramp::setTargetSpeed. */
-    double_t getCurrentSpeed() const;
+    number_t getCurrentSpeed() const;
     /** Returns the target speed set with Ramp::setTargetSpeed. */
-    double_t getTargetSpeed() const;
+    number_t getTargetSpeed() const;
     /** Returns the maximal acceleration set with Ramp::setMaximalAcceleration. */
-    double_t getMaximalAcceleration() const;
+    number_t getMaximalAcceleration() const;
 
     /**
      * Immediately sets the current speed to the given value, ignoring the ramp acceleration. See update() to enforce the maximum acceleration.
      */
-    void overwriteCurrentSpeed(double_t speed);
+    void overwriteCurrentSpeed(number_t speed);
 
     /**
      * Sets the signed target speed of the robot. The unit can be either meters per second (for linear speeds) or radians per
@@ -37,7 +37,7 @@ class Ramp {
      *
      * NB: Changing the target speed does NOT reset the current speed.
      */
-    void setTargetSpeed(double_t speed);
+    void setTargetSpeed(number_t speed);
     /**
      * Sets the maximal absolute acceleration (and deceleration) of the robot. The unit can be either meters per second
      * squared (for linear accelerations) or radians per second squared (for angular accelerations), but should be consistent
@@ -45,7 +45,7 @@ class Ramp {
      *
      * NB: Changing the maximal acceleration does NOT reset the current speed.
      */
-    void setMaximalAcceleration(double_t acceleration);
+    void setMaximalAcceleration(number_t acceleration);
 
     /**
      * Updates the current speed towards the target speed, while enforcing the maximal acceleration. If the current speed is already equal
@@ -53,34 +53,34 @@ class Ramp {
      *
      * @param interval The time elapsed since the last update.
      */
-    void update(double_t interval);
+    void update(number_t interval);
 
     /**
      * Compute the minimum braking distance to reach the target speed from the current speed, considering the acceleration is
      * constant and equal to the maximal acceleration of this ramp.
      */
-    double_t getBrakingDistance(double_t targetSpeed = 0) const;
+    number_t getBrakingDistance(number_t targetSpeed = 0) const;
 
     /**
      * Compute the maximum acceptable speed to be able to stop in at most `distance` meters, considering the braking deceleration is
      * constant and equal to the maximal acceleration of this ramp.
      * This returns an absolute (i.e. unsigned) speed.
      */
-    double_t computeSpeedFromBrakingDistance(double_t distance) const;
+    number_t computeSpeedFromBrakingDistance(number_t distance) const;
 
     /**
      * Reduces the target speed if the current braking distance is higher than the specified distance. This does not alter the current speed.
      *
      * See computeSpeedFromBrakingDistance().
      */
-    void ensureCanBrake(double_t distance);
+    void ensureCanBrake(number_t distance);
 
   private:
     /// Flag indicating whether targetSpeed=currentSpeed, to avoid recomputing the condition at every update.
     bool m_isComplete;
-    double_t m_currentSpeed;
-    double_t m_targetSpeed;
-    double_t m_maxAcceleration;
+    number_t m_currentSpeed;
+    number_t m_targetSpeed;
+    number_t m_maxAcceleration;
 };
 
 #endif

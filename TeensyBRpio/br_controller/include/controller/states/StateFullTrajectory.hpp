@@ -19,7 +19,7 @@ class StateFullTrajectory : private fsm::StateMachine<fsm::StateUninit, StateIni
     StateFullTrajectory(DisplacementKind kind, Trajectory *trajectory, Arena::rotation_ptr &rotation_buffer, Angle initialOrientation,
                         Speeds maxSpeeds, Accelerations maxAccelerations);
     ControllerStatus getStatus() const;
-    StateUpdateResult update(double_t interval);
+    StateUpdateResult update(number_t interval);
     void setMaxSpeeds(Speeds maxSpeeds);
 
   private:

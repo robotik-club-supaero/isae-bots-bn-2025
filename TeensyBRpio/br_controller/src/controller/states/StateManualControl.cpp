@@ -15,7 +15,7 @@ ControllerStatus StateManualControl::getStatus() const {
     return ControllerStatus::ManualControl;
 }
 
-StateUpdateResult StateManualControl::update(double_t interval) {
+StateUpdateResult StateManualControl::update(number_t interval) {
     m_linearRamp.update(interval);
     m_angularRamp.update(interval);
 

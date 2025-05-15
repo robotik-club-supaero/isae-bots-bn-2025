@@ -12,7 +12,7 @@ ControllerStatus StateBraking::getStatus() const {
     return ControllerStatus::Braking;
 }
 
-StateUpdateResult StateBraking::update(double_t interval) {
+StateUpdateResult StateBraking::update(number_t interval) {
     m_linRamp.update(interval);
     m_angRamp.update(interval);
 

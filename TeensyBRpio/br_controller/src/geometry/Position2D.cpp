@@ -5,7 +5,7 @@ template <typename Unit, typename TAngle>
 Position2D<Unit, TAngle>::Position2D() : Vector2D<Unit>(), theta(0) {}
 
 template <typename Unit, typename TAngle>
-Position2D<Unit, TAngle>::Position2D(double_t x, double_t y, TAngle theta) : Vector2D<Unit>(x, y), theta(theta) {}
+Position2D<Unit, TAngle>::Position2D(number_t x, number_t y, TAngle theta) : Vector2D<Unit>(x, y), theta(theta) {}
 
 template <typename Unit, typename TAngle>
 Position2D<Unit, TAngle>::Position2D(Vector2D<Unit> pos, TAngle theta) : Vector2D<Unit>(pos), theta(theta) {}
@@ -17,8 +17,8 @@ Position2D<Unit, Angle> Position2D<Unit, TAngle>::flip() const {
 
 template <typename Unit, typename TAngle>
 Vector2D<Unit> Position2D<Unit, TAngle>::makeAbsolute(Vector2D<Unit> vector) const {
-    double_t cos = std::cos(theta);
-    double_t sin = std::sin(theta);
+    number_t cos = std::cos(theta);
+    number_t sin = std::sin(theta);
 
     return Vector2D<Unit>(vector.x * cos - vector.y * sin, vector.x * sin + vector.y * cos);
 }
@@ -29,7 +29,7 @@ Vector2D<Unit> Position2D<Unit, TAngle>::makeRelative(Vector2D<Unit> vector) con
 }
 
 template <typename Unit, typename TAngle>
-Position2D<Unit, TAngle> Position2D<Unit, TAngle>::relativeOffset(double_t xr, double_t yr, TAngle theta) const {
+Position2D<Unit, TAngle> Position2D<Unit, TAngle>::relativeOffset(number_t xr, number_t yr, TAngle theta) const {
     Vector2D<Unit> vector = makeAbsolute(Vector2D<Unit>(xr, yr));
 
     return Position2D<Unit, TAngle>(this->x + vector.x, this->y + vector.y, this->theta + theta);
@@ -64,20 +64,20 @@ Position2D<Unit, TAngle> Position2D<Unit, TAngle>::operator-(Position2D<Unit, An
     return Position2D<Unit, TAngle>(Vector2D<Unit>::operator-(pos), theta - static_cast<TAngle>(pos.theta));
 }
 template <typename Unit, typename TAngle>
-Position2D<Unit, double_t> Position2D<Unit, TAngle>::operator+(Position2D<Unit, double_t> pos) const {
-    return Position2D<Unit, double_t>(Vector2D<Unit>::operator+(pos), static_cast<double_t>(theta) + pos.theta);
+Position2D<Unit, number_t> Position2D<Unit, TAngle>::operator+(Position2D<Unit, number_t> pos) const {
+    return Position2D<Unit, number_t>(Vector2D<Unit>::operator+(pos), static_cast<number_t>(theta) + pos.theta);
 }
 template <typename Unit, typename TAngle>
-Position2D<Unit, double_t> Position2D<Unit, TAngle>::operator-(Position2D<Unit, double_t> pos) const {
-    return Position2D<Unit, double_t>(Vector2D<Unit>::operator-(pos), static_cast<double_t>(theta) - pos.theta);
+Position2D<Unit, number_t> Position2D<Unit, TAngle>::operator-(Position2D<Unit, number_t> pos) const {
+    return Position2D<Unit, number_t>(Vector2D<Unit>::operator-(pos), static_cast<number_t>(theta) - pos.theta);
 }
 template <typename Unit, typename TAngle>
-Position2D<Unit, double_t> Position2D<Unit, TAngle>::operator*(double_t factor) const {
-    return Position2D<Unit, double_t>(Vector2D<Unit>::operator*(factor), theta * factor);
+Position2D<Unit, number_t> Position2D<Unit, TAngle>::operator*(number_t factor) const {
+    return Position2D<Unit, number_t>(Vector2D<Unit>::operator*(factor), theta * factor);
 }
 template <typename Unit, typename TAngle>
-Position2D<Unit, double_t> Position2D<Unit, TAngle>::operator/(double_t factor) const {
-    return Position2D<Unit, double_t>(Vector2D<Unit>::operator/(factor), theta / factor);
+Position2D<Unit, number_t> Position2D<Unit, TAngle>::operator/(number_t factor) const {
+    return Position2D<Unit, number_t>(Vector2D<Unit>::operator/(factor), theta / factor);
 }
 template <typename Unit, typename TAngle>
 Position2D<Unit, TAngle> Position2D<Unit, TAngle>::operator+(Speeds offset) const {
@@ -88,25 +88,25 @@ Position2D<Unit, TAngle> Position2D<Unit, TAngle>::operator-(Speeds offset) cons
     return *this + (-offset);
 }
 template <typename Unit, typename TAngle>
-Position2D<Unit, double_t> Position2D<Unit, TAngle>::operator*(Speeds factor) const {
-    return Position2D<Unit, double_t>(Vector2D<Unit>::operator*(factor.linear), theta * factor.angular);
+Position2D<Unit, number_t> Position2D<Unit, TAngle>::operator*(Speeds factor) const {
+    return Position2D<Unit, number_t>(Vector2D<Unit>::operator*(factor.linear), theta * factor.angular);
 }
 template <typename Unit, typename TAngle>
-Position2D<Unit, double_t> Position2D<Unit, TAngle>::operator/(Speeds factor) const {
-    return Position2D<Unit, double_t>(Vector2D<Unit>::operator/(factor.linear), theta / factor.angular);
+Position2D<Unit, number_t> Position2D<Unit, TAngle>::operator/(Speeds factor) const {
+    return Position2D<Unit, number_t>(Vector2D<Unit>::operator/(factor.linear), theta / factor.angular);
 }
 
 #define __SPECIALIZE(UNIT, ANGLE)                                                                                                                    \
     template class Position2D<UNIT, ANGLE>;                                                                                                          \
                                                                                                                                                      \
     template <>                                                                                                                                      \
-    Position2D<UNIT, ANGLE> clamp<Position2D<UNIT, ANGLE>>(Position2D<UNIT, ANGLE> value, double_t minBound, double_t maxBound) {                    \
+    Position2D<UNIT, ANGLE> clamp<Position2D<UNIT, ANGLE>>(Position2D<UNIT, ANGLE> value, number_t minBound, number_t maxBound) {                    \
         return Position2D<UNIT, ANGLE>(clamp<Vector2D<UNIT>>(value, minBound, maxBound), value.theta);                                               \
     }
 
 __SPECIALIZE(Meter, Angle);
-__SPECIALIZE(Meter, double_t);
+__SPECIALIZE(Meter, number_t);
 __SPECIALIZE(Millimeter, Angle);
-__SPECIALIZE(Millimeter, double_t);
+__SPECIALIZE(Millimeter, number_t);
 
 #undef __SPECIALIZE

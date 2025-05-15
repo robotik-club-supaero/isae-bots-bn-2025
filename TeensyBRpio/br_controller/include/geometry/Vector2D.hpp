@@ -14,7 +14,7 @@ template <typename Unit = Meter>
 class Vector2D {
   public:
     Vector2D();
-    Vector2D(double_t x, double_t y);
+    Vector2D(number_t x, number_t y);
 
     template <typename To>
         requires Convertible<Unit, To>
@@ -33,7 +33,7 @@ class Vector2D {
         return convert<Meter>();
     }
 
-    double_t norm() const;
+    number_t norm() const;
     /**
      * Returns the signed angle between the vector (1, 0) and the current vector, or, equivalently, the argument of the complex number x+iy.
      * If this is called on the zero vector, zero is returned instead.
@@ -47,27 +47,27 @@ class Vector2D {
 
     void operator+=(Vector2D<Unit> pos);
     void operator-=(Vector2D<Unit> pos);
-    void operator*=(double_t factor);
-    void operator/=(double_t factor);
+    void operator*=(number_t factor);
+    void operator/=(number_t factor);
 
     bool operator==(const Vector2D<Unit> &pos) const = default;
     Vector2D<Unit> operator+(Vector2D<Unit> pos) const;
     Vector2D<Unit> operator-(Vector2D<Unit> pos) const;
-    Vector2D<Unit> operator*(double_t factor) const;
-    Vector2D<Unit> operator/(double_t factor) const;
+    Vector2D<Unit> operator*(number_t factor) const;
+    Vector2D<Unit> operator/(number_t factor) const;
 
     Vector2D<Unit> operator-() const;
 
-    static double_t distance(Vector2D<Unit> a, Vector2D<Unit> b);
+    static number_t distance(Vector2D<Unit> a, Vector2D<Unit> b);
     /**
      * Returns the signed angle between a and b (in radians).
      * If any of both vectors is the zero vector, 0 is returned instead.
      */
     static Angle angle(Vector2D<Unit> a, Vector2D<Unit> b);
-    static double_t dot(Vector2D<Unit> a, Vector2D<Unit> b);
+    static number_t dot(Vector2D<Unit> a, Vector2D<Unit> b);
 
-    double_t x;
-    double_t y;
+    number_t x;
+    number_t y;
 
 #ifdef _STRING_EXT_
     operator std::string() const { return "(" + to_string(x) + ", " + to_string(y) + ")"; }
@@ -75,7 +75,7 @@ class Vector2D {
 };
 
 template <typename Unit>
-inline Vector2D<Unit> operator*(double_t factor, Vector2D<Unit> pos) {
+inline Vector2D<Unit> operator*(number_t factor, Vector2D<Unit> pos) {
     return pos * factor;
 }
 

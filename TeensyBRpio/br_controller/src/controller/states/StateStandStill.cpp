@@ -11,7 +11,7 @@ ControllerStatus StateStandStill::getStatus() const {
     return ControllerStatus::Still;
 }
 
-StateUpdateResult StateStandStill::update(double_t interval) {
+StateUpdateResult StateStandStill::update(number_t interval) {
     return PositionControl(m_restPosition);
 }
 

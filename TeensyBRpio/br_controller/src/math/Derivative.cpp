@@ -5,11 +5,11 @@
         requires Add<TValue> && Mul<TValue, TDerivative> && std::is_default_constructible_v<TValue> && Clampable<TValue>
 
 TEMPLATE
-Derivative<TDerivative, TValue>::Derivative(double_t gain, double_t filter, TValue initialValue, std::optional<double_t> saturation)
+Derivative<TDerivative, TValue>::Derivative(number_t gain, number_t filter, TValue initialValue, std::optional<number_t> saturation)
     : m_gain(gain), m_filter(filter), m_lastValue(initialValue), m_lastDerivative(), m_saturation(saturation) {}
 
 TEMPLATE
-void Derivative<TDerivative, TValue>::update(TValue value, double_t interval) {
+void Derivative<TDerivative, TValue>::update(TValue value, number_t interval) {
     m_lastDerivative = m_gain / (interval + m_filter * m_gain) * (m_lastDerivative * m_filter + (value - m_lastValue));
     if (m_saturation) {
         m_lastDerivative = clamp<TValue>(m_lastDerivative, -*m_saturation, *m_saturation);
@@ -39,20 +39,20 @@ TValue Derivative<TDerivative, TValue>::getLastInput() const {
 }
 
 TEMPLATE
-double_t Derivative<TDerivative, TValue>::gain() const {
+number_t Derivative<TDerivative, TValue>::gain() const {
     return m_gain;
 }
 
 TEMPLATE
-double_t Derivative<TDerivative, TValue>::filter() const {
+number_t Derivative<TDerivative, TValue>::filter() const {
     return m_filter;
 }
 
 TEMPLATE
-std::optional<double_t> Derivative<TDerivative, TValue>::saturation() const {
+std::optional<number_t> Derivative<TDerivative, TValue>::saturation() const {
     return m_saturation;
 }
 
 #include "geometry/Position2D.hpp"
 template class Derivative<Vector2D<Meter>>;
-template class Derivative<Position2D<Meter, double_t>, Position2D<Meter>>;
+template class Derivative<Position2D<Meter, number_t>, Position2D<Meter>>;

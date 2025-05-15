@@ -19,7 +19,7 @@ class OrientationProfile {
      * @return true if the profile was advanced. false if it is already complete. If this method returns false, subsequent calls to advance()
      * must also return false.
      */
-    virtual bool advance(double_t diffAngle) = 0;
+    virtual bool advance(number_t diffAngle) = 0;
 
     /**
      * Get the current orientation of this profile.
@@ -37,7 +37,7 @@ class OrientationProfile {
      *
      * After advance() has returned false, this must return 0.
      */
-    virtual std::optional<double_t> getRemainingAngle() const = 0;
+    virtual std::optional<number_t> getRemainingAngle() const = 0;
 
     /**
      * Attempts to recompute the profile such that:

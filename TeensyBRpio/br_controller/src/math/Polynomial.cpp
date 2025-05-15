@@ -4,7 +4,7 @@ template <Add T, std::size_t N>
 Polynomial<T, N>::Polynomial(std::array<T, N> coeffs) : m_coeffs(std::move(coeffs)) {}
 
 template <Add T, std::size_t N>
-T Polynomial<T, N>::operator()(double_t value) const {
+T Polynomial<T, N>::operator()(number_t value) const {
     T r;
     for (auto coeff = m_coeffs.rbegin(); coeff != m_coeffs.rend(); coeff++) {
         r = r * value + *coeff;

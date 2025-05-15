@@ -21,18 +21,13 @@ class SmallDequeIterator {
     using reference = std::conditional_t<Const, const T &, T &>;
 
     SmallDequeIterator<T, Const, Rev> &operator++() {
-        if (m_cap == 0) {
-            return *this;
-        }
         if constexpr (Rev) {
-            if (m_pos == 0) {
-                m_pos = m_cap;
+            if (m_pos > 0) {
+                m_pos--;
+            } else {
+                m_pos = m_deque.size();
             }
-            m_pos--;
         } else {
-            if (m_pos == m_cap) {
-                m_pos = 0;
-            }
             m_pos++;
         }
         return *this;
@@ -43,22 +38,20 @@ class SmallDequeIterator {
         return cpy;
     }
 
-    reference operator*() const { return m_ptr[m_pos]; }
-    pointer operator->() const { return &m_ptr[m_pos]; }
+    reference operator*() const { return m_deque[m_pos]; }
+    pointer operator->() const { return &m_deque[m_pos]; }
 
-    constexpr bool operator==(const SmallDequeIterator<T, Const, Rev> &other) const { return m_ptr == other.m_ptr && m_pos == other.m_pos; }
+    constexpr bool operator==(const SmallDequeIterator<T, Const, Rev> &other) const { return m_pos == other.m_pos; }
     constexpr bool operator!=(const SmallDequeIterator<T, Const, Rev> &other) const { return !(*this == other); }
 
   private:
     friend class SmallDeque<T>;
 
-    using alloc_type = std::conditional_t<Const, const typename SmallDeque<T>::Alloc &, typename SmallDeque<T>::Alloc &>;
+    using deque_type = std::conditional_t<Const, const SmallDeque<T> &, SmallDeque<T> &>;
 
-    SmallDequeIterator(alloc_type alloc, std::size_t pos) : SmallDequeIterator(alloc.raw(), alloc.capacity(), pos) {}
-    SmallDequeIterator(pointer ptr, std::size_t cap, std::size_t pos) : m_ptr(ptr), m_cap(cap), m_pos(pos) {}
+    SmallDequeIterator(deque_type deque, std::size_t pos) : m_deque(deque), m_pos(pos) {}
 
-    pointer m_ptr;
-    std::size_t m_cap;
+    deque_type m_deque;
     std::size_t m_pos;
 };
 
@@ -171,17 +164,17 @@ class SmallDeque {
     T &operator[](std::size_t index) { return *m_alloc.get(storage_index_of(index)); }
     /// @}
 
-    iterator begin() { return iterator(m_alloc, m_head); }
-    iterator end() { return iterator(m_alloc, m_size > 0 ? storage_index_of(m_size - 1) + 1 : m_head); }
+    iterator begin() { return iterator(*this, 0); }
+    iterator end() { return iterator(*this, m_size); }
 
-    const_iterator begin() const { return const_iterator(m_alloc, m_head); }
-    const_iterator end() const { return const_iterator(m_alloc, m_size > 0 ? storage_index_of(m_size - 1) + 1 : m_head); }
+    const_iterator begin() const { return const_iterator(*this, 0); }
+    const_iterator end() const { return const_iterator(*this, m_size); }
 
-    reverse_iterator rbegin() { return reverse_iterator(m_alloc, m_size > 0 ? storage_index_of(m_size - 1) : 0); }
-    reverse_iterator rend() { return reverse_iterator(m_alloc, m_size > 0 ? (m_head + capacity() - 1) % capacity() : 0); }
+    reverse_iterator rbegin() { return reverse_iterator(*this, m_size > 0 ? m_size - 1 : 0); }
+    reverse_iterator rend() { return reverse_iterator(*this, m_size); }
 
-    const_reverse_iterator rbegin() const { return const_reverse_iterator(m_alloc, m_size > 0 ? storage_index_of(m_size - 1) : 0); }
-    const_reverse_iterator rend() const { return const_reverse_iterator(m_alloc, m_size > 0 ? (m_head + capacity() - 1) % capacity() : 0); }
+    const_reverse_iterator rbegin() const { return const_reverse_iterator(*this, m_size > 0 ? m_size - 1 : 0); }
+    const_reverse_iterator rend() const { return const_reverse_iterator(*this, m_size); }
 
     /// Reserves capacity for at least `count` additional elements to be inserted in this deque.
     ///
@@ -342,10 +335,6 @@ class SmallDeque {
     }
 
   private:
-    friend class SmallDequeIterator<T, true, true>;
-    friend class SmallDequeIterator<T, true, false>;
-    friend class SmallDequeIterator<T, false, true>;
-    friend class SmallDequeIterator<T, false, false>;
     struct Alloc {
         Alloc() : ptr(nullptr), cap(0) {}
         Alloc(std::size_t capacity)

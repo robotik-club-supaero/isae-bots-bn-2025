@@ -9,10 +9,10 @@
 #define BR_RIGHT 0
 #define BR_LEFT 1
 
-MotorsOdrive2::MotorsOdrive2(uint8_t odriveRxPin, uint8_t odriveTxPin, double_t transmissionRatio, double_t wheelDiameter, double_t wheelDistance,
-                             double_t maxMotorSpeed)
+MotorsOdrive2::MotorsOdrive2(uint8_t odriveRxPin, uint8_t odriveTxPin, number_t transmissionRatio, number_t wheelDiameter, number_t wheelDistance,
+                             number_t maxMotorSpeed)
     : m_serial(std::make_unique<SoftwareSerial>(odriveRxPin, odriveTxPin)), m_odrive(*m_serial),
-      m_conversionFactor(transmissionRatio / (2 * std::numbers::pi_v<double_t>)), m_wheelRadius(wheelDiameter / 2), m_wheelDistance(wheelDistance),
+      m_conversionFactor(transmissionRatio / (2 * std::numbers::pi_v<number_t>)), m_wheelRadius(wheelDiameter / 2), m_wheelDistance(wheelDistance),
       m_maxMotorSpeed(maxMotorSpeed) {
     m_serial->begin(115200);
 }
@@ -29,7 +29,7 @@ void MotorsOdrive2::sendCommand(Speeds speeds) {
     sendCommand(BR_RIGHT, wheelSpeeds.right);
 }
 
-void MotorsOdrive2::sendCommand(int motor_number, double_t velCmd) {
+void MotorsOdrive2::sendCommand(int motor_number, number_t velCmd) {
     // constrain the motor command for safety
     m_odrive.SetVelocity(motor_number, std::clamp(velCmd, -m_maxMotorSpeed, m_maxMotorSpeed));
 }
@@ -45,7 +45,7 @@ void MotorsOdrive2::switchOff() {
     m_odrive.run_state(BR_LEFT, AXIS_STATE_IDLE, false, 0.0);
 }
 
-void MotorsOdrive2::update(double_t interval) {
+void MotorsOdrive2::update(number_t interval) {
     // Nothing to do
 }
 
@@ -58,10 +58,10 @@ bool MotorsOdrive2::isIdle() {
 }
 
 #ifdef _BR_DEBUG
-double_t MotorsOdrive2::getLastLeftSpeed() const {
+number_t MotorsOdrive2::getLastLeftSpeed() const {
     return m_lastLeftSpeed;
 }
-double_t MotorsOdrive2::getLastRightSpeed() const {
+number_t MotorsOdrive2::getLastRightSpeed() const {
     return m_lastRightSpeed;
 }
 #endif

@@ -19,7 +19,7 @@ class CurveTrajectory final : public SmoothTrajectory {
      * @param advanceMaxStep The maximum integration step (in meter) used in `advance()`. If the requested distance is greater,
      * it will be split in multiple steps less than or equal to the maximum step.
      */
-    CurveTrajectory(TCurve curve, double_t samplingStep = 0.005, double_t samplingTolerance = 0.005)
+    CurveTrajectory(TCurve curve, number_t samplingStep = 0.005, number_t samplingTolerance = 0.005)
         : m_curve(std::move(curve)), m_sampling(samplingStep, samplingTolerance), m_curvature(samplingStep), m_distance(0), m_t(0) {}
 
     template <typename... Args>
@@ -27,8 +27,8 @@ class CurveTrajectory final : public SmoothTrajectory {
     CurveTrajectory(Args &&...args) : CurveTrajectory(TCurve(std::forward<Args>(args)...)) {}
 
     /// @copydoc Trajectory::advance()
-    bool advance(double_t distance) override {
-        if (m_sampling.lengthEstimationComplete() && m_distance >= m_sampling.length()) {
+    bool advance(number_t distance) override {
+        if (m_sampling.samplingComplete() && m_distance >= m_sampling.length()) {
             return false;
         }
 
@@ -44,26 +44,26 @@ class CurveTrajectory final : public SmoothTrajectory {
     Position2D<Meter> getCurrentPosition() const override { return Position2D<Meter>(m_curve(m_t), m_curve.derivative(m_t).argument()); }
 
     /// @copydoc Trajectory::getRemainingDistance()
-    std::optional<double_t> getRemainingDistance() const override {
-        if (m_sampling.lengthEstimationComplete()) {
-            return std::max(static_cast<double_t>(0.0), m_sampling.length() - m_distance);
+    std::optional<number_t> getRemainingDistance() const override {
+        if (m_sampling.samplingComplete()) {
+            return std::max(static_cast<number_t>(0.0), m_sampling.length() - m_distance);
         } else {
             return std::nullopt;
         }
     }
     /// @copydoc Trajectory::getMaxCurvature()
-    double_t getMaxCurvature(double_t distance) override {
+    number_t getMaxCurvature(number_t distance) override {
         forceGenerate(distance);
 
-        return m_curvature.getMaximum(m_distance, m_distance + distance, [&](double_t dist) {
-            double_t t = m_sampling.solveInverseArcLength(m_curve, dist);
+        return m_curvature.getMaximum(m_distance, m_distance + distance, [&](number_t dist) {
+            number_t t = m_sampling.solveInverseArcLength(m_curve, dist);
             return std::abs(m_curve.curvature(t));
         });
     }
 
     const TCurve &getCurve() const { return m_curve; }
 
-    void forceGenerate(double_t distance = std::numeric_limits<double_t>::max()) {
+    void forceGenerate(number_t distance = std::numeric_limits<number_t>::max()) {
         m_sampling.sample(m_curve, m_distance + distance);
         if (m_sampling.isDegraded()) {
             m_sampling.discardSamples(m_distance);
@@ -71,7 +71,7 @@ class CurveTrajectory final : public SmoothTrajectory {
     }
 
 #ifdef _BR_DEBUG
-    double_t sampledDistance() const { return m_sampling.sampledLength(); }
+    number_t sampledDistance() const { return m_sampling.sampledLength(); }
     std::size_t numberOfSamplePoints() const { return m_sampling.numberOfSamplePoints(); }
     std::size_t numberOfCurvatureExtrema() const { return m_curvature.getExtrema().size(); }
     bool isCurvatureIncreasing() const { return m_curvature.isStartIncreasing(); }
@@ -83,8 +83,8 @@ class CurveTrajectory final : public SmoothTrajectory {
     CurveSampling m_sampling;
     RollingMax m_curvature;
 
-    double_t m_distance;
-    double_t m_t;
+    number_t m_distance;
+    number_t m_t;
 };
 
 #endif

@@ -9,7 +9,7 @@ namespace msg {
 class Command : public br_messages__msg__Command {
   public:
     Command() = default;
-    Command(double_t linear, double_t angular) {
+    Command(number_t linear, number_t angular) {
         this->linear = linear;
         this->angular = angular;
     }

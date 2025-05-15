@@ -5,14 +5,14 @@
         requires Add<TValue> && Mul<TValue> && std::is_default_constructible_v<TValue> && Clampable<TValue>
 
 TEMPLATE
-ProportionalIntegralDerivative<TValue>::ProportionalIntegralDerivative(double_t kp, double_t ti, double_t td, double_t filter,
-                                                                       std::optional<double_t> outputSaturation, std::optional<double_t> integralSaturation,
-                                                                       std::optional<double_t> derivativeSaturation)
+ProportionalIntegralDerivative<TValue>::ProportionalIntegralDerivative(number_t kp, number_t ti, number_t td, number_t filter,
+                                                                       std::optional<number_t> outputSaturation, std::optional<number_t> integralSaturation,
+                                                                       std::optional<number_t> derivativeSaturation)
     : m_kp(kp), m_ki(ti == 0 ? 0 : 1 / ti), m_value(), m_integral(integralSaturation), m_derivative(td, filter, {}, derivativeSaturation),
       m_saturation(outputSaturation) {}
 
 TEMPLATE
-void ProportionalIntegralDerivative<TValue>::update(TValue error, double_t interval) {
+void ProportionalIntegralDerivative<TValue>::update(TValue error, number_t interval) {
     m_derivative.update(error, interval);
     m_integral.update(error, interval);
 
@@ -50,32 +50,32 @@ TValue ProportionalIntegralDerivative<TValue>::lastError() const {
 #endif
 
 TEMPLATE
-double_t ProportionalIntegralDerivative<TValue>::kp() const {
+number_t ProportionalIntegralDerivative<TValue>::kp() const {
     return m_kp;
 }
 TEMPLATE
-double_t ProportionalIntegralDerivative<TValue>::ti() const {
+number_t ProportionalIntegralDerivative<TValue>::ti() const {
     return m_ki == 0 ? 0 : 1 / m_ki;
 }
 TEMPLATE
-double_t ProportionalIntegralDerivative<TValue>::td() const {
+number_t ProportionalIntegralDerivative<TValue>::td() const {
     return m_derivative.gain();
 }
 TEMPLATE
-double_t ProportionalIntegralDerivative<TValue>::filter() const {
+number_t ProportionalIntegralDerivative<TValue>::filter() const {
     return m_derivative.filter();
 }
 
 TEMPLATE
-std::optional<double_t> ProportionalIntegralDerivative<TValue>::saturation() const {
+std::optional<number_t> ProportionalIntegralDerivative<TValue>::saturation() const {
     return m_saturation;
 }
 TEMPLATE
-std::optional<double_t> ProportionalIntegralDerivative<TValue>::integralSaturation() const {
+std::optional<number_t> ProportionalIntegralDerivative<TValue>::integralSaturation() const {
     return m_integral.saturation();
 }
 TEMPLATE
-std::optional<double_t> ProportionalIntegralDerivative<TValue>::derivativeSaturation() const {
+std::optional<number_t> ProportionalIntegralDerivative<TValue>::derivativeSaturation() const {
     return m_derivative.saturation();
 }
 

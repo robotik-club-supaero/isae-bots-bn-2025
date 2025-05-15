@@ -5,7 +5,7 @@ LinearTrajectory::LinearTrajectory(Point2D<Meter> origin, Point2D<Meter> destina
     : m_origin(origin), m_destination(destination), m_direction((m_destination - m_origin).normalize()),
       m_totalLength(Point2D<Meter>::distance(m_origin, m_destination)), m_position(0) {}
 
-bool LinearTrajectory::advance(double_t distance) {
+bool LinearTrajectory::advance(number_t distance) {
     if (m_position == m_totalLength) {
         return false;
     }
@@ -21,11 +21,11 @@ Position2D<Meter> LinearTrajectory::getCurrentPosition() const {
     return Position2D<Meter>(m_origin + m_direction * m_position, m_direction.argument());
 }
 
-std::optional<double_t> LinearTrajectory::getRemainingDistance() const {
-    return std::make_optional<double_t>(m_totalLength - m_position);
+std::optional<number_t> LinearTrajectory::getRemainingDistance() const {
+    return std::make_optional<number_t>(m_totalLength - m_position);
 }
 
-double_t LinearTrajectory::getMaxCurvature(double_t distance) {
+number_t LinearTrajectory::getMaxCurvature(number_t distance) {
     return 0;
 }
 

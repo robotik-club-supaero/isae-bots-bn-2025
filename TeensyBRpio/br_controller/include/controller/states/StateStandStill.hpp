@@ -10,7 +10,7 @@ class StateStandStill {
     StateStandStill() = default;
     StateStandStill(Position2D<Meter> restPoint);
     ControllerStatus getStatus() const;
-    StateUpdateResult update(double_t interval);
+    StateUpdateResult update(number_t interval);
 
   private:
     Position2D<Meter> m_restPosition;

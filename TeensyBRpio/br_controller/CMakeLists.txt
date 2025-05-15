@@ -16,7 +16,8 @@ find_package(br_messages REQUIRED)
 include_directories(include)
 
 file(GLOB_RECURSE base_SRCS
-   "${PROJECT_SOURCE_DIR}/src/controller/*.cpp" 
+    "${PROJECT_SOURCE_DIR}/src/allocator.cpp" 
+    "${PROJECT_SOURCE_DIR}/src/controller/*.cpp"
     "${PROJECT_SOURCE_DIR}/src/feedback/UnicycleStateSimulator.cpp" 
     "${PROJECT_SOURCE_DIR}/src/feedback/TwoWheelSimulator.cpp" 
     "${PROJECT_SOURCE_DIR}/src/geometry/*.cpp" 

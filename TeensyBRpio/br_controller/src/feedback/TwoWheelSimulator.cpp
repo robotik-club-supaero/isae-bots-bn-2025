@@ -4,17 +4,17 @@
 #include "Clock.hpp"
 #include "geometry/WheelSpeeds.hpp"
 
-TwoWheelSimulator::TwoWheelSimulator(double_t wheelDiameter, double_t wheelDistance, double_t minWheelSpeed, double_t maxWheelSpeed,
-                                     double_t maxWheelAcceleration, double_t noise_stddev)
+TwoWheelSimulator::TwoWheelSimulator(number_t wheelDiameter, number_t wheelDistance, number_t minWheelSpeed, number_t maxWheelSpeed,
+                                     number_t maxWheelAcceleration, number_t noise_stddev)
     : m_wheelRadius(wheelDiameter / 2), m_wheelDistance(wheelDistance), m_minWheelSpeed(minWheelSpeed), m_maxWheelSpeed(maxWheelSpeed), m_noise(),
       m_requestedSpeeds(std::make_shared<Speeds>()), m_leftWheelSpeed(0, maxWheelAcceleration), m_rightWheelSpeed(0, maxWheelAcceleration),
       m_position() {
     if (noise_stddev > 0) {
-        m_noise = std::normal_distribution<double_t>(0, noise_stddev);
+        m_noise = std::normal_distribution<number_t>(0, noise_stddev);
     }
 }
 
-void TwoWheelSimulator::update(double_t interval) {
+void TwoWheelSimulator::update(number_t interval) {
     static std::default_random_engine generator(micros());
 
     // Apply max acceleration to wheel speed (simulates damping)
@@ -44,7 +44,7 @@ void TwoWheelSimulator::update(double_t interval) {
     // Update position
     Speeds speeds = wheelSpeeds.toUnicycleSpeeds(m_wheelRadius, m_wheelDistance);
 
-    double_t linOffset = speeds.linear * interval;
+    number_t linOffset = speeds.linear * interval;
     m_position.x += std::cos(m_position.theta) * linOffset;
     m_position.y += std::sin(m_position.theta) * linOffset;
     m_position.theta += Angle(speeds.angular * interval);

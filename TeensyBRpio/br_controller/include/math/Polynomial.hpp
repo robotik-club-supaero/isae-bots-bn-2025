@@ -31,7 +31,7 @@ class Polynomial {
     Polynomial(std::array<T, N> coeffs);
 
     /// Evaluates the polynomial at `value` using Horner's method.
-    T operator()(double_t value) const;
+    T operator()(number_t value) const;
 
     Derivative derivative() const;
 

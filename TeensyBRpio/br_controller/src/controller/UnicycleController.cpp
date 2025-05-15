@@ -11,13 +11,13 @@ namespace controller {
 
 template <ErrorConverter TConverter>
 UnicycleController<TConverter>::UnicycleController(Vector2D<Meter> trackingOffset, TConverter converter, Accelerations brakeAccelerations,
-                                                   Speeds maxSpeeds, Accelerations maxAccelerations, double_t speedThreshold)
+                                                   Speeds maxSpeeds, Accelerations maxAccelerations, number_t speedThreshold)
     : m_offset(trackingOffset), m_brakeAccelerations(brakeAccelerations), m_maxSpeeds(maxSpeeds), m_maxAccelerations(maxAccelerations),
       m_speedThreshold(speedThreshold), m_reversing(), m_speedControl(), m_setpoint(Position2D<Meter>()), m_goalPointSpeed(), m_actualSpeed(),
       m_trackingPointSpeed(1, 0.2), m_converter(std::move(converter)), m_event(), m_currentOrder(), m_arena(), m_lastCommand() {}
 
 template <ErrorConverter TConverter>
-Speeds UnicycleController<TConverter>::updateCommand(double_t interval, Position2D<Meter> robotPosition) {
+Speeds UnicycleController<TConverter>::updateCommand(number_t interval, Position2D<Meter> robotPosition) {
     m_event = UpdateResultCode();
     m_actualSpeed.update(robotPosition, interval);
 
@@ -48,7 +48,7 @@ Speeds UnicycleController<TConverter>::updateCommand(double_t interval, Position
 
 // Private
 template <ErrorConverter TConverter>
-setpoint_t UnicycleController<TConverter>::computeSetpoint(double_t interval, Position2D<Meter> robotPosition) {
+setpoint_t UnicycleController<TConverter>::computeSetpoint(number_t interval, Position2D<Meter> robotPosition) {
     StateUpdateResult result = updateState<StateUpdateResult>(interval);
     return std::visit<setpoint_t>( //
         overload{
@@ -112,7 +112,7 @@ setpoint_t UnicycleController<TConverter>::computeSetpoint(double_t interval, Po
 
 // Private
 template <ErrorConverter TConverter>
-Speeds UnicycleController<TConverter>::computeCommand(double_t interval, Position2D<Meter> robotPosition, setpoint_t setpoint) {
+Speeds UnicycleController<TConverter>::computeCommand(number_t interval, Position2D<Meter> robotPosition, setpoint_t setpoint) {
     return std::visit( //
         overload{
             [&](Position2D<Meter> &setpoint) {
@@ -146,15 +146,15 @@ Speeds UnicycleController<TConverter>::computeCommand(double_t interval, Positio
                 Vector2D<Meter> convertedError = m_goalPointSpeed.value() + m_converter.value();
 
                 // Compute command from error
-                double_t alpha = m_offset.x;
-                double_t beta = m_offset.y;
-                double_t theta = robotPosition.theta;
-                double_t cos_theta = std::cos(theta);
-                double_t sin_theta = std::sin(theta);
+                number_t alpha = m_offset.x;
+                number_t beta = m_offset.y;
+                number_t theta = robotPosition.theta;
+                number_t cos_theta = std::cos(theta);
+                number_t sin_theta = std::sin(theta);
 
-                double_t cmd_v =
+                number_t cmd_v =
                     ((alpha * cos_theta - beta * sin_theta) * convertedError.x + (alpha * sin_theta + beta * cos_theta) * convertedError.y) / alpha;
-                double_t cmd_omega = (-sin_theta * convertedError.x + cos_theta * convertedError.y) / alpha;
+                number_t cmd_omega = (-sin_theta * convertedError.x + cos_theta * convertedError.y) / alpha;
 
                 if (reversing) {
                     cmd_v = -cmd_v;
@@ -344,7 +344,7 @@ Vector2D<Meter> UnicycleController<TConverter>::getGoalPointSpeed() const {
 }
 
 template <ErrorConverter TConverter>
-Position2D<Meter, double_t> UnicycleController<TConverter>::getEstimatedRobotSpeed() const {
+Position2D<Meter, number_t> UnicycleController<TConverter>::getEstimatedRobotSpeed() const {
     return m_actualSpeed.value();
 }
 

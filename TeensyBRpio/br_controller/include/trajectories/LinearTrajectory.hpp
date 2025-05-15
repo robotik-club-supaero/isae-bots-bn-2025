@@ -9,16 +9,16 @@ class LinearTrajectory final : public SmoothTrajectory {
     LinearTrajectory(Point2D<Meter> origin, Point2D<Meter> destination);
 
     /// @copydoc Trajectory::advance()
-    bool advance(double_t distance) override;
+    bool advance(number_t distance) override;
 
     /// @copydoc Trajectory::getCurrentPosition()
     Position2D<Meter> getCurrentPosition() const override;
 
     /// @copydoc Trajectory::getRemainingDistance()
-    std::optional<double_t> getRemainingDistance() const override;
+    std::optional<number_t> getRemainingDistance() const override;
 
     /// @copydoc Trajectory::getMaxCurvature()
-    double_t getMaxCurvature(double_t distance) override;
+    number_t getMaxCurvature(number_t distance) override;
 
     /// @copydoc Trajectory::recompute()
     bool recompute(Position2D<Meter> newStartPosition) override;
@@ -27,8 +27,8 @@ class LinearTrajectory final : public SmoothTrajectory {
     Point2D<Meter> m_origin;
     Point2D<Meter> m_destination;
     Vector2D<Meter> m_direction;
-    double_t m_totalLength;
-    double_t m_position;
+    number_t m_totalLength;
+    number_t m_position;
 };
 
 #endif

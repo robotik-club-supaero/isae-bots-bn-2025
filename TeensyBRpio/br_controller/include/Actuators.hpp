@@ -18,7 +18,7 @@ class Actuators {
     void switchOff();
     /// Updates the state of the actuators. What this actually does is actuator-dependent.
     /// @param interval The time elapsed since the last update, in the time frame of the controller.
-    void update(double_t interval);
+    void update(number_t interval);
     /// Indicates whether all actuators are ready
     bool isReady();
     /// Indicates whether all actuators are idle
@@ -28,7 +28,7 @@ class Actuators {
 #endif
 
 template <typename T>
-concept Actuators = requires(T a, double_t interval) {
+concept Actuators = requires(T a, number_t interval) {
     a.switchOn();
     a.switchOff();
     a.update(interval);
@@ -38,6 +38,6 @@ concept Actuators = requires(T a, double_t interval) {
 
 template <typename TController, typename TActuators>
 concept CanControl =
-    requires(TController c, TActuators a, double_t interval, Position2D<Meter> pos) { a.sendCommand(c.updateCommand(interval, pos)); };
+    requires(TController c, TActuators a, number_t interval, Position2D<Meter> pos) { a.sendCommand(c.updateCommand(interval, pos)); };
 
 #endif

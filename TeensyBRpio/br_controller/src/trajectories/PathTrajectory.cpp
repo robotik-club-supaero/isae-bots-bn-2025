@@ -17,8 +17,8 @@ inline Vector2D<Meter> angleBisector(Vector2D<Meter> lineA, Vector2D<Meter> line
  */
 BezierCurve<4> generateBezier(Point2D<Meter> start, Point2D<Meter> end, Vector2D<Meter> initialDirection,
                               std::optional<Vector2D<Meter>> finalDirection) {
-    double_t distance = Point2D<Meter>::distance(start, end);
-    double_t ctrlPtDistance = distance / 3;
+    number_t distance = Point2D<Meter>::distance(start, end);
+    number_t ctrlPtDistance = distance / 3;
 
     Point2D<Meter> controlPt1 = start + initialDirection.normalize() * ctrlPtDistance;
     Point2D<Meter> controlPt2 = end - finalDirection.value_or(end - controlPt1).normalize() * ctrlPtDistance;
@@ -35,7 +35,10 @@ BezierCurvesGenerator::BezierCurvesGenerator(std::optional<Angle> initialDirecti
 
     Vector2D<Meter> preferredDirection;
     if (m_points.size() > 2) {
-        preferredDirection = angleBisector(m_points[1] - m_points[0], 1.5 * m_points[1] - (m_points[0] + 0.5 * m_points[2]));
+        Angle theta1 = (m_points[1] - m_points[0]).argument();
+        Angle theta2 = (m_points[2] - m_points[1]).argument();
+
+        preferredDirection = (theta1 - Angle(0.5 * (theta2 - theta1))).toHeadingVector();
     } else {
         preferredDirection = m_points[1] - m_points[0];
     }
@@ -43,7 +46,7 @@ BezierCurvesGenerator::BezierCurvesGenerator(std::optional<Angle> initialDirecti
     // Otherwise, as we are not moving yet, it is more efficient (and safer) to turn now than starting to move in the wrong direction.
     if (initialDirection) {
         if (std::abs(*initialDirection - preferredDirection.argument()) <= Angle::Pi / 3) {
-            preferredDirection = {std::cos(*initialDirection), std::sin(*initialDirection)};
+            preferredDirection = initialDirection->toHeadingVector();
         }
     }
     m_initialDirection = preferredDirection;

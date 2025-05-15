@@ -41,11 +41,11 @@
 
 /* ROS */
 
-#ifdef _SIMULATION
-#define SEND_POSITION_INTERVAL 10 // ms (for a smooth GUI)
-#else
+#ifdef ARDUINO
 // Also applies to topic /odos_count
 #define SEND_POSITION_INTERVAL 100 // ms
+#else
+#define SEND_POSITION_INTERVAL 10 // ms (for a smooth GUI)
 #endif
 
 // Applies to topic /logTotaleArray
@@ -84,11 +84,11 @@
 #define SIM_MAX_WHEEL_SPEED 50  // rad/s (simulates saturation, roughly corresponds to MAX_MOTOR_SPEED)
 #define SIM_MAX_WHEEL_ACCEL 100 // rad/s² (simulates damping + robot inertia) // TODO measure actual value
 
-#endif
-
 /* MEMORY POOL config - Arduino only */
 // The memory pool contains all the "SmallDeque":
 //    - The pre-generated Bézier curves (See CurveTrajectory and MultiCurveTrajectory)
 //    - For each curve, the number of sample points and the number of curvature extrema (see CurveSampling and RollingMax)
 #define BLOCK_COUNT 64
 #define BLOCK_SIZE 64 // bytes
+
+#endif

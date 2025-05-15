@@ -8,7 +8,7 @@ constexpr uint8_t FLAG_REVERSE = 0b0001;
 constexpr uint8_t FLAG_FINAL_ORIENTATION = 0b0010;
 constexpr uint8_t FLAG_ALLOW_CURVE = 0b0100;
 
-constexpr double_t CONTROL_MAX_SPEED = 255.;
+constexpr number_t CONTROL_MAX_SPEED = 255.;
 
 using namespace ros2;
 
@@ -40,8 +40,9 @@ inline void handleGoTo(TManager &manager, const br_messages::msg::DisplacementOr
 
         SmallDeque<Point2D<Meter>> path;
         if (!path.reserve(path_view.size() + 1)) {
+            // This should not happen because we reset the memory pool just above.
             log(ERROR, "Could not initialize trajectory because of memory exhaustion");
-            // TODO callback
+            // TODO callback"
             return;
         }
         for (const Point2D<Meter> &point : path_view) {
@@ -87,7 +88,7 @@ inline void handleSetGains(TManager &manager, const br_messages::msg::GainsPid &
 template <typename TManager>
 inline void handleSetSpeed(TManager &manager, const std_msgs::msg::Int16 &speedFactor) {
     Speeds maxSpeeds = manager.getController().getMaxSpeeds();
-    manager.getController().setMaxSpeeds(maxSpeeds * clamp(static_cast<double_t>(speedFactor.data), 1., 100.) / 100.,
+    manager.getController().setMaxSpeeds(maxSpeeds * clamp(static_cast<number_t>(speedFactor.data), 1., 100.) / 100.,
                                          /* persist = */ false);
 }
 

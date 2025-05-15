@@ -24,11 +24,11 @@ PYBIND11_MODULE(br_trajectories, m) {
     m.doc() = "Python bindings to display and simulate trajectories. This does NOT allow to communicate with the program that runs the BR, you need "
               "to use ROS for that.";
 
-    py::class_<Angle>(m, "Angle").def(py::init<double_t>()).def_property_readonly("value", &Angle::value);
+    py::class_<Angle>(m, "Angle").def(py::init<number_t>()).def_property_readonly("value", &Angle::value);
 
     py::class_<Point2D<Meter>>(m, "Point2D")
         .def(py::init<>())
-        .def(py::init<double_t, double_t>())
+        .def(py::init<number_t, number_t>())
         .def("__repr__", &Point2D<Meter>::operator std::string)
         .def_readwrite("x", &Point2D<Meter>::x)
         .def_readwrite("y", &Point2D<Meter>::y)
@@ -36,16 +36,16 @@ PYBIND11_MODULE(br_trajectories, m) {
         .def(py::self += py::self)
         .def(py::self - py::self)
         .def(py::self -= py::self)
-        .def(py::self * double_t())
-        .def(double_t() * py::self)
-        .def(py::self *= double_t())
-        .def(py::self / double_t())
-        .def(py::self /= double_t());
+        .def(py::self * number_t())
+        .def(number_t() * py::self)
+        .def(py::self *= number_t())
+        .def(py::self / number_t())
+        .def(py::self /= number_t());
 
     py::class_<Position2D<Meter>, Point2D<Meter>>(m, "Position2D")
         .def(py::init<>())
-        .def(py::init<double_t, double_t, double_t>())
-        .def(py::init<Point2D<Meter>, double_t>())
+        .def(py::init<number_t, number_t, number_t>())
+        .def(py::init<Point2D<Meter>, number_t>())
         .def("__repr__", &Position2D<Meter>::operator std::string)
         .def_readwrite("theta", &Position2D<Meter>::theta);
 
@@ -57,7 +57,7 @@ PYBIND11_MODULE(br_trajectories, m) {
         .def_property_readonly_static("FORWARD", []() { return FORWARD; })
         .def_property_readonly_static("REVERSE", []() { return REVERSE; });
 
-    py::implicitly_convertible<double_t, Angle>();
+    py::implicitly_convertible<number_t, Angle>();
 
     m.def("getTrajectoryCurves", [](Position2D<Meter> robotPosition, std::optional<Angle> finalOrientation, SmallDeque<Point2D<Meter>> path) {
         std::vector<BezierCurve<4>> curves;

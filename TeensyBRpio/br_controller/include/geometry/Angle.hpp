@@ -7,14 +7,14 @@ template <typename Unit>
 class Vector2D;
 
 /**
- * A signed angle in radians, in (-PI, PI]. This type supports implicit conversion from and to double_t.
+ * A signed angle in radians, in (-PI, PI]. This type supports implicit conversion from and to number_t.
  */
 class Angle {
   public:
-    Angle(double_t value);
+    Angle(number_t value);
 
-    operator double_t() const;
-    double_t value() const;
+    operator number_t() const;
+    number_t value() const;
 
     /// @return this + PI
     Angle reverse() const;
@@ -31,18 +31,18 @@ class Angle {
     Angle operator+(Angle other) const;
     Angle operator-(Angle other) const;
 
-    static constexpr double_t Pi = std::numbers::pi_v<double_t>;
+    static constexpr number_t Pi = std::numbers::pi_v<number_t>;
 
   private:
-    double_t m_value;
+    number_t m_value;
 };
 
 namespace std {
-inline double_t cos(Angle angle) {
-    return cos(static_cast<double_t>(angle));
+inline number_t cos(Angle angle) {
+    return cos(static_cast<number_t>(angle));
 }
-inline double_t sin(Angle angle) {
-    return sin(static_cast<double_t>(angle));
+inline number_t sin(Angle angle) {
+    return sin(static_cast<number_t>(angle));
 }
 } // namespace std
 

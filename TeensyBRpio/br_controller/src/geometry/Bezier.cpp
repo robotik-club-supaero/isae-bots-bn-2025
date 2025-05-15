@@ -68,19 +68,19 @@ BezierCurve<N>::BezierCurve(std::array<Point2D<Meter>, N> points)
       m_points(std::move(points)) {}
 
 template <std::size_t N>
-Point2D<Meter> BezierCurve<N>::operator()(double_t t) const {
+Point2D<Meter> BezierCurve<N>::operator()(number_t t) const {
     return m_polynomial(t);
 }
 
 template <std::size_t N>
-Vector2D<Meter> BezierCurve<N>::derivative(double_t t) const {
+Vector2D<Meter> BezierCurve<N>::derivative(number_t t) const {
     return m_derivative(t);
 }
 
 template <std::size_t N>
-double_t BezierCurve<N>::curvature(double_t t) const {
+number_t BezierCurve<N>::curvature(number_t t) const {
     Vector2D<Meter> derivative = m_derivative(t);
-    double_t derivativeNorm = derivative.norm();
+    number_t derivativeNorm = derivative.norm();
     Vector2D<Meter> secondDerivative = m_secondDerivative(t);
 
     return (derivative.x * secondDerivative.y - derivative.y * secondDerivative.x) / (derivativeNorm * derivativeNorm * derivativeNorm);

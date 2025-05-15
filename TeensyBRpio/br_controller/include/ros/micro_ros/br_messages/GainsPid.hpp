@@ -9,7 +9,7 @@ namespace msg {
 class GainsPid : public br_messages__msg__GainsPid {
   public:
     GainsPid() = default;
-    GainsPid(double_t kp, double_t ti, double_t td) {
+    GainsPid(number_t kp, number_t ti, number_t td) {
         this->kp = kp;
         this->ti = ti;
         this->td = td;

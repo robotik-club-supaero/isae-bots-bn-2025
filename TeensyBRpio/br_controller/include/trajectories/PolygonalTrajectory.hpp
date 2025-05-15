@@ -12,19 +12,19 @@ class PolygonalTrajectory final : public Trajectory {
     PolygonalTrajectory(SmallDeque<Point2D<Meter>> path);
 
     /// @copydoc Trajectory::advance()
-    bool advance(double_t distance) override;
+    bool advance(number_t distance) override;
 
     /// @copydoc Trajectory::advanceSmooth()
-    bool advanceSmooth(double_t distance) override;
+    bool advanceSmooth(number_t distance) override;
 
     /// @copydoc Trajectory::getCurrentPosition()
     Position2D<Meter> getCurrentPosition() const override;
 
     /// @copydoc Trajectory::getRemainingDistance()
-    std::optional<double_t> getRemainingDistance() const override;
+    std::optional<number_t> getRemainingDistance() const override;
 
     /// @copydoc Trajectory::getMaxCurvature()
-    double_t getMaxCurvature(double_t distance) override;
+    number_t getMaxCurvature(number_t distance) override;
 
     /// @copydoc Trajectory::recompute()
     bool recompute(Position2D<Meter> newStartPosition) override;

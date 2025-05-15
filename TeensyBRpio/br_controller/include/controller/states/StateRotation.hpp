@@ -11,29 +11,29 @@ namespace controller {
 class StateRotation {
   public:
     ControllerStatus getStatus() const;
-    StateUpdateResult update(double_t interval);
-    void setMaxSpeed(double_t maxAngSpeed);
+    StateUpdateResult update(number_t interval);
+    void setMaxSpeed(number_t maxAngSpeed);
 
   protected:
     /// @param profile must not be null and must be valid for the lifetime of this state
-    StateRotation(OrientationProfile *profile, double_t maxAngSpeed, double_t maxAngAcceleration);
+    StateRotation(OrientationProfile *profile, number_t maxAngSpeed, number_t maxAngAcceleration);
 
   private:
     OrientationProfile *m_profile;
-    double_t m_maxSpeed;
+    number_t m_maxSpeed;
     Ramp m_ramp;
 };
 
 class StateInitialRotation final : public StateRotation {
   public:
     /// @param profile must not be null and must be valid for the lifetime of this state
-    StateInitialRotation(OrientationProfile *profile, double_t maxAngSpeed, double_t maxAngAcceleration);
+    StateInitialRotation(OrientationProfile *profile, number_t maxAngSpeed, number_t maxAngAcceleration);
 };
 
 class StateFinalRotation final : public StateRotation {
   public:
     /// @param profile must not be null and must be valid for the lifetime of this state
-    StateFinalRotation(OrientationProfile *profile, double_t maxAngSpeed, double_t maxAngAcceleration);
+    StateFinalRotation(OrientationProfile *profile, number_t maxAngSpeed, number_t maxAngAcceleration);
 };
 
 } // namespace controller

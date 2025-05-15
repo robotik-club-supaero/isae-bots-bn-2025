@@ -113,12 +113,12 @@ class ControllerManager
      *
      * # Caveat
      *
-     * This desynchronizes the manager from the clock. Calling `update(void)` after `update(double_t` is a logic error
+     * This desynchronizes the manager from the clock. Calling `update(void)` after `update(number_t` is a logic error
      * and will lead to inconsistent update rates. To avoid this, you must call `resyncClock()` before calling `update(void)` again.
      *
      * @param interval The time elapsed since the last update. Must be positive.
      */
-    void update(double_t interval);
+    void update(number_t interval);
 
     /**
      * Resynchronizes the manager with the clock. This resets the time of the last update.

@@ -17,19 +17,19 @@ class BezierCurve {
      * Returns `B(t)` where `B` is the function describing this Bézier curve.
      * @param t The position on the curve. Must be between 0 and 1 (both included), otherwise the result is unspecified.
      */
-    Point2D<Meter> operator()(double_t t) const;
+    Point2D<Meter> operator()(number_t t) const;
 
     /**
      * Computes the derivative `dB(t)/dt` where `B` is the function describing this Bézier curve.
      * @param t The position on the curve. Must be between 0 and 1 (both included), otherwise the result is unspecified.
      */
-    Vector2D<Meter> derivative(double_t t) const;
+    Vector2D<Meter> derivative(number_t t) const;
 
     /**
      * Computes the *signed* curvature of the curve. This is the reciprocal of the radius of curvature.
      * @param t The position on the curve. Must be between 0 and 1 (both included), otherwise the result is unspecified.
      */
-    double_t curvature(double_t t) const;
+    number_t curvature(number_t t) const;
 
     const std::array<Point2D<Meter>, N> &points() const;
 

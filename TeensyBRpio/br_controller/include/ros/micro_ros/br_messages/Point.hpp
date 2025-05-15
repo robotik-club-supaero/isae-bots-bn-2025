@@ -10,7 +10,7 @@ class Point : public br_messages__msg__Point {
   public:
     Point() = default;
     Point(const br_messages__msg__Point &point) : Point(point.x, point.y) {}
-    Point(double_t x, double_t y) {
+    Point(number_t x, number_t y) {
         this->x = x;
         this->y = y;
     }

@@ -21,7 +21,7 @@
  */
 class RollingMax {
   public:
-    RollingMax(double_t step, double_t initialStart = 0)
+    RollingMax(number_t step, number_t initialStart = 0)
         : m_start(initialStart), m_end(initialStart), m_step(step), m_extrema(), m_start_increasing() {}
 
     /**
@@ -32,14 +32,14 @@ class RollingMax {
      * The behavior is undefined if `end` < `start` or `start` is less than `initialStart` or the value used in the previous call to `getMaximum`.
      */
     template <typename Fun>
-        requires std::is_invocable_r_v<double_t, Fun &, double_t>
-    double_t getMaximum(double_t start, double_t end, Fun &&function) {
+        requires std::is_invocable_r_v<number_t, Fun &, number_t>
+    number_t getMaximum(number_t start, number_t end, Fun &&function) {
         shrinkInterval(start);
         bool sample_complete = sampleUntil(end, function);
 
         bool increasing = m_start_increasing;
 
-        double_t value = increasing ? std::numeric_limits<double_t>::lowest() : function(start);
+        number_t value = increasing ? std::numeric_limits<number_t>::lowest() : function(start);
         for (std::size_t i = 0; i < m_extrema.size() && m_extrema[i] < end; i++) {
             if (increasing && m_extrema[i] >= start) {
                 value = std::max(value, function(m_extrema[i]));
@@ -57,21 +57,21 @@ class RollingMax {
         return value;
     }
 
-    const SmallDeque<double_t> &getExtrema() const { return m_extrema; }
+    const SmallDeque<number_t> &getExtrema() const { return m_extrema; }
     bool isStartIncreasing() const { return m_start_increasing; }
 
   private:
     template <typename Fun>
-        requires std::is_invocable_r_v<double_t, Fun &, double_t>
-    double_t getMaximumNaive(double_t end, Fun &&function) const {
-        double_t m = std::numeric_limits<double_t>::lowest();
-        for (double_t x = m_end + m_step; x <= end; x += m_step) {
+        requires std::is_invocable_r_v<number_t, Fun &, number_t>
+    number_t getMaximumNaive(number_t end, Fun &&function) const {
+        number_t m = std::numeric_limits<number_t>::lowest();
+        for (number_t x = m_end + m_step; x <= end; x += m_step) {
             m = std::max(m, function(x));
         }
         return m;
     }
 
-    void shrinkInterval(double_t newStart) {
+    void shrinkInterval(number_t newStart) {
         while (!m_extrema.empty() && m_extrema.front() < newStart) {
             // The start edge of the interval is required to be non-decreasing, so we drop the obsolete extremums
             m_extrema.pop_front();
@@ -81,24 +81,24 @@ class RollingMax {
     }
 
     template <typename Fun>
-        requires std::is_invocable_r_v<double_t, Fun &, double_t>
-    bool sampleUntil(double_t newEnd, Fun &&function) {
+        requires std::is_invocable_r_v<number_t, Fun &, number_t>
+    bool sampleUntil(number_t newEnd, Fun &&function) {
         if (newEnd <= m_end) {
             return true;
         }
         if (m_end == m_start) {
             m_end += m_step;
-            double_t initialValue = function(m_start);
-            double_t endValue = function(m_end);
+            number_t initialValue = function(m_start);
+            number_t endValue = function(m_end);
             m_start_increasing = endValue >= initialValue;
         }
 
         bool m_end_increasing = m_start_increasing ^ (m_extrema.size() % 2 == 1);
 
-        double_t oldEndValue = function(m_end);
+        number_t oldEndValue = function(m_end);
         while (newEnd > m_end) {
-            double_t nextEnd = m_end + m_step;
-            double_t endValue = function(nextEnd);
+            number_t nextEnd = m_end + m_step;
+            number_t endValue = function(nextEnd);
 
             if (m_end_increasing) {
                 if (oldEndValue > endValue) {
@@ -121,12 +121,12 @@ class RollingMax {
         return true;
     }
 
-    bool addExtremum(double_t x) { return m_extrema.push_back(x); }
+    bool addExtremum(number_t x) { return m_extrema.push_back(x); }
 
-    double_t m_start;
-    double_t m_end;
-    double_t m_step;
-    SmallDeque<double_t> m_extrema;
+    number_t m_start;
+    number_t m_end;
+    number_t m_step;
+    SmallDeque<number_t> m_extrema;
 
     /// Whether the function is initially increasing (or constant) around `m_start` (false = decreasing)
     bool m_start_increasing;

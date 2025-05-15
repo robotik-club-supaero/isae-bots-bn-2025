@@ -41,7 +41,7 @@ class Node {
         rcl_interfaces__msg__Log__init(&m_msgLog);
         rosidl_runtime_c__String__assign(&m_msgLog.name, name);
 
-        m_logger.emplace(createPublisher<rcl_interfaces::msg::Log>("rosout", /* reliability = */ ReliableOnly));
+        m_logger.emplace(createPublisher<rcl_interfaces::msg::Log>("rosout", /* reliability = */ AllowBestEffort));
     }
 
     void spin_once() { RCCHECK_HARD(rclc_executor_spin_some(m_executor.get(), 0)); }

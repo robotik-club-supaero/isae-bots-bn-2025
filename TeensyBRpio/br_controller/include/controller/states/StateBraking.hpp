@@ -10,7 +10,7 @@ class StateBraking {
   public:
     StateBraking(Speeds initialSpeeds, Accelerations brakeAccelerations);
     ControllerStatus getStatus() const;
-    StateUpdateResult update(double_t interval);
+    StateUpdateResult update(number_t interval);
 
   private:
     Ramp m_linRamp;

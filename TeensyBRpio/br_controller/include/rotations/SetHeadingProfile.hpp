@@ -13,7 +13,7 @@ class SetHeadingProfile : public OrientationProfile {
     /**
      * @copydoc OrientationProfile::advance()
      */
-    bool advance(double_t diffAngle) override;
+    bool advance(number_t diffAngle) override;
 
     /**
      * @copydoc OrientationProfile::getCurrentOrientation()
@@ -23,7 +23,7 @@ class SetHeadingProfile : public OrientationProfile {
     /**
      * @copydoc OrientationProfile::getRemainingAngle()
      */
-    std::optional<double_t> getRemainingAngle() const override;
+    std::optional<number_t> getRemainingAngle() const override;
 
     /**
      * @copydoc OrientationProfile::recompute

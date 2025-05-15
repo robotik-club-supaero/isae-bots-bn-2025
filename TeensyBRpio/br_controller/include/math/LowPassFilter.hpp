@@ -6,24 +6,24 @@
 /**
  * First-order low pass fiter.
  */
-template <typename TValue = double_t>
+template <typename TValue = number_t>
     requires Add<TValue> && Mul<TValue> && std::is_default_constructible_v<TValue>
 class LowPassFilter {
   public:
-    LowPassFilter(double_t tau);
+    LowPassFilter(number_t tau);
 
     /**
      * Updates the output of the filter
      * @param value The current value of the function.
      * @param interval The time elapsed since the last call to update. Must be strictly positive.
      */
-    void update(TValue input, double_t interval);
+    void update(TValue input, number_t interval);
 
     TValue value() const;
     operator TValue() const;
 
   private:
-    double_t m_tau;  // time constant, in s
+    number_t m_tau;  // time constant, in s
     TValue m_output; // last output that has been computed
 };
 

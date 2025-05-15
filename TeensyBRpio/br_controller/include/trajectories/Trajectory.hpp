@@ -35,7 +35,7 @@ class Trajectory {
      *
      * If `distance < 0`, the behavior is undefined.
      */
-    virtual bool advance(double_t distance) = 0;
+    virtual bool advance(number_t distance) = 0;
 
     /**
      * This is the same as `advance` but must stop at points of discontinuity.
@@ -43,7 +43,7 @@ class Trajectory {
      * - Otherwise, this must stop just before the discontinuity. Then subsequent calls to advanceSmooth() must do nothing and return false until
      * `advance` is called.
      */
-    virtual bool advanceSmooth(double_t distance) = 0;
+    virtual bool advanceSmooth(number_t distance) = 0;
 
     /**
      * Returns the current position on the trajectory. The position must be heading forward in the current local direction of the trajectory.
@@ -61,7 +61,7 @@ class Trajectory {
      *
      * After advance() has returned false, this must return 0.
      */
-    virtual std::optional<double_t> getRemainingDistance() const = 0;
+    virtual std::optional<number_t> getRemainingDistance() const = 0;
 
     /**
      * Returns the maximum absolute curvature of the trajectory for the next `distance` meters, starting at the current position.
@@ -75,7 +75,7 @@ class Trajectory {
      *
      * If `distance < 0`, the behavior is undefined.
      */
-    virtual double_t getMaxCurvature(double_t distance) = 0;
+    virtual number_t getMaxCurvature(number_t distance) = 0;
 
     /**
      * Attempts to recompute the trajectory such that:
@@ -117,7 +117,7 @@ class SmoothTrajectory : public Trajectory {
      * If you know the trajectory is smooth, you should call `advance` directly instead.
      *
      * @copydoc Trajectory::advanceSmooth */
-    bool advanceSmooth(double_t distance) override final { return advance(distance); }
+    bool advanceSmooth(number_t distance) override final { return advance(distance); }
 
   protected:
     SmoothTrajectory() = default;

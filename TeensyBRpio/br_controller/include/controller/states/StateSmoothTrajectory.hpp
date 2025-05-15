@@ -19,9 +19,9 @@ namespace controller {
 class StateSmoothTrajectory {
   public:
     /// @param trajectory must not be null and must be valid for the lifetime of this state
-    StateSmoothTrajectory(DisplacementKind kind, Trajectory *trajectory, Speeds maxSpeeds, double_t maxLinAcceleration);
+    StateSmoothTrajectory(DisplacementKind kind, Trajectory *trajectory, Speeds maxSpeeds, number_t maxLinAcceleration);
     ControllerStatus getStatus() const;
-    StateUpdateResult update(double_t interval);
+    StateUpdateResult update(number_t interval);
     void setMaxSpeeds(Speeds maxSpeeds);
 
   private:

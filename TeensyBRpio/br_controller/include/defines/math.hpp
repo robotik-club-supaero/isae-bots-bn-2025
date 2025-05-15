@@ -7,7 +7,7 @@
 #include <cmath>
 #include <limits>
 
-using double_t = double;
+using number_t = double;
 
 template <typename T>
 concept Add = requires(T a) {
@@ -15,7 +15,7 @@ concept Add = requires(T a) {
     { a - a } -> std::convertible_to<T>;
 };
 template <typename TValue, typename TOutput = TValue>
-concept Mul = requires(double_t a, TValue b) {
+concept Mul = requires(number_t a, TValue b) {
     { b *a } -> std::convertible_to<TOutput>;
 };
 
@@ -26,7 +26,7 @@ class Meter {
   public:
     /** Converts `value` from meters to `Unit` */
     template <typename Unit>
-    static double_t convert(double_t value);
+    static number_t convert(number_t value);
 };
 
 /** A phantom marker that specifies that lengths are expressed in millimeters. */
@@ -34,34 +34,34 @@ class Millimeter {
   public:
     /** Converts `value` from millimeters to `Unit` */
     template <typename Unit>
-    static double_t convert(double_t value);
+    static number_t convert(number_t value);
 };
 
 /** No-op */
 template <>
-inline double_t Meter::convert<Meter>(double_t value) {
+inline number_t Meter::convert<Meter>(number_t value) {
     return value;
 }
 /** Converts `value` from meters to millimeters */
 template <>
-inline double_t Meter::convert<Millimeter>(double_t value) {
+inline number_t Meter::convert<Millimeter>(number_t value) {
     return value * 1000.0;
 }
 
 /** No-op */
 template <>
-inline double_t Millimeter::convert<Millimeter>(double_t value) {
+inline number_t Millimeter::convert<Millimeter>(number_t value) {
     return value;
 }
 /** Converts `value` from millimeters to meters */
 template <>
-inline double_t Millimeter::convert<Meter>(double_t value) {
+inline number_t Millimeter::convert<Meter>(number_t value) {
     return value / 1000.0;
 }
 
 template <typename From, typename To>
-concept Convertible = requires(double_t a) {
-    { From::template convert<To>(a) } -> std::convertible_to<double_t>;
+concept Convertible = requires(number_t a) {
+    { From::template convert<To>(a) } -> std::convertible_to<number_t>;
 };
 
 /* #endregion */
@@ -80,20 +80,20 @@ constexpr inline bool is_power_of_two(std::size_t n) {
 
 /// Coordinate-wise clamping. See also std::clamp.
 template <typename T>
-T clamp(T value, double_t minBound, double_t maxBound);
+T clamp(T value, number_t minBound, number_t maxBound);
 
 template <typename T>
-concept StdClampable = requires(T t, double_t b) {
+concept StdClampable = requires(T t, number_t b) {
     { std::clamp(t, b, b) } -> std::convertible_to<T>;
 };
 
 template <StdClampable T>
-inline T clamp(T value, double_t minBound, double_t maxBound) {
+inline T clamp(T value, number_t minBound, number_t maxBound) {
     return std::clamp(value, minBound, maxBound);
 }
 
 template <typename T>
-concept Clampable = requires(T t, double_t b) {
+concept Clampable = requires(T t, number_t b) {
     { clamp<T>(t, -b, b) } -> std::convertible_to<T>;
 };
 

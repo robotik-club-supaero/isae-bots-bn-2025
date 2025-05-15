@@ -6,10 +6,10 @@
         requires Add<TValue> && Mul<TValue> && std::is_default_constructible_v<TValue>
 
 TEMPLATE
-LowPassFilter<TValue>::LowPassFilter(double_t tau) : m_tau(tau), m_output() {}
+LowPassFilter<TValue>::LowPassFilter(number_t tau) : m_tau(tau), m_output() {}
 
 TEMPLATE
-void LowPassFilter<TValue>::update(TValue value, double_t interval) {
+void LowPassFilter<TValue>::update(TValue value, number_t interval) {
     if (!std::isnan(value) && !std::isinf(value)) {
         m_output = (value + (m_output * m_tau) / interval) / (1.0 + m_tau / interval); // we consider dS/dt = (U_(n+1) - U_n) / dt
     }
@@ -25,4 +25,4 @@ TValue LowPassFilter<TValue>::value() const {
     return m_output;
 }
 
-template class LowPassFilter<double_t>;
+template class LowPassFilter<number_t>;
