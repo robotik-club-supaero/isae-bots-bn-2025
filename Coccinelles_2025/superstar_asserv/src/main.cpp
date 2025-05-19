@@ -36,8 +36,8 @@ void setup()
   // Si on veut tester les encodeurs , on les setup
   
   
-  //encoder_L.setup();
-  //encoder_R.setup();
+  encoder_L.setup();
+  encoder_R.setup();
   
 
   Serial.begin(115200); // Initialisation de la communication série

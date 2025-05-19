@@ -56,8 +56,8 @@ void Mesure_pos::loop()
         }
 
         // Positions
-        position_theta += (position_l - position_r) * K_angle;
-        position_x += ((position_l * K_l + position_r * K_r) / 2) * cos(position_theta);
+        position_theta += (position_l*K_l + position_r*K_r) * K_angle;
+        position_x += ((position_l * K_l - position_r * K_r) / 2) * cos(position_theta);
         position_y += ((position_l * K_l + position_r * K_r) / 2) * sin(position_theta);
 
         // Vitesse
@@ -77,6 +77,7 @@ void Mesure_pos::loop()
         Serial.println("Position_x = " + String(position_x));
         Serial.println("Position_y = " + String(position_y));
         Serial.println("Position_theta = " + String(position_theta));
+
         //Serial.println("Vitesse_x = " + String(Vitesse_x));
         //Serial.println("Vitesse_y = " + String(Vitesse_y));
         //Serial.println("Vr=" + String(vitesse_r));
