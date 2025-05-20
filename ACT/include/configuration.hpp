@@ -29,14 +29,14 @@
 
 // -- STEPPERS CONFIGURATION (ELEVATORS) --
 
-#define ELEVATOR_1_STEP_PER_REV 800 // TODO
+#define ELEVATOR_1_STEP_PER_REV 200 // TODO
 #define ELEVATOR_2_STEP_PER_REV ELEVATOR_1_STEP_PER_REV // TODO
 
-#define ELEVATOR_1_SPEED 50 // rev per minute // TODO
+#define ELEVATOR_1_SPEED 500 // rev per minute // TODO
 #define ELEVATOR_2_SPEED ELEVATOR_1_SPEED // rev per minute // TODO
 
 // number of steps between states DOWN and UP - change sign to invert direction
-#define ELEVATOR_1_POS_OFFSET 200 // TODO
+#define ELEVATOR_1_POS_OFFSET 5000 // TODO
 #define ELEVATOR_2_POS_OFFSET ELEVATOR_1_POS_OFFSET // TODO
 
 // -- PINS --
