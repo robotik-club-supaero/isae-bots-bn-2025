@@ -59,6 +59,8 @@ void Asserv::asserv_global(float vitesse_l_consigne, float vitesse_r_consigne, f
 {
     float erreur_l = vitesse_l_consigne - m_p_mesure_pos->vitesse_l;
     float erreur_r = vitesse_r_consigne - m_p_mesure_pos->vitesse_r;
+    Serial.println("erreur_l" + String(erreur_l));
+    Serial.println("erreur_r" + String(erreur_r));
     float output_l = m_asservPID_l.computeOutput(erreur_l, micros());
     float output_r = m_asservPID_r.computeOutput(erreur_r, micros());
 
@@ -85,7 +87,7 @@ void Asserv::loop()
 {
     if (micros() - m_time >= 1e4)
     {
-        asserv_global(255, 255, 0);
+        asserv_global(255, 255, 0); // vitesse max de 25 cm/s. Est-ce vrai ?
         m_time = micros();
     }
 }

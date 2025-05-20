@@ -63,17 +63,17 @@ void loop()
 {
     
   //DEBUG
-encoder_L.loop();
-encoder_R.loop();
+//encoder_L.loop();
+//encoder_R.loop();
   
   
   //ultrason.loop();
 mesure_pos.loop();
 //  Serial.println("mesure pos loop");
 //  // #DEBUG Si on veut tester les asservissements , on decommente la lige suivante et on commente machine_etats.loop()
-//  asserv.loop();
+asserv.loop();
 //machine_etats.loop();
 //  Serial.println("machie etats loop");
-//  delay(100); // Delay de 100ms entre chaque boucle
+//delay(100); // Delay de 100ms entre chaque boucle
 //le délai -pause des problèmes sur l'asserv !!
 }
