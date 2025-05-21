@@ -56,9 +56,9 @@
 #define ODOS_METHOD MethodMoveFirst
 
 // Calibrated values
-#define ECARTS_ODOS 5980.73537126610L // (ticks.rad^(-1) ecart entre les 2 odos
-#define UNITS_ODOS 51.54179961710274L // ticks.mm^(-1)
-#define L_R_ODOS 1.0011809854125424L  // Correction factor between the encoders
+#define ECARTS_ODOS 5978.462898951549L     //5980.73537126610L // (ticks.rad^(-1) ecart entre les 2 odos
+#define UNITS_ODOS 51.56183449886886L //51.54179961710274L // ticks.mm^(-1)
+#define L_R_ODOS 0.9983401020305469L //1.0011809854125424L  // Correction factor between the encoders
 
 /* WHEELS */
 
