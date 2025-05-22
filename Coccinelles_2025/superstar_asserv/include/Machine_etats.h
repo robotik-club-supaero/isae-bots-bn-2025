@@ -17,7 +17,7 @@
 #define time_global 100000
 #define time_sensor 8000
 
-#define SPEED 255        // Vitesse en cm/s 25 est la vitesse max des moteurs
+#define SPEED 20      // Vitesse en cm/s 25 est la vitesse max des moteurs
 // c'est faux 25 n'est pas la vitesse max des moteurs, à trouver la bonne valeur (pour moi c'est 255)
 #define DISTANCE_MIN 80 // Distance minimale pour éviter un obstacle en mm
 
@@ -32,7 +32,7 @@ class Machine_etats
 
     };
 
-private:
+public:
     Pami_State etat;
     long m_time;
     long m_time_global;
@@ -42,7 +42,7 @@ private:
     bool condx_arret ;
     bool condy_arret ;
 
-public:
+// public:
     int tirette = 1; // TODO Etat par défaut de la tirette , CHANGER SI NECESSAIRE
     
     float pos_init_x = DEPART_SUPERSTAR_X; // TODO : A MODIFIER en foction de la stratégie

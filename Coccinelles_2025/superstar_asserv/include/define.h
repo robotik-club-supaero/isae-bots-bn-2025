@@ -18,6 +18,11 @@ ENCODEURS
 
 #define INV_L 0 // Inversion du sens de rotation de l'encodeur gauche
 #define INV_R 0 // Inversion du sens de rotation de l'encodeur droit
+
+
+
+
+
 /*
 MOTEURS
 */
@@ -51,9 +56,9 @@ MACHINE A ETAT
 #define DEPART_SUPERSTAR_X 0
 #define DEPART_SUPERSTAR_Y 0
 #define FIN_SUPERSTAR_X 120
-#define FIN_SUPERSTAR_Y 40 //position finale superstar
+#define FIN_SUPERSTAR_Y -38 //position finale superstar
 #define EPSP 1 //Incertitude position, cm
-#define EPSA 0,1 //Incertitude position, radian
+#define EPSA 0.1 //0,1 ? //Incertitude position, radian
 
 /*
 Capteur ultrason

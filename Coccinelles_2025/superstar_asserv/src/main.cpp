@@ -27,6 +27,8 @@ Mesure_pos mesure_pos = Mesure_pos(&encoder_R, &encoder_L);
 Asserv asserv = Asserv(&moteur_d, &moteur_g, &mesure_pos);
 Machine_etats machine_etats = Machine_etats(&asserv, &mesure_pos, &ultrason);
 
+long m_time_log = 0; // Variable de temps ou on stocke le temps actuel
+
 void setup()
 {
 
@@ -56,6 +58,8 @@ void setup()
   Serial.println("asserv setup");
   machine_etats.setup();
   Serial.println("machine etats setup");
+
+  m_time_log = millis();
   
 }
 
@@ -71,9 +75,26 @@ void loop()
 mesure_pos.loop();
 //  Serial.println("mesure pos loop");
 //  // #DEBUG Si on veut tester les asservissements , on decommente la lige suivante et on commente machine_etats.loop()
-asserv.loop();
-//machine_etats.loop();
+//asserv.loop();
+machine_etats.loop();
 //  Serial.println("machie etats loop");
-//delay(100); // Delay de 100ms entre chaque boucle
+// delay(100); // Delay de 100ms entre chaque boucle
+
+  if(m_time_log + 500 < millis()) // Log toutes les secondes
+  {
+    Serial.print("Vitesse L :");
+    Serial.print(mesure_pos.vitesse_l);
+    Serial.print(" Vitesse R :");
+    Serial.print(mesure_pos.vitesse_r);
+    Serial.print(" Pos X :");
+    Serial.print(mesure_pos.position_x);
+    Serial.print(" Pos Y :");
+    Serial.print(mesure_pos.position_y);
+    Serial.print(" Theta :");
+    Serial.print(mesure_pos.position_theta);
+    Serial.print(" Etat :");
+    Serial.println(machine_etats.etat);
+    m_time_log = millis();
+  }
 //le délai -pause des problèmes sur l'asserv !!
 }
