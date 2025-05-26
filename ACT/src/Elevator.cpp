@@ -21,7 +21,10 @@ ElevatorStepper2::ElevatorStepper2()
     : ElevatorStepper(ELEVATOR_2_STEP_PER_REV, ELEVATOR_2_STEP_PIN, ELEVATOR_2_DIR_PIN, 2, ELEVATOR_2_SPEED, ELEVATOR_2_POS_OFFSET) {}
 
 ElevatorCallback ElevatorStepper::getState() const { return m_state; }
-void ElevatorStepper::setState(uint16_t state) {
+bool ElevatorStepper::setState(uint16_t state) {
+    if (state == m_state && m_remaining_steps == 0) {
+        return false;
+    }
     if (state != m_state) {
         switch (state) {
             case UP:
@@ -39,6 +42,7 @@ void ElevatorStepper::setState(uint16_t state) {
                 log(WARN, String("Invalid order received for elevator ").concat(m_level));
         }
     }
+    return true;
 }
 
 bool ElevatorStepper::loop() {
@@ -68,7 +72,9 @@ void Elevators::loop() {
             log(WARN, "Refusing to move elevator 1 UP while elevator 2 is DOWN");
             m_elevator_1.sendCallback(m_stepper_1.getState());
         } else {
-            m_stepper_1.setState(*state);
+            if (!m_stepper_1.setState(*state)) {
+                m_elevator_1.sendCallback(m_stepper_1.getState());
+            }
         }
         m_elevator_1.clearRequestedState();
     }
@@ -78,7 +84,9 @@ void Elevators::loop() {
             log(WARN, "Refusing to move elevator 2 DOWN while elevator 1 is UP");
             m_elevator_2.sendCallback(m_stepper_2.getState());
         } else {
-            m_stepper_2.setState(*state);
+            if (!m_stepper_2.setState(*state)) {
+                m_elevator_2.sendCallback(m_stepper_2.getState());
+            }
         }
         m_elevator_2.clearRequestedState();
     }
