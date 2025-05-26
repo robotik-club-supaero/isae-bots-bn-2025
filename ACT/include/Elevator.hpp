@@ -24,7 +24,7 @@ class ElevatorStepper {
 
     /// Sets the desired state of the stepper.
     /// Warning: the stepper does not actually move until `loop` is called. 
-    void setState(uint16_t state);
+    bool setState(uint16_t state);
 
     /// Effectively moves the stepper if appropriate. If no move was requested, this is a no-op.
     /// This will block for approximately `STEPPER_YIELD_TIMEOUT` in the worst case (see configuration.hpp).
