@@ -4,16 +4,16 @@
 // -- SERVO POSITIONS --
 
 // Clamp 1
-#define CLAMP_2_1_OPEN_POS 10   // TODO
-#define CLAMP_2_1_CLOSED_POS 160  // TODO
+#define CLAMP_2_1_OPEN_POS 160   // TODO
+#define CLAMP_2_1_CLOSED_POS 10  // TODO
 
 // Clamp 2
-#define CLAMP_2_2_OPEN_POS 160   // TODO
-#define CLAMP_2_2_CLOSED_POS 10  // TODO
+#define CLAMP_2_2_OPEN_POS 10   // TODO
+#define CLAMP_2_2_CLOSED_POS 160  // TODO
 
 // Clamp bas  
-#define CLAMP_1_1_OPEN_POS 170   // TODO
-#define CLAMP_1_1_CLOSED_POS 5  // TODO
+#define CLAMP_1_1_OPEN_POS 5   // TODO
+#define CLAMP_1_1_CLOSED_POS 170  // TODO
 
 // Clamp en trop  
 #define CLAMP_1_2_OPEN_POS 0   // TODO
