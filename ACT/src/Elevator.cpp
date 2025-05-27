@@ -86,7 +86,7 @@ void Elevators::loop() {
         } else {
             if (!m_stepper_2.setState(*state)) {
                 m_elevator_2.sendCallback(m_stepper_2.getState());
-            }
+            } 
         }
         m_elevator_2.clearRequestedState();
     }
