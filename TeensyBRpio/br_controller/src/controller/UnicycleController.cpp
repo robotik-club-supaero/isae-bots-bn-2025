@@ -178,12 +178,12 @@ void UnicycleController<TConverter>::setSetpoint(Position2D<Meter> setpoint) {
 template <ErrorConverter TConverter>
 void UnicycleController<TConverter>::setSetpointSpeed(Speeds speeds, bool enforceMaxSpeeds, bool enforceMaxAccelerations) {
     cancelOrder();
-    m_currentOrder.emplace<Speeds>(speeds);
 
     if (enforceMaxSpeeds) {
         speeds.linear = clamp(speeds.linear, -m_maxSpeeds.linear, m_maxSpeeds.linear);
         speeds.angular = clamp(speeds.angular, -m_maxSpeeds.angular, m_maxSpeeds.angular);
     }
+    m_currentOrder.emplace<Speeds>(speeds);
 
     if (auto *state = getStateOrNull<StateManualControl>()) {
         state->setSpeed(speeds, enforceMaxAccelerations);
@@ -245,7 +245,7 @@ void UnicycleController<TConverter>::startOrder(bool resume, bool checkMoving) {
                          }
                          setCurrentState<StateFinalRotation>(m_arena.currentRotation.get(), m_maxSpeeds.angular, m_maxAccelerations.angular);
                      },
-                     [&](Speeds &request) { setCurrentState<StateManualControl>(m_maxAccelerations, request); }, //
+                     [&](Speeds &request) { setCurrentState<StateManualControl>(request, m_maxAccelerations); }, //
                      [](no_order &request) {}},
             m_currentOrder);
     }
