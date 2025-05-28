@@ -18,7 +18,7 @@ class ElevatorStepper {
     /// @param level Level of the elevator (1 or 2)
     /// @param speed Number of revolutions per second when moving
     /// @param move_steps Number of steps to do when moving from DOWN to UP
-    ElevatorStepper(int number_of_steps, int pin1, int pin2, int level, long speed, int move_steps);
+    ElevatorStepper(int number_of_steps, int pin1, int pin2, int level, long speed, int move_steps_up, int move_steps_downs);
 
     ElevatorCallback getState() const;
 
@@ -34,7 +34,8 @@ class ElevatorStepper {
    private:
     Stepper m_stepper;
     int m_level;
-    int m_steps;
+    int m_steps_up;
+    int m_steps_down;
     int m_remaining_steps;
     int m_max_steps;
     ElevatorCallback m_state;

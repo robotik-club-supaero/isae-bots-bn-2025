@@ -4,10 +4,11 @@
 #include "logging.hpp"
 
 // TODO what should be the initial state?
-ElevatorStepper::ElevatorStepper(int number_of_steps, int pin1, int pin2, int level, long speed, int move_steps)
+ElevatorStepper::ElevatorStepper(int number_of_steps, int pin1, int pin2, int level, long speed, int move_steps_up, int move_steps_down)
     : m_stepper(number_of_steps, pin1, pin2),
       m_level(level),
-      m_steps(move_steps),
+      m_steps_up(move_steps_up),
+      m_steps_down(move_steps_down),
       m_remaining_steps(),
       m_max_steps(max(1, STEPPER_YIELD_TIMEOUT * speed * number_of_steps / 60 / 1000)),
       m_state(DOWN) {
@@ -15,10 +16,10 @@ ElevatorStepper::ElevatorStepper(int number_of_steps, int pin1, int pin2, int le
 }
 
 ElevatorStepper1::ElevatorStepper1()
-    : ElevatorStepper(ELEVATOR_1_STEP_PER_REV, ELEVATOR_1_STEP_PIN, ELEVATOR_1_DIR_PIN, 1, ELEVATOR_1_SPEED, ELEVATOR_1_POS_OFFSET) {}
+    : ElevatorStepper(ELEVATOR_1_STEP_PER_REV, ELEVATOR_1_STEP_PIN, ELEVATOR_1_DIR_PIN, 1, ELEVATOR_1_SPEED, ELEVATOR_1_POS_OFFSET_UP, ELEVATOR_1_POS_OFFSET_DOWN) {}
 
 ElevatorStepper2::ElevatorStepper2()
-    : ElevatorStepper(ELEVATOR_2_STEP_PER_REV, ELEVATOR_2_STEP_PIN, ELEVATOR_2_DIR_PIN, 2, ELEVATOR_2_SPEED, ELEVATOR_2_POS_OFFSET) {}
+    : ElevatorStepper(ELEVATOR_2_STEP_PER_REV, ELEVATOR_2_STEP_PIN, ELEVATOR_2_DIR_PIN, 2, ELEVATOR_2_SPEED, ELEVATOR_2_POS_OFFSET_UP, ELEVATOR_2_POS_OFFSET_DOWN) {}
 
 ElevatorCallback ElevatorStepper::getState() const { return m_state; }
 bool ElevatorStepper::setState(uint16_t state) {
@@ -29,13 +30,13 @@ bool ElevatorStepper::setState(uint16_t state) {
         switch (state) {
             case UP:
                 log(INFO, String("Moving elevator ").concat(m_level).concat(" UP"));
-                m_remaining_steps += m_steps;
+                m_remaining_steps += m_steps_up;
                 m_state = UP;
                 break;
             case DOWN:
 
                 log(INFO, String("Moving elevator ").concat(m_level).concat(" DOWN"));
-                m_remaining_steps -= m_steps;
+                m_remaining_steps -= m_steps_down;
                 m_state = DOWN;
                 break;
             default:
