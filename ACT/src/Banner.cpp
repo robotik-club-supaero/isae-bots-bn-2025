@@ -28,3 +28,10 @@ void Banner::loop() {
         m_servo_2.markNotified();
     }
 }
+
+void Banner::reset() {
+    m_ros.clearRequestedState();
+
+    m_servo_1.setState(RETRACTED);
+    m_servo_2.setState(RETRACTED);
+}

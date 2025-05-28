@@ -3,6 +3,7 @@
 #include <optional>
 
 #include "Banner.hpp"
+#include "Bumper.hpp"
 #include "Clamp.hpp"
 #include "Elevator.hpp"
 #include "Led.hpp"
@@ -18,6 +19,7 @@ std::optional<Elevators> elevators;
 std::optional<Clamps1> clamp1;
 std::optional<Clamps2> clamp2;
 std::optional<Banner> banner;
+std::optional<Bumpers> bumpers;
 
 void setup() {
     Serial.begin(115200);
@@ -34,6 +36,16 @@ void setup() {
     clamp1.emplace(*node);
     clamp2.emplace(*node);
     banner.emplace(*node);
+    bumpers.emplace(*node);
+
+    node->createSubscriber<std_msgs::Empty>("/act/reset", [](const std_msgs::Empty &) {
+        // WARNING: use ->reset instead of .reset, otherwise you will reset the "optional" and not the actuators' state!
+        elevators->reset();
+        clamp1->reset();
+        clamp2->reset();
+        banner->reset();
+        bumpers->reset();
+    });
 }
 
 void loop() {
@@ -43,6 +55,7 @@ void loop() {
     clamp1->loop();
     clamp2->loop();
     banner->loop();
+    bumpers->loop();
 
     ros2::spin(*node);
 }

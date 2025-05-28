@@ -32,6 +32,7 @@ class Banner {
     Banner(ros2::Node &node);
 
     void loop();
+    void reset();
 
    private:
     BannerServo1 m_servo_1;

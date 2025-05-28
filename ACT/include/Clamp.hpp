@@ -21,6 +21,7 @@ class Clamps {
     Clamps(ClampServo servo1, ClampServo servo2, ros2::Node &node, int level, const char *order_topic, const char *callback_topic);
 
     void loop();
+    void reset();
 
    private:
     int m_level;

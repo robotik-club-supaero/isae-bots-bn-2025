@@ -4,8 +4,9 @@
 #include "logging.hpp"
 
 // TODO what should be the initial state?
+#define CLAMP_INIT_STATE OPEN
 
-ClampServo::ClampServo(int servo_pin, std::array<int, 2> positions) : ActuatorServo(servo_pin, positions, /* initial_state = */ OPEN) {}
+ClampServo::ClampServo(int servo_pin, std::array<int, 2> positions) : ActuatorServo(servo_pin, positions, /* initial_state = */ CLAMP_INIT_STATE) {}
 
 Clamps::Clamps(ClampServo servo1, ClampServo servo2, ros2::Node &node, int level, const char *order_topic, const char *callback_topic)
     : m_level(level), m_ros(node, order_topic, callback_topic), m_clamp_1(servo1), m_clamp_2(servo2) {}
@@ -24,6 +25,13 @@ void Clamps::loop() {
         m_ros.sendCallback(m_clamp_1.getState());
         m_clamp_1.markNotified();
     }
+}
+
+void Clamps::reset() {
+    m_ros.clearRequestedState();
+
+    m_clamp_1.setState(CLAMP_INIT_STATE);
+    m_clamp_2.setState(CLAMP_INIT_STATE);
 }
 
 ClampServo1_1::ClampServo1_1() : ClampServo(CLAMP_1_1_PIN, std::array{CLAMP_1_1_CLOSED_POS, CLAMP_1_1_OPEN_POS}) {}

@@ -35,12 +35,14 @@
 #define ELEVATOR_1_SPEED 800 // rev per minute // TODO
 #define ELEVATOR_2_SPEED ELEVATOR_1_SPEED // rev per minute // TODO
 
-// number of steps between states DOWN and UP - change sign to invert direction
-#define ELEVATOR_1_POS_OFFSET_UP 5000 // TODO butée     BAS
-#define ELEVATOR_2_POS_OFFSET_UP 30000 // TODO HAUT 43000
+// number of steps between states DOWN and MIDDLE - change sign to invert direction
+#define ELEVATOR_1_POS_MIDDLE 4000
+#define ELEVATOR_2_POS_MIDDLE 10000 // TODO HAUT 43000
 
-#define ELEVATOR_1_POS_OFFSET_DOWN 4000
-#define ELEVATOR_2_POS_OFFSET_DOWN 10000 // TODO HAUT 43000
+// number of steps between states DOWN and UP - must be same sign as POS_MIDDLE and greater (absolutely)
+// WARNING: this is between DOWN and UP, NOT between MIDDLE and UP
+#define ELEVATOR_1_POS_UP 5000 // TODO butée     BAS
+#define ELEVATOR_2_POS_UP 30000 // TODO HAUT 43000
 
 // -- PINS --
 
@@ -58,6 +60,15 @@
 #define BANNER_1_PIN 9
 #define BANNER_2_PIN 10
 
+#define BUMPER_1_PIN 0 // TODO
+#define BUMPER_2_PIN 0 // TODO
+
+// -- BUMPER CONFIG --
+
+#define BUMPER_DETECTION_THRESHOLD 0.7 // 0 (very sensitive) -> 1 (never detects)
+#define BUMPER_FILTER_TAU 0.05 // s (time constant of the low-pass filter)
+#define BUMPER_UPDATE_INTERVAL 10 // ms
+
 // -- OTHER CONFIG --
 
 #define CALLBACK_INTERVAL 10  // ms
@@ -67,5 +78,6 @@
 // still be processed and other actuators' state can be updated.
 // The displacement continues the next time `ElevatorStepper::loop` is called.
 #define STEPPER_YIELD_TIMEOUT 50 // ms
+
 
 #endif
