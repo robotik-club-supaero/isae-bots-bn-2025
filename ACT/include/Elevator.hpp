@@ -20,7 +20,7 @@ class ElevatorStepper {
     /// @param level Level of the elevator (1 or 2)
     /// @param speed Number of revolutions per second when moving
     /// @param move_steps Number of steps to do when moving from DOWN to UP
-    ElevatorStepper(int number_of_steps, int pin1, int pin2, int level, long speed, std::array<int, 2> positions);
+    ElevatorStepper(int number_of_steps, int pin1, int pin2, int level, long speed, unsigned int ramp_duration, std::array<int, 2> positions);
 
     ElevatorCallback getState() const;
 
@@ -46,6 +46,10 @@ class ElevatorStepper {
     std::array<int, 2> m_positions;
     int m_remaining_steps;
     int m_max_steps;
+    long m_max_speed;
+    unsigned long m_ramp_start;
+    unsigned int m_ramp_duration;
+    double m_speed_coeff;
     ElevatorCallback m_state;
 };
 

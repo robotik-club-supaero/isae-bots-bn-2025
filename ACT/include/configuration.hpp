@@ -78,6 +78,6 @@
 // still be processed and other actuators' state can be updated.
 // The displacement continues the next time `ElevatorStepper::loop` is called.
 #define STEPPER_YIELD_TIMEOUT 50 // ms
-
+#define STEPPER_RAMP_DURATION 50 // ms
 
 #endif

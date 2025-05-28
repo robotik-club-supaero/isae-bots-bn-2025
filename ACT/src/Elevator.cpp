@@ -4,22 +4,27 @@
 #include "logging.hpp"
 
 // TODO what should be the initial state?
-ElevatorStepper::ElevatorStepper(int number_of_steps, int pin1, int pin2, int level, long speed, std::array<int, 2> positions)
+ElevatorStepper::ElevatorStepper(int number_of_steps, int pin1, int pin2, int level, long speed, unsigned int ramp_duration,
+                                 std::array<int, 2> positions)
     : m_stepper(number_of_steps, pin1, pin2),
       m_level(level),
       m_positions(positions),
       m_remaining_steps(),
       m_max_steps(max(1, STEPPER_YIELD_TIMEOUT * speed * number_of_steps / 60 / 1000)),
+      m_max_speed(speed),
+      m_ramp_start(),
+      m_ramp_duration(ramp_duration),
+      m_speed_coeff(1),
       m_state(DOWN) {
     m_stepper.setSpeed(speed);
 }
 
 ElevatorStepper1::ElevatorStepper1()
-    : ElevatorStepper(ELEVATOR_1_STEP_PER_REV, ELEVATOR_1_STEP_PIN, ELEVATOR_1_DIR_PIN, 1, ELEVATOR_1_SPEED,
+    : ElevatorStepper(ELEVATOR_1_STEP_PER_REV, ELEVATOR_1_STEP_PIN, ELEVATOR_1_DIR_PIN, 1, ELEVATOR_1_SPEED, STEPPER_RAMP_DURATION,
                       std::array{ELEVATOR_1_POS_MIDDLE, ELEVATOR_1_POS_UP}) {}
 
 ElevatorStepper2::ElevatorStepper2()
-    : ElevatorStepper(ELEVATOR_2_STEP_PER_REV, ELEVATOR_2_STEP_PIN, ELEVATOR_2_DIR_PIN, 2, ELEVATOR_2_SPEED,
+    : ElevatorStepper(ELEVATOR_2_STEP_PER_REV, ELEVATOR_2_STEP_PIN, ELEVATOR_2_DIR_PIN, 2, ELEVATOR_2_SPEED, STEPPER_RAMP_DURATION,
                       std::array{ELEVATOR_2_POS_MIDDLE, ELEVATOR_2_POS_UP}) {}
 
 ElevatorCallback ElevatorStepper::getState() const { return m_state; }
@@ -52,6 +57,9 @@ bool ElevatorStepper::setState(uint16_t state) {
 
         m_remaining_steps = getPositionOfState(targetState) - getCurrentPosition();
         m_state = targetState;
+
+        m_ramp_start = millis();
+        m_speed_coeff = m_ramp_duration == 0. ? 1. : 0.;
     }
     return true;
 }
@@ -69,12 +77,24 @@ int ElevatorStepper::getPositionOfState(ElevatorCallback state) const {
 int ElevatorStepper::getCurrentPosition() const { return getPositionOfState(m_state) - m_remaining_steps; }
 
 bool ElevatorStepper::loop() {
-    if (m_remaining_steps < -m_max_steps) {
-        m_stepper.step(-m_max_steps);
-        m_remaining_steps += m_max_steps;
-    } else if (m_remaining_steps > m_max_steps) {
-        m_stepper.step(m_max_steps);
-        m_remaining_steps -= m_max_steps;
+    if (m_speed_coeff < 1.) {
+        m_speed_coeff = (millis() - m_ramp_start) / m_ramp_duration;
+        if (m_speed_coeff > 1.) {
+            m_speed_coeff = 1.;
+        } else if (m_speed_coeff < 0.01) {
+            m_speed_coeff = 0.01;
+        }
+        m_stepper.setSpeed(static_cast<long>(static_cast<double>(m_max_speed) * m_speed_coeff));
+    }
+
+    long max_steps = static_cast<long>(static_cast<double>(m_max_steps) * m_speed_coeff);
+
+    if (m_remaining_steps < -max_steps) {
+        m_stepper.step(-max_steps);
+        m_remaining_steps += max_steps;
+    } else if (m_remaining_steps > max_steps) {
+        m_stepper.step(max_steps);
+        m_remaining_steps -= max_steps;
     } else if (m_remaining_steps != 0) {
         m_stepper.step(m_remaining_steps);
         m_remaining_steps = 0;
