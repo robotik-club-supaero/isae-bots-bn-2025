@@ -306,13 +306,7 @@ void UnicycleController<TConverter>::softReset(Position2D<Meter> robotPosition) 
 // Getters and setters
 template <ErrorConverter TConverter>
 ControllerStatus UnicycleController<TConverter>::getStatus() const {
-    ControllerStatus status = getStateStatus<ControllerStatus>();
-    return std::visit<ControllerStatus>( //
-        overload{[status](const trajectory_request_t &) { return status | ControllerStatus::TRAJECTORY; },
-                 [status](const rotation_request &) { return status | ControllerStatus::ROTATING; },
-                 [status](const Speeds &) { return status | ControllerStatus::SPEED_CONTROL; }, //
-                 [status](const no_order &) { return status; }},
-        m_currentOrder);
+   return getStateStatus<ControllerStatus>();
 }
 
 template <ErrorConverter TConverter>
