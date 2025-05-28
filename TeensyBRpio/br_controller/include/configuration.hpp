@@ -28,10 +28,10 @@
 // TODO check the speeds and accelerations on the real robot
 
 #define MAX_LINEAR_GOAL_SPEED 0.5   // m/s
-#define MAX_ROTATION_GOAL_SPEED 3.0 // rad/s
+#define MAX_ROTATION_GOAL_SPEED 1.0 // rad/s
 
 #define DEFAULT_LINEAR_ACCELERATION 0.1   // m/s^2
-#define DEFAULT_ROTATION_ACCELERATION 3.0 // rad/s^2
+#define DEFAULT_ROTATION_ACCELERATION 1.0 // rad/s^2
 
 #define BRAKING_LINEAR_ACCELERATION 1.5   // m/s^2, >= DEFAULT_LINEAR_ACCELERATION
 #define BRAKING_ROTATION_ACCELERATION 3.0 // rad/s^2, >= DEFAULT_ROTATION_ACCELERATION
