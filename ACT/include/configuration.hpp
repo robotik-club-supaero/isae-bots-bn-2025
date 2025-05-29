@@ -32,17 +32,17 @@
 #define ELEVATOR_1_STEP_PER_REV 200 // TODO
 #define ELEVATOR_2_STEP_PER_REV ELEVATOR_1_STEP_PER_REV // TODO
 
-#define ELEVATOR_1_SPEED 800 // rev per minute // TODO
+#define ELEVATOR_1_SPEED 1500 // rev per minute // TODO
 #define ELEVATOR_2_SPEED ELEVATOR_1_SPEED // rev per minute // TODO
 
 // number of steps between states DOWN and MIDDLE - change sign to invert direction
-#define ELEVATOR_1_POS_MIDDLE 4000
-#define ELEVATOR_2_POS_MIDDLE 10000 // TODO HAUT 43000
+#define ELEVATOR_1_POS_MIDDLE 0
+#define ELEVATOR_2_POS_MIDDLE 57000 // TODO HAUT 43000
 
 // number of steps between states DOWN and UP - must be same sign as POS_MIDDLE and greater (absolutely)
 // WARNING: this is between DOWN and UP, NOT between MIDDLE and UP
 #define ELEVATOR_1_POS_UP 5000 // TODO butée     BAS
-#define ELEVATOR_2_POS_UP 30000 // TODO HAUT 43000
+#define ELEVATOR_2_POS_UP 61000 // TODO HAUT 43000
 
 // -- PINS --
 
@@ -60,8 +60,8 @@
 #define BANNER_1_PIN 9
 #define BANNER_2_PIN 10
 
-#define BUMPER_1_PIN 0 // TODO
-#define BUMPER_2_PIN 0 // TODO
+#define BUMPER_1_PIN 11 // TODO
+#define BUMPER_2_PIN 12 // TODO
 
 // -- BUMPER CONFIG --
 

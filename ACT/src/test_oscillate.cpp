@@ -45,7 +45,7 @@ class TestElevator {
         if (millis() - m_last_change > TEST_OSCILLATE_INTERVAL) {
             m_last_change = millis();
 
-            m_stepper.setState((m_stepper.getState() + 1) % 2);
+            m_stepper.setState((m_stepper.getState() + 1) % 3);
         }
         m_stepper.loop();
     }
