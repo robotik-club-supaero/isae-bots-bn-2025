@@ -4,20 +4,20 @@
 // -- SERVO POSITIONS --
 
 // Clamp 1
-#define CLAMP_2_1_OPEN_POS 10   // TODO
-#define CLAMP_2_1_CLOSED_POS 160  // TODO
+#define CLAMP_2_1_OPEN_POS 5   // TODO 10
+#define CLAMP_2_1_CLOSED_POS 170  // TODO 160
 
 // Clamp 2
-#define CLAMP_2_2_OPEN_POS 10   // TODO
-#define CLAMP_2_2_CLOSED_POS 160  // TODO
+#define CLAMP_2_2_OPEN_POS 0   // TODO 10
+#define CLAMP_2_2_CLOSED_POS 0  // TODO 160
 
 // Clamp bas  
-#define CLAMP_1_1_OPEN_POS 5   // TODO
-#define CLAMP_1_1_CLOSED_POS 170  // TODO
+#define CLAMP_1_1_OPEN_POS 10  // TODO  5
+#define CLAMP_1_1_CLOSED_POS 160  // TODO  170
 
 // Clamp en trop  
-#define CLAMP_1_2_OPEN_POS 0   // TODO
-#define CLAMP_1_2_CLOSED_POS 0  // TODO
+#define CLAMP_1_2_OPEN_POS 10   // TODO  0
+#define CLAMP_1_2_CLOSED_POS 160  // TODO 0
 
 // The servo that opens first when deploying the banner
 #define BANNER_1_DEPLOYED_POS 50  // TODO
@@ -52,10 +52,10 @@
 #define ELEVATOR_2_STEP_PIN 5
 #define ELEVATOR_2_DIR_PIN 6
 
-#define CLAMP_1_1_PIN 20 
-#define CLAMP_1_2_PIN 21
-#define CLAMP_2_1_PIN 22
-#define CLAMP_2_2_PIN 23 
+#define CLAMP_1_1_PIN 22 //20
+#define CLAMP_1_2_PIN 23  //21
+#define CLAMP_2_1_PIN 20 //22
+#define CLAMP_2_2_PIN 21 // 23
 
 #define BANNER_1_PIN 9
 #define BANNER_2_PIN 10
