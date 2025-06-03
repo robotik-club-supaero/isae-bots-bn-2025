@@ -20,6 +20,7 @@ std::optional<Clamps1> clamp1;
 std::optional<Clamps2> clamp2;
 std::optional<Banner> banner;
 std::optional<Bumpers> bumpers;
+std::optional<ros2::Subscriber<std_msgs::Empty>> resetSub;
 
 void setup() {
     Serial.begin(115200);
@@ -38,14 +39,14 @@ void setup() {
     banner.emplace(*node);
     bumpers.emplace(*node);
 
-    node->createSubscriber<std_msgs::Empty>("/act/reset", [](const std_msgs::Empty &) {
+    resetSub.emplace(node->createSubscriber<std_msgs::Empty>("/act/reset", [](const std_msgs::Empty &) {
         // WARNING: use ->reset instead of .reset, otherwise you will reset the "optional" and not the actuators' state!
         elevators->reset();
         clamp1->reset();
         clamp2->reset();
         banner->reset();
         bumpers->reset();
-    });
+    }));
 }
 
 void loop() {
