@@ -3,6 +3,8 @@ set (CMAKE_CXX_STANDARD 20)
 cmake_minimum_required(VERSION 3.5)
 project (br_simu)
 
+option(BUILD_HEADLESS "Build in headless mode (disable windowed/desktop features such as SFML UI tests)" OFF)
+
 add_compile_definitions(_SIMULATION)
 add_compile_definitions(_BR_DEBUG)
 
@@ -50,7 +52,7 @@ ament_environment_hooks(
   ${CMAKE_CURRENT_SOURCE_DIR}/hooks/${PROJECT_NAME}.sh.in
 )
 
-if(BUILD_TESTING)
+if(BUILD_TESTING AND NOT BUILD_HEADLESS)
   add_executable(test_curve test/test_curve.cpp ${base_SRCS} ${test_SRCS})
   target_link_libraries(test_curve m sfml-graphics sfml-window sfml-system)
   target_include_directories(test_curve PRIVATE test)
