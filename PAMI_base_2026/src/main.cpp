@@ -15,7 +15,7 @@
 #include <Ultrason.hpp>
 #include <Machine_etats.h>
 
-#define IR_PIN 4 //  ne sert à rien pour le moment , sert pour l'interruption
+#define IR_PIN 4 ; //  ne sert à rien pour le moment , sert pour l'interruption
 
 // Initialise les différents objets :
 Ultrason ultrason = Ultrason(ULTRASON_ECHO, ULTRASON_TRIGGER);

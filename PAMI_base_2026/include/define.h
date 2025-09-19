@@ -34,8 +34,8 @@ MOTEURS
 /*
 SENSORS (IR, Ultrason, ect...)
 */
-#define ULTRASON_ECHO = 18 // Ultrason echo pin
-#define ULTRASON_TRIGGER = 19 // Ultrason trigger pin
+#define ULTRASON_ECHO 18 // Ultrason echo pin
+#define ULTRASON_TRIGGER 19 // Ultrason trigger pin
 
 /*
 SERVO
@@ -54,7 +54,7 @@ MACHINE A ETAT
 
 #define LED 5 // PIN LED pour le setup
 #define PIN_READEQUIPE 17 // PIN pour lire l'interrupteur qui defini l'équipe
-#define PIN_TIRETTE = 4 // PIN de la tirette pour lancer le match
+#define PIN_TIRETTE 4 // PIN de la tirette pour lancer le match
 
 #define GLOBALTIME 99000 // Temps global de la pami en ms (99s)
 #define START_TIME 85000 // Les pamis commencent dans les 15 dernières minutes.
@@ -64,16 +64,16 @@ MACHINE A ETAT
 #define EPSA 0.1        // 0,1 ? //Incertitude position, radian
 
 // Define Positions en fonction des équipe (J = JAUNE (gauche), B = BLUE (droite))
-#define J_POSITION_DEPART_X = 0 ;
-#define J_POSITION_DEPART_Y = 0 ;
+#define J_POSITION_DEPART_X 0 ;
+#define J_POSITION_DEPART_Y 0 ;
 
-#define J_POSITION_FINAL_X = 0 ;
-#define J_POSITION_FINAL_Y = 0 ;
+#define J_POSITION_FINAL_X 0 ;
+#define J_POSITION_FINAL_Y 0 ;
 
-#define B_POSITION_DEPART_X = 0 ;
-#define B_POSITION_DEPART_Y = 0 ;
+#define B_POSITION_DEPART_X 0 ;
+#define B_POSITION_DEPART_Y 0 ;
 
-#define B_POSITION_FINAL_X = 0 ;
-#define B_POSITION_FINAL_Y = 0 ;
+#define B_POSITION_FINAL_X 0 ;
+#define B_POSITION_FINAL_Y 0 ;
 
 #endif
