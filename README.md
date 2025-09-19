@@ -5,18 +5,16 @@
 - `main` : Branche principale
     * Elle n'est pas mise à jour souvent
     * Ne faites pas de commit directement dessus
-
-- `Cocinelle_2025` : Branche de développement des Coccinelles
+- `PAMI_2026` : Branche de développement des PAMI avec base de code
 - `br` : Branche de développement de la BR
+- `act` : Branche de développement des actionneurs
 - `camera_deportee` : Branche de développement de la caméra déportée (sur le mat)
+- `teensy_4.0_test` : Branche de développement du code sur teensy 4.0 (config platformio ect..)
 
 ### Branches à venir :
 
-- Branche de développement des actionneurs 2025
-
 ### Branches OBSOLETES
 
-- `br_new` : Ne plus utiliser, sera supprimée bientôt
 - `main_backup` : Sauvegarde de la branche `main`, ne sera pas mise à jour, peut être supprimée à tout moment
 
 # Fusion des branches de développement avec main
