@@ -1,8 +1,0 @@
-prefix=/app/dev/install
-
-Name: lcd
-Description: Description of lcd
-Version: 1.0.0
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: 
