@@ -6,6 +6,9 @@ This branch of isae-bot-bn is dedicated for the PAMI.
 
 ## How to use
 
+First, you need to be added to th BN team. (Ask a moderator)
+Then you need to clone the repository on your computer. (git clone https://github.com/robotik-club-supaero/isae-bots-bn-2025.git)
+
 #### The folder "PAMI_base_2026" shouldn't be touched !\
 
 To make your PAMI, duplicate it and give him a meaningfull name. ( ex: `PAMI_JeanClaude_2026` ).\
