@@ -5,7 +5,7 @@
 - `main` : Branche principale
     * Elle n'est pas mise à jour souvent
     * Ne faites pas de commit directement dessus
-- `PAMI_2026` : Branche de développement des PAMI avec base de code
+- `PAMI` : Branche de développement des PAMI avec base de code
 - `br` : Branche de développement de la BR
 - `act` : Branche de développement des actionneurs
 - `camera_deportee` : Branche de développement de la caméra déportée (sur le mat)
