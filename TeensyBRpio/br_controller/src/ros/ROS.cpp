@@ -23,10 +23,16 @@ constexpr bool hasTwoWheels = requires(const T &t) {
 TEMPLATE
 _ROS::ROS(duration_t sendPositionInterval, duration_t logInterval)
     : ros2::Node("base_roulante"), m_sendInterval(sendPositionInterval), m_logInterval(logInterval), m_lastSend(0), m_lastLog(0), m_wasActive(false),
+      m_lastGameTimer(0), m_firstGameTimerReceived(false),
       m_dispatcher(), m_pubPositionFeedback(this->template createPublisher<br_messages::msg::Position>("/br/currentPosition")),
       m_pubHN(this->template createPublisher<std_msgs::msg::Int16>("/br/callbacks", /* reliability = */ ReliableOnly)), //
       m_pubLog(this->template createPublisher<br_messages::msg::LogEntry>("/br/logTotaleArray")),
-      m_pubOdosTicks(this->template createPublisher<br_messages::msg::OdosCount>("/br/odosCount")) {}
+      m_pubOdosTicks(this->template createPublisher<br_messages::msg::OdosCount>("/br/odosCount")) {
+    m_subGameTime.emplace(this->template createSubscription<std_msgs::msg::Int16>("/game/timer", [this](const std_msgs::msg::Int16 &) {
+        m_lastGameTimer = micros();
+        m_firstGameTimerReceived = true;
+    }));
+}
 
 TEMPLATE
 void _ROS::attachManager(std::shared_ptr<manager_t> manager) {
@@ -73,6 +79,15 @@ void _ROS::loop() {
     }
 
     duration_t now = micros();
+
+#ifdef ARDUINO
+    if (m_firstGameTimerReceived && getDurationMicros(m_lastGameTimer, now) > (duration_t)CONNECTION_WATCHDOG_MS * 1000) {
+        log(ERROR, "Connection watchdog timeout: resetting Teensy");
+        this->spin_once();
+        SCB_AIRCR = 0x05FA0004;
+    }
+#endif
+
     if (getDurationMicros(m_lastSend, now) > m_sendInterval) {
         m_lastSend = now;
         m_pubPositionFeedback.publish(br_messages::position_cast(m_manager->getPositionFeedback().getRobotPosition().toMillimeters()));

@@ -36,7 +36,7 @@ class Node {
     Node(const char *name) : m_msgLog(), m_logger() {
         RCCHECK_HARD(rclc_support_init(m_support.get(), 0, NULL, &m_allocator));
         RCCHECK_HARD(rclc_node_init_default(m_node.get(), name, "", m_support.get()));
-        RCCHECK_HARD(rclc_executor_init(m_executor.get(), &m_support->context, 7, &m_allocator));
+        RCCHECK_HARD(rclc_executor_init(m_executor.get(), &m_support->context, 8, &m_allocator));
 
         rcl_interfaces__msg__Log__init(&m_msgLog);
         rosidl_runtime_c__String__assign(&m_msgLog.name, name);

@@ -41,6 +41,8 @@
 
 /* ROS */
 
+#define CONNECTION_WATCHDOG_MS 5000 // ms without /game/time before software reset
+
 #ifdef ARDUINO
 // Also applies to topic /odos_count
 #define SEND_POSITION_INTERVAL 100 // ms

@@ -59,10 +59,14 @@ class ROS : public ros2::Node {
     instant_t m_lastLog;
     bool m_wasActive;
 
+    instant_t m_lastGameTimer;
+    bool m_firstGameTimerReceived;
+
     br_messages::msg::LogEntry m_log;
 
     /* SUBSCRIBERS */
     std::optional<Dispatcher<manager_t>> m_dispatcher;
+    std::optional<subscription_t<std_msgs::msg::Int16>> m_subGameTime;
 
     /* PUBLISHERS */
 
