@@ -5,12 +5,12 @@
 // See classes Integral, Derivative and ProportionalIntegralDerivative (folder math)
 
 #define DEFAULT_KP 13.2
-#define DEFAULT_TI 0.25
+#define DEFAULT_TI 1.0     // Higher means less integral effect
 #define DEFAULT_TD 0.167
 #define DERIVATIVE_FILTER 5.0
 
 // Use {} instead of a number to disable saturation
-#define INTEGRAL_SATURATION 0.5
+#define INTEGRAL_SATURATION 0.1
 #define DERIVATIVE_SATURATION 10.0
 #define PID_SATURATION 10.0
 
@@ -45,7 +45,7 @@
 
 #ifdef ARDUINO
 // Also applies to topic /odos_count
-#define SEND_POSITION_INTERVAL 100 // ms
+#define SEND_POSITION_INTERVAL 50 // ms
 #else
 #define SEND_POSITION_INTERVAL 10 // ms (for a smooth GUI)
 #endif
