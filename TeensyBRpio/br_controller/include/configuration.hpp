@@ -39,7 +39,7 @@
 // threshold to determine if the robot is moving or stopped
 #define STOPPED_SPEED_THRESHOLD 0.001 // m/s // TODO set
 
-/* ROS */
+/* ROS */ 
 
 #define ENABLE_WATCHDOG false 
 #define CONNECTION_WATCHDOG_MS 5000 // ms without /game/time before software reset
