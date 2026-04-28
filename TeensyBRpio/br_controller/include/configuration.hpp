@@ -41,6 +41,7 @@
 
 /* ROS */
 
+#define ENABLE_WATCHDOG false 
 #define CONNECTION_WATCHDOG_MS 5000 // ms without /game/time before software reset
 
 #ifdef ARDUINO

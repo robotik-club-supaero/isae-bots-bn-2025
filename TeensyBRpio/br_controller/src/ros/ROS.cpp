@@ -81,10 +81,12 @@ void _ROS::loop() {
     duration_t now = micros();
 
 #ifdef ARDUINO
-    if (m_firstGameTimerReceived && getDurationMicros(m_lastGameTimer, now) > (duration_t)CONNECTION_WATCHDOG_MS * 1000) {
-        log(ERROR, "Connection watchdog timeout: resetting Teensy");
-        this->spin_once();
-        SCB_AIRCR = 0x05FA0004;
+    if (ENABLE_WATCHDOG) {
+            if (m_firstGameTimerReceived && getDurationMicros(m_lastGameTimer, now) > (duration_t)CONNECTION_WATCHDOG_MS * 1000) {
+            log(ERROR, "Connection watchdog timeout: resetting Teensy");
+            this->spin_once();
+            SCB_AIRCR = 0x05FA0004;
+        }
     }
 #endif
 
