@@ -6,11 +6,11 @@
 
 #define DEFAULT_KP 13.2
 #define DEFAULT_TI 0.25
-#define DEFAULT_TD 0.167
+#define DEFAULT_TD 0.1
 #define DERIVATIVE_FILTER 5.0
 
 // Use {} instead of a number to disable saturation
-#define INTEGRAL_SATURATION 0.5
+#define INTEGRAL_SATURATION 0.0
 #define DERIVATIVE_SATURATION 10.0
 #define PID_SATURATION 10.0
 
@@ -27,11 +27,12 @@
 /* TRAJECTORIES */
 // TODO check the speeds and accelerations on the real robot
 
-#define MAX_LINEAR_GOAL_SPEED 0.5   // m/s
+#define MAX_LINEAR_GOAL_SPEED 0.3   // m/s
 #define MAX_ROTATION_GOAL_SPEED 1.0 // rad/s
 
 #define DEFAULT_LINEAR_ACCELERATION 0.1   // m/s^2
-#define DEFAULT_ROTATION_ACCELERATION 1.0 // rad/s^2
+#define DEFAULT_ROTATION_ACCELERATION 0.5
+ // rad/s^2
 
 #define BRAKING_LINEAR_ACCELERATION 1.5   // m/s^2, >= DEFAULT_LINEAR_ACCELERATION
 #define BRAKING_ROTATION_ACCELERATION 3.0 // rad/s^2, >= DEFAULT_ROTATION_ACCELERATION
@@ -56,9 +57,9 @@
 #define ODOS_METHOD MethodMoveFirst
 
 // Calibrated values
-#define ECARTS_ODOS 5978.462898951549L     //5980.73537126610L // (ticks.rad^(-1) ecart entre les 2 odos
-#define UNITS_ODOS 51.56183449886886L //51.54179961710274L // ticks.mm^(-1)
-#define L_R_ODOS 0.9983401020305469L //1.0011809854125424L  // Correction factor between the encoders
+#define ECARTS_ODOS 5860.573348825648L     //5980.73537126610L // (ticks.rad^(-1) ecart entre les 2 odos
+#define UNITS_ODOS 51.68577474083916L //51.54179961710274L // ticks.mm^(-1)
+#define L_R_ODOS 1.000894934650091L //1.0011809854125424L  // Correction factor between the encoders
 
 /* WHEELS */
 
